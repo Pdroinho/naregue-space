@@ -1,0 +1,69 @@
+/* NaRegua 2.0 — passwordless client access and communication preferences. */
+.nr-client-access-access {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 48px);
+  background: var(--surface-canvas);
+  color: var(--ink-strong);
+}
+
+.nr-client-access-access-card {
+  position: relative;
+  width: min(610px, 100%);
+  display: grid;
+  gap: 20px;
+  overflow: hidden;
+  padding: clamp(28px, 5vw, 50px);
+  border: 1px solid var(--line-soft);
+  border-radius: 26px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-md);
+}
+.nr-client-access-access-card::before { content: ''; position: absolute; inset: 28px auto 28px 0; width: 4px; background: var(--brand-action); }
+
+.nr-client-access-back { width: max-content; display: inline-flex; align-items: center; gap: 6px; padding: 5px 0; border: 0; background: transparent; color: var(--ink-soft); font-size: .7rem; font-weight: 720; cursor: pointer; }
+.nr-client-access-back:hover { color: var(--brand-action-hover); }
+.nr-client-access-access-brand { display: flex; align-items: center; gap: 11px; }
+.nr-client-access-access-brand > span { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--brand-action) 26%, var(--line-soft)); border-radius: 12px; background: var(--brand-soft); color: var(--brand-action-hover); }
+.nr-client-access-access-brand > div { display: grid; gap: 2px; }
+.nr-client-access-access-brand strong { font-size: .78rem; }
+.nr-client-access-access-brand small { color: var(--ink-faint); font-size: .62rem; }
+
+.nr-client-access-access-copy > span { color: var(--brand-action-hover); font-size: .62rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.nr-client-access-access-copy h1 { max-width: 12ch; margin: 10px 0 12px; color: var(--ink-strong); font: 600 clamp(2.25rem, 6vw, 3.5rem)/.98 var(--font-display); letter-spacing: -.05em; text-wrap: balance; }
+.nr-client-access-access-copy p { max-width: 48ch; margin: 0; color: var(--ink-body); font-size: .82rem; line-height: 1.65; }
+
+.nr-client-access-field { display: grid; gap: 8px; }
+.nr-client-access-field > span { color: var(--ink-body); font-size: .72rem; font-weight: 740; }
+.nr-client-access-field input { width: 100%; min-height: 56px; padding: 0 15px; border: 1px solid var(--line-strong); border-radius: 13px; outline: 0; background: var(--surface-raised); color: var(--ink-strong); font-size: .92rem; font-weight: 650; }
+.nr-client-access-field input::placeholder { color: var(--ink-faint); font-weight: 520; }
+.nr-client-access-field input:focus { border-color: var(--brand-action); box-shadow: var(--focus-ring); }
+.nr-client-access-field input[inputmode='numeric'] { font-family: var(--font-mono); font-size: 1.2rem; letter-spacing: .28em; }
+
+.nr-client-access-access-error { padding: 10px 12px; border-left: 3px solid var(--danger-strong); background: var(--danger-soft); color: var(--danger-strong); font-size: .72rem; line-height: 1.5; }
+.nr-client-access-access-submit { min-height: 54px; display: inline-flex; align-items: center; justify-content: space-between; gap: 18px; padding: 0 12px 0 18px; border: 1px solid var(--brand-action); border-radius: 13px; background: var(--brand-action); color: var(--nr-color-on-accent); font-size: .76rem; font-weight: 800; cursor: pointer; }
+.nr-client-access-access-submit:hover:not(:disabled) { background: var(--brand-action-hover-bg); border-color: var(--brand-action-hover-bg); }
+.nr-client-access-access-submit:disabled { opacity: .55; cursor: wait; }
+.nr-client-access-access-secondary { display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--ink-faint); }
+.nr-client-access-change-phone { padding: 3px; border: 0; background: transparent; color: var(--ink-soft); font-size: .67rem; font-weight: 720; cursor: pointer; }
+.nr-client-access-change-phone:hover { color: var(--brand-action-hover); }
+.nr-client-access-access-note { display: flex; align-items: flex-start; gap: 7px; padding-top: 17px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: .65rem; line-height: 1.55; }
+.nr-client-access-access-note svg { flex: none; margin-top: 1px; color: var(--brand-action); }
+
+.client27-comms { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 18px 20px; border: 1px solid var(--line-soft); border-radius: var(--nr-radius-card); background: var(--surface-raised); box-shadow: var(--shadow-xs); }
+.client27-comms > div { display: grid; gap: 3px; }
+.client27-comms > div > span { color: var(--brand-action-hover); font-size: .59rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.client27-comms strong { font-size: .82rem; }
+.client27-comms small { color: var(--ink-soft); font-size: .68rem; }
+.client27-comms > button { min-height: 38px; padding: 0 13px; border: 1px solid var(--line-strong); border-radius: var(--nr-radius-control); background: var(--surface-raised); color: var(--ink-body); font-size: .68rem; font-weight: 760; cursor: pointer; }
+.client27-comms > button:hover:not(:disabled) { border-color: var(--brand-action); color: var(--brand-action-hover); }
+.client27-comms > p { grid-column: 1 / -1; margin: 0; color: var(--danger-strong); font-size: .68rem; }
+
+@media (max-width: 560px) {
+  .nr-client-access-access { padding: 0; background: var(--surface-raised); }
+  .nr-client-access-access-card { min-height: 100dvh; align-content: center; border: 0; border-radius: 0; box-shadow: none; }
+  .nr-client-access-access-card::before { inset-block: 24px; }
+  .client27-comms { grid-template-columns: 1fr; padding: 16px; }
+  .client27-comms > button { width: 100%; }
+}

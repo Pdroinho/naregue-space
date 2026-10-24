@@ -1,0 +1,37 @@
+/* NaRegua 2.0 — typography contract. Manrope keeps the product precise and
+   contemporary across headings, controls and dense operational surfaces. */
+:root {
+  --font-display: 'Manrope', 'Segoe UI Variable', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-ui: 'Manrope', 'Segoe UI Variable', 'Segoe UI', 'Helvetica Neue', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Display treatments use controlled weight and tracking; forms and dense data
+   stay compact and neutral for clarity. */
+.nr-sales-landing :is(h1, h2, h3), .nr-auth :is(.nr-auth-title, .nr-auth-success-title, .nr-auth-bootstrap-title), .landing-access-page .landing-access-content h1, .nr-booking :is(.nr-booking-heading h1, .nr-booking-heading h2), .nr-shell :is(.nr-page-title, .cardTitle, .nr-calendar-title), .nr-legal-page :is(.nr-legal-hero h1, .nr-legal-document h2), .nr-client-access-access-copy h1, .legal-acceptance-card h1, .fatal-error-card h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-synthesis: none;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+}
+
+.nr-sales-landing :is(h1, h2),
+.nr-auth .nr-auth-title,
+.landing-access-page .landing-access-content h1,
+.nr-client-access-access-copy h1,
+.legal-acceptance-card h1,
+.fatal-error-card h1 {
+  letter-spacing: -.028em;
+}
+
+/* Interface and support typography stays compact and neutral. */
+.nr-sales-landing,
+.nr-auth,
+.landing-access-page,
+.nr-booking,
+.nr-shell,
+.nr-legal-page,
+.nr-client-access-access,
+.legal-acceptance-screen,
+.fatal-error-page {
+  font-family: var(--font-ui);
+}

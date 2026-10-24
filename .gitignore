@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# Dados e artefatos locais
+/data/*
+!/data/.gitkeep
+/backups/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite.gz
+*.sqlite.gz.sha256
+*.log
+coverage/
+
+.DS_Store
+Thumbs.db

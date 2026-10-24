@@ -1,0 +1,254 @@
+/* NaRegua 2.0 — one overlay contract, always portalled to body. */
+.nr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: rgba(1, 10, 15, .76);
+  backdrop-filter: blur(4px) saturate(.9);
+}
+
+.nr-dialog {
+  position: relative;
+  width: min(620px, 100%);
+  max-width: 100%;
+  max-height: calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
+  border-radius: var(--radius-dialog, 22px);
+  background: var(--surface-raised);
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-dialog);
+  isolation: isolate;
+}
+
+.nr-dialog--tenant { width: min(650px, 100%); }
+.nr-dialog--destructive { width: min(560px, 100%); }
+.nr-dialog--tenant-settings { width: min(560px, 100%); }
+
+.nr-dialog > .cardHeader,
+.nr-dialog > .modal-header,
+.nr-dialog > div:first-child:not(.modal-body):not(.cardBody) {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--surface-soft) 62%, var(--surface-raised));
+}
+
+.nr-dialog > .nr-dialog-body,
+.nr-dialog > .cardBody,
+.nr-dialog > .modal-body,
+.nr-dialog > form.modal-body,
+.nr-dialog > div:nth-child(2):not(.modal-footer) {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  padding: 22px 24px;
+}
+
+.nr-dialog > .nr-dialog-footer,
+.nr-dialog > .modal-footer,
+.nr-dialog > div:last-child:not(:first-child):has(> .btn),
+.nr-dialog > form > .modal-footer {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 16px 24px max(16px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--surface-soft) 48%, var(--surface-raised));
+}
+
+.nr-dialog .cardHeader,
+.nr-dialog .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nr-dialog .cardTitle,
+.nr-dialog .modal-title,
+.nr-dialog h2,
+.nr-dialog h3 {
+  min-width: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.nr-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.nr-dialog-header .cardTitle { margin: 0; font-size: 1.18rem; }
+.nr-dialog-context { max-width: 420px; margin-top: 4px; overflow: hidden; color: var(--ink-faint); font-family: var(--font-mono); font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.tenant-dialog-loading > .skeleton-text { width: 60%; margin-bottom: 16px; }
+.tenant-dialog-loading .skeleton-card { height: 40px; flex: 1; }
+.nr-form-error { padding: 10px 12px; border: 1px solid var(--status-danger-border); border-radius: 10px; background: var(--status-danger-bg); color: var(--status-danger-ink); font-size: .8rem; line-height: 1.45; }
+.tenant-dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tenant-danger-actions, .tenant-dialog-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tenant-dialog-actions { justify-content: flex-end; }
+
+.nr-dialog input,
+.nr-dialog textarea,
+.nr-dialog .input-wrapper,
+.nr-dialog .input-group,
+.nr-dialog .form-stack,
+.nr-dialog .row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.nr-dialog input,
+.nr-dialog textarea { width: 100%; }
+
+.nr-dialog .modal-close,
+.nr-dialog .cardHeader > .icon-btn,
+.nr-dialog .modal-header > .icon-btn {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+}
+
+body.has-blocking-overlay .nr-page,
+body.has-blocking-overlay .nr-sidebar-nav {
+  overscroll-behavior: none;
+}
+
+/* Global feedback stays above transactional surfaces without blocking input. */
+.toast-region {
+  position: fixed;
+  z-index: 1200;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  width: min(390px, calc(100dvi - 28px));
+  display: grid;
+  gap: 10px;
+  pointer-events: none;
+}
+.app-toast {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-md);
+  animation: nr-toast-enter 180ms var(--nr-ease-standard);
+}
+.app-toast > svg { color: var(--brand-action); stroke-width: 1.65; }
+.app-toast > span { font-size: .84rem; line-height: 1.5; }
+.app-toast > button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin: -4px -4px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: currentColor;
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: .64;
+  cursor: pointer;
+}
+.app-toast > button:hover { background: var(--surface-soft); opacity: 1; }
+.app-toast.success { border-color: color-mix(in srgb, var(--success-strong) 32%, var(--line-soft)); }
+.app-toast.success > svg { color: var(--success-strong); }
+.app-toast.error { border-color: color-mix(in srgb, var(--danger-strong) 32%, var(--line-soft)); }
+.app-toast.error > svg { color: var(--danger-strong); }
+.app-toast.warning { border-color: color-mix(in srgb, var(--warning-strong) 36%, var(--line-soft)); }
+.app-toast.warning > svg { color: var(--warning-strong); }
+@keyframes nr-toast-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .nr-overlay {
+    place-items: end center;
+    padding: max(8px, env(safe-area-inset-top)) 0 0;
+    background: rgba(1, 10, 15, .72);
+  }
+
+  .nr-dialog,
+  .nr-dialog--tenant,
+  .nr-dialog--tenant-settings,
+  .nr-dialog--destructive {
+    width: 100%;
+    max-width: none;
+    max-height: min(94dvh, calc(100dvh - max(8px, env(safe-area-inset-top))));
+    margin: 0;
+    border-width: 1px 0 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .nr-dialog::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 42px;
+    height: 4px;
+    margin: 8px auto 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ink-faint) 36%, transparent);
+  }
+
+  .nr-dialog > .cardHeader,
+  .nr-dialog > .modal-header,
+  .nr-dialog > div:first-child:not(.modal-body):not(.cardBody) { padding: 16px 16px 14px; }
+
+  .nr-dialog > .nr-dialog-body,
+  .nr-dialog > .cardBody,
+  .nr-dialog > .modal-body,
+  .nr-dialog > form.modal-body,
+  .nr-dialog > div:nth-child(2):not(.modal-footer) { padding: 18px 16px; }
+
+  .nr-dialog > .nr-dialog-footer,
+  .nr-dialog > .modal-footer,
+  .nr-dialog > div:last-child:not(:first-child):has(> .btn),
+  .nr-dialog > form > .modal-footer {
+    padding: 12px 16px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .nr-dialog .nr-dialog-footer,
+  .nr-dialog .modal-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .nr-dialog .nr-dialog-footer > *,
+  .nr-dialog .modal-footer > * { min-width: 0; width: 100%; margin: 0; }
+
+  .tenant-dialog-footer { display: flex; align-items: stretch; flex-direction: column-reverse; }
+  .tenant-dialog-actions, .tenant-danger-actions { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tenant-danger-actions:has(> :only-child) { grid-template-columns: 1fr; }
+  .tenant-dialog-actions > .btn, .tenant-danger-actions > .btn { width: 100%; }
+
+  .toast-region {
+    inset: auto 10px max(10px, env(safe-area-inset-bottom));
+    width: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .nr-dialog .nr-dialog-footer,
+  .nr-dialog .nr-dialog-footer,
+  .nr-dialog .modal-footer { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast { animation: none; }
+}

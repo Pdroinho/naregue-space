@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-08-15",
+  "brand": [
+    "brand/logo-wordmark-approved.png",
+    "brand/logo-wordmark-approved-web.png",
+    "brand/logo-wordmark-approved-inverse.png",
+    "brand/logo-symbol-approved.png",
+    "brand/logo-symbol-approved-web.png",
+    "brand/brand-seal-approved.png",
+    "brand/brand-seal-approved-web.png",
+    "brand/app-icon-approved.png",
+    "brand/app-icon-approved-web.png"
+  ],
+  "barbershop_editorial": [
+    "naregua/hero.webp",
+    "naregua/craft.webp",
+    "naregua/dashboard.webp"
+  ],
+  "service_covers": [
+    "naregua/services/traditional.webp",
+    "naregua/services/fade.webp",
+    "naregua/services/beard.webp",
+    "naregua/services/combo.webp",
+    "naregua/services/barbotherapy.webp",
+    "naregua/services/finish.webp",
+    "naregua/services/kids.webp"
+  ],
+  "product_real_captures": [
+    "landing/product/real/agenda.webp",
+    "landing/product/real/dashboard.webp",
+    "landing/product/real/mestre-ai.webp",
+    "landing/product/real/mobile-dashboard.webp",
+    "landing/product/real/booking.webp",
+    "landing/product/real/whatsapp.webp"
+  ],
+  "pwa": [
+    "favicon-32.png",
+    "apple-touch-icon.png",
+    "icon-192.png",
+    "icon-512.png",
+    "icon-maskable-512.png",
+    "og-cover.jpg"
+  ]
+}

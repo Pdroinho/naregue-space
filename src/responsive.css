@@ -1,0 +1,589 @@
+/* NaRegua 2.0 — shared responsive contract.
+   Breakpoints follow the content rather than named devices. */
+
+:root {
+  --responsive-nav-breakpoint: 900px;
+  --page-gutter: clamp(10px, 2.2vw, 32px);
+  --compact-gutter: clamp(10px, 3.2vw, 18px);
+  --mobile-header-height: 64px;
+  --sheet-radius: 24px;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+/* Text may wrap at spaces, never letter-by-letter. Long technical values are
+   handled by their own selectors below. */
+h1,
+h2,
+h3,
+h4,
+p,
+span,
+label,
+button,
+a {
+  word-break: normal;
+}
+
+button,
+.btn,
+.btnPrimary,
+.btn-ghost,
+.icon-btn,
+.calendar-nav-btn,
+.view-btn {
+  overflow-wrap: normal;
+}
+
+.btn,
+.btnPrimary,
+.btn-ghost,
+.icon-btn,
+.calendar-nav-btn,
+.view-btn {
+  min-height: 44px;
+}
+
+.btn:not(.w-full),
+.btnPrimary:not(.w-full),
+.icon-btn,
+.calendar-nav-btn,
+.view-btn {
+  white-space: nowrap;
+}
+
+.card,
+.cardHeader,
+.cardBody,
+.grid,
+.column,
+.row,
+.form-stack,
+.input-group,
+.input-wrapper,
+.table-scroll,
+.custom-domains-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Fluid grids ----------------------------------------------------------- */
+.grid-2-1,
+.backup-grid {
+  min-width: 0;
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: clamp(12px, 1.6vw, 24px);
+}
+
+.schedule-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.cardHeader {
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+.cardHeader > * {
+  min-width: 0;
+}
+
+.cardTitle,
+.cardDesc {
+  max-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.row {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.row > .input-group,
+.row > .input-wrapper {
+  min-width: min(100%, 210px);
+  flex: 1 1 210px;
+}
+
+.input,
+textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Tables keep their information instead of disappearing on small screens. */
+.table-scroll {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.table-scroll .data-table {
+  display: table;
+  width: max(100%, 680px);
+  min-width: 680px;
+}
+
+.data-table th,
+.data-table td {
+  max-width: 320px;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+/* A component that already supplies a dedicated mobile card list may hide its
+   desktop table. Other screens retain a horizontally scrollable table. */
+@media (max-width: 768px) {
+  .table-scroll:has(+ .mobile-appointment-list) .data-table {
+    display: none;
+  }
+}
+
+/* Menus and floating surfaces ------------------------------------------ */
+.portal-menu-content {
+  width: max-content;
+  min-width: 190px;
+  max-width: min(320px, calc(100dvi - 24px));
+  max-height: min(70dvh, 440px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+/* Product tour ---------------------------------------------------------- */
+
+/* Calendar and schedule ------------------------------------------------- */
+
+.calendar-view-toggle {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.calendar-days-header {
+  width: max-content;
+  min-width: 100%;
+}
+
+.calendar-header-cell,
+.calendar-day-column {
+  flex: 1 0 140px;
+}
+
+.calendar-month-grid {
+  min-width: 720px;
+}
+
+.calendar-event,
+.calendar-month-event {
+  overflow-wrap: normal;
+}
+
+.schedule-day-header,
+.schedule-lunch-times,
+.block-card,
+.block-meta {
+  min-width: 0;
+}
+
+.schedule-lunch-times {
+  flex-wrap: wrap;
+}
+
+.blocks-list {
+  max-width: 900px;
+}
+
+/* Finance --------------------------------------------------------------- */
+
+/* Integrations / phone preview ----------------------------------------- */
+
+/* Domains --------------------------------------------------------------- */
+.domain-title-row,
+.domain-name-line,
+.domain-actions,
+.domain-verify-row,
+.domain-add-row,
+.domain-input-wrap,
+.domain-dns-step,
+.domain-copy {
+  min-width: 0;
+}
+
+.domain-name-line > strong,
+.domain-meta,
+.domain-message {
+  overflow-wrap: anywhere;
+}
+
+.domain-copy code {
+  direction: ltr;
+}
+
+/* Authentication, booking and client portal ---------------------------- */
+
+.dateScrollerWrapper,
+.dateScrollerContainer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dateScrollerContainer {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.dateScrollerContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* ----------------------------------------------------------------------
+   Tablet / compact desktop: switch to the drawer before the content area
+   becomes cramped. This matches the JS breakpoint used by ProductTour.
+   ---------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .grid-2-1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+
+  .grid-3,
+  .backup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-header-cell,
+  .calendar-day-column {
+    flex-basis: clamp(112px, 30vw, 150px);
+    min-width: clamp(112px, 30vw, 150px);
+  }
+
+  .calendar-month-grid {
+    min-width: 680px;
+  }
+}
+
+/* Phone layouts -------------------------------------------------------- */
+@media (max-width: 640px) {
+  :root {
+    --sheet-radius: 22px;
+  }
+
+  .test-mode-label {
+    display: none;
+  }
+
+  .card {
+    border-radius: 16px;
+  }
+
+  .cardHeader,
+  .cardBody {
+    padding: 14px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cardHeader > div {
+    width: 100%;
+  }
+
+  .cardHeader .btn,
+  .cardHeader .btnPrimary {
+    align-self: stretch;
+  }
+
+  .cardTitle {
+    text-align: left;
+    font-size: 1rem;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .row > *,
+  .row > .input-group,
+  .row > .input-wrapper {
+    width: 100%;
+    min-width: 0;
+    flex-basis: auto;
+  }
+
+  .form-stack .btnPrimary,
+  .form-stack > .btn,
+  .modal-footer .btn,
+  .nr-confirm-actions .btn {
+    width: 100%;
+  }
+
+  .table-scroll {
+    margin-inline: -2px;
+    width: calc(100% + 4px);
+  }
+
+  .table-scroll .data-table {
+    width: max(100%, 620px);
+    min-width: 620px;
+    font-size: 0.82rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 11px 12px;
+  }
+
+  .mobile-appointment-list,
+  .mobile-tenant-list {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .mobile-appointment-card,
+  .mobile-tenant-card {
+    min-width: 0;
+  }
+
+  .mobile-appointment-header,
+  .mobile-tenant-card {
+    align-items: flex-start;
+  }
+
+  .mobile-appointment-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Bottom sheets keep independent scrolling content and sticky actions. */
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    flex: 0 0 auto;
+    background: var(--bg-card);
+  }
+
+  .modal-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    background: var(--bg-card);
+  }
+
+  .modal-footer > * {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .nr-confirm-dialog {
+    width: 100%;
+    max-width: none;
+    grid-template-columns: auto minmax(0, 1fr);
+    border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+    padding: 20px 16px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .nr-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .toast-region {
+    inset: auto 10px max(10px, env(safe-area-inset-bottom));
+    width: auto;
+  }
+
+  .schedule-grid,
+  .blocks-list {
+    padding-inline: 0;
+  }
+
+  .schedule-day-card {
+    padding: 16px 14px;
+  }
+
+  .schedule-day-header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .calendar-view-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .view-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Week view: one comfortable day at a time with scroll snapping. */
+  .calendar-header-cell,
+  .calendar-day-column {
+    flex: 1 1 0;
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .calendar-time-column,
+  .calendar-header-cell.empty {
+    width: 50px;
+    min-width: 50px;
+    flex: 0 0 50px;
+  }
+
+  .calendar-month-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .calendar-month-cell {
+    min-height: 84px;
+    border-right: 0;
+    padding: 12px;
+  }
+
+  .block-card {
+    padding: 14px;
+  }
+
+  .block-info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .block-meta {
+    flex-wrap: wrap;
+  }
+
+  .domain-add-row,
+  .domain-dns-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .domain-item-head,
+  .domain-verify-row,
+  .custom-domains-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .domain-actions {
+    justify-content: flex-start;
+  }
+
+  .domain-actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .domain-copy {
+    min-height: 44px;
+  }
+
+  .domain-copy code {
+    font-size: 0.7rem;
+  }
+
+  .dateScrollBtn,
+  .dateScrollerBlur {
+    display: none;
+  }
+
+  .dateScrollerContainer {
+    padding-inline: 2px;
+  }
+
+  .dateCardDay {
+    min-width: 64px;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 380px) {
+
+  .table-scroll .data-table {
+    min-width: 560px;
+  }
+}
+
+/* Short viewports (landscape phones / split-screen windows). */
+
+/* Inline layout groups remain contained by the shared mobile contract. */
+@media (max-width: 640px) {
+  .cardBody > [style*='display: flex'] {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .cardBody input[style*='width'] {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .cardBody > [style*='display:flex'] {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+}

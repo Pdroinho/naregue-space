@@ -1,0 +1,865 @@
+/* NaRegua 2.0 — mobile shell, dashboard and agenda.
+   Owns mobile shell, Dashboard and Agenda. Desktop remains untouched. */
+
+.nr-mobile-tabbar,
+.nr-mobile-topbar-brand { display: none; }
+
+.nr-shell.has-tenant-brand .nr-sidebar-wordmark { display: none; }
+.nr-shell.has-tenant-brand .nr-sidebar-brand-name { display: block; }
+.nr-shell.has-tenant-brand .nr-sidebar-brand-copy { display:grid; }
+.nr-sidebar-brand .logo-icon.is-tenant-logo {
+  width: 42px;
+  height: 42px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--line-soft) 88%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-raised) 94%, transparent);
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --nr-mobile-tabbar-height: 68px;
+    --nr-mobile-topbar-height: 62px;
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-main {
+    grid-template-rows: var(--nr-mobile-topbar-height) minmax(0, 1fr);
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-topbar {
+    min-height: var(--nr-mobile-topbar-height);
+    height: var(--nr-mobile-topbar-height);
+    padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+    background: color-mix(in srgb, var(--surface-panel) 94%, transparent);
+    backdrop-filter: blur(18px) saturate(1.08);
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-mobile-menu-button { display: none; }
+
+  .nr-mobile-topbar-brand {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    object-fit: contain;
+    object-position: center;
+    padding: 3px;
+    border: 1px solid color-mix(in srgb, var(--line-soft) 88%, transparent);
+    border-radius: 12px;
+    background: var(--surface-raised);
+  }
+
+  .nr-mobile-topbar-brand.is-tenant-logo { display: block; }
+  .nr-shell.has-mobile-tabbar .nr-mobile-topbar-brand { display: block; }
+
+  .nr-shell.has-mobile-tabbar .nr-topbar-left {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 10px;
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-page-heading { min-width: 0; }
+  .nr-shell.has-mobile-tabbar .nr-page-title {
+    max-width: min(52vw, 280px);
+    color: var(--ink-strong);
+    font-size: 1.06rem;
+    font-weight: 780;
+    line-height: 1.08;
+    letter-spacing: -.03em;
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-topbar-actions .tour-launcher,
+  .nr-shell.has-mobile-tabbar .nr-topbar-actions .search-trigger,
+  .nr-shell.has-mobile-tabbar .nr-topbar-divider { display: none; }
+
+  .nr-shell.has-mobile-tabbar .nr-topbar-actions .icon-btn,
+  .nr-shell.has-mobile-tabbar .nr-topbar-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-page {
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    background: var(--surface-canvas);
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-page-inner {
+    max-width: 760px;
+    padding: 14px 14px calc(var(--nr-mobile-tabbar-height) + 26px + env(safe-area-inset-bottom));
+  }
+
+  .nr-mobile-tabbar {
+    position: fixed;
+    z-index: 25;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: start;
+    min-height: calc(var(--nr-mobile-tabbar-height) + env(safe-area-inset-bottom));
+    padding: 6px 8px max(7px, env(safe-area-inset-bottom));
+    border-top: 1px solid color-mix(in srgb, var(--line-soft) 82%, transparent);
+    background: color-mix(in srgb, var(--surface-panel) 96%, transparent);
+    box-shadow: 0 -12px 34px rgba(3, 23, 34, .08);
+    backdrop-filter: blur(20px) saturate(1.12);
+  }
+
+  .nr-mobile-tabbar-item {
+    min-width: 0;
+    min-height: 54px;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    padding: 3px 2px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--ink-faint);
+    font: 700 .61rem/1.05 var(--font-ui);
+    letter-spacing: -.01em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nr-mobile-tabbar-icon {
+    width: 34px;
+    height: 29px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    transition: background-color .16s ease, color .16s ease, transform .16s ease;
+  }
+
+  .nr-mobile-tabbar-item.is-active { color: var(--brand-action); }
+  .nr-mobile-tabbar-item.is-active .nr-mobile-tabbar-icon {
+    background: var(--brand-soft);
+    color: var(--brand-action);
+  }
+  .nr-mobile-tabbar-item:active .nr-mobile-tabbar-icon { transform: scale(.94); }
+  .nr-mobile-tabbar-item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .nr-shell.has-mobile-tabbar .nr-assistant-launcher {
+    bottom: calc(var(--nr-mobile-tabbar-height) + 14px + env(safe-area-inset-bottom));
+  }
+
+  .nr-shell.has-mobile-tabbar .nr-mobile-backdrop { z-index: 115; }
+  .nr-shell.has-mobile-tabbar .nr-sidebar { z-index: 120; }
+}
+
+@media (max-width: 640px) {
+  /* Shared app-like mobile surfaces ----------------------------------- */
+  .nr-shell.has-mobile-tabbar .nr-page-inner { padding-inline: 12px; padding-top: 12px; }
+  .nr-shell.has-mobile-tabbar .card {
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(3, 23, 34, .045);
+  }
+  .nr-shell.has-mobile-tabbar .cardHeader,
+  .nr-shell.has-mobile-tabbar .cardBody { padding: 14px; }
+  .nr-shell.has-mobile-tabbar .btn,
+  .nr-shell.has-mobile-tabbar .btnPrimary,
+  .nr-shell.has-mobile-tabbar .icon-btn { min-height: 44px; }
+
+  /* Dashboard --------------------------------------------------------- */
+  .nr-dashboard-page {
+    display: grid;
+    gap: 12px;
+  }
+
+  .nr-dashboard-page .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin: 0;
+  }
+
+  .nr-dashboard-page .stat-card {
+    min-height: 104px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: start;
+    gap: 9px;
+    padding: 13px 12px;
+    border-radius: 17px;
+    box-shadow: none;
+  }
+
+  .nr-dashboard-page .stat-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 11px;
+    background: var(--brand-soft);
+    color: var(--brand-action);
+  }
+  .nr-dashboard-page .stat-icon svg { width: 18px; height: 18px; }
+  .nr-dashboard-page .stat-info { min-width: 0; }
+  .nr-dashboard-page .stat-info h4 {
+    margin: 2px 0 7px;
+    color: var(--ink-soft);
+    font-size: .61rem;
+    line-height: 1.18;
+    letter-spacing: .03em;
+  }
+  .nr-dashboard-page .stat-info .value {
+    color: var(--ink-strong);
+    font-size: clamp(1.08rem, 5vw, 1.42rem);
+    line-height: 1.02;
+    letter-spacing: -.04em;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .nr-dashboard-page .appointment-confirmation-overview {
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+  .nr-dashboard-page .appointment-confirmation-overview__copy > strong {
+    font-size: .79rem;
+    line-height: 1.42;
+  }
+  .nr-dashboard-page .appointment-confirmation-overview__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .nr-dashboard-page .appointment-confirmation-overview__metrics > span {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 7px 1fr;
+    align-items: center;
+    gap: 4px 6px;
+    padding: 9px 7px;
+    border-radius: 12px;
+    background: var(--surface-soft);
+    white-space: normal;
+    font-size: .59rem;
+    line-height: 1.2;
+  }
+  .nr-dashboard-page .appointment-confirmation-overview__metrics > span strong {
+    font-size: .82rem;
+    color: var(--ink-strong);
+  }
+
+  .nr-dashboard-page .grid-2-1 { gap: 12px; }
+  .nr-dashboard-page .column { gap: 12px; }
+  .nr-dashboard-page .cardHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .nr-dashboard-page .cardHeader .btn,
+  .nr-dashboard-page .cardHeader .btnPrimary { width: auto; align-self: center; }
+  .nr-dashboard-page .mobile-appointment-list { padding: 8px 10px 12px; gap: 8px; }
+  .nr-dashboard-page .mobile-appointment-card {
+    padding: 12px;
+    border-radius: 15px;
+    background: var(--surface-raised);
+    border-color: var(--line-soft);
+    box-shadow: 0 4px 14px rgba(3,23,34,.035);
+  }
+
+  /* Agenda ------------------------------------------------------------ */
+  .nr-agenda { gap: 10px; }
+
+  .nr-agenda-tabs {
+    position: relative;
+    z-index: 4;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--line-soft);
+    border-radius: 15px;
+    background: var(--surface-soft);
+    box-shadow: none;
+  }
+  .nr-agenda-tab {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 7px 8px;
+    border-radius: 11px;
+    text-align: center;
+    font-size: .72rem;
+  }
+  .nr-agenda-tab.is-active {
+    color: var(--brand-action);
+    box-shadow: 0 3px 10px rgba(3,23,34,.055);
+  }
+
+  .nr-calendar {
+    overflow: hidden;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(3,23,34,.04);
+  }
+
+  .nr-calendar-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px;
+  }
+  .nr-calendar-period {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+  }
+  .nr-calendar-arrows { gap: 5px; }
+  .nr-calendar .calendar-nav-btn {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    flex-basis: 38px;
+    border-radius: 12px;
+  }
+  .nr-calendar-title {
+    justify-self: end;
+    max-width: 100%;
+    font-size: 1rem;
+    text-align: right;
+  }
+
+  .nr-calendar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 8px;
+    margin-left: 0;
+  }
+  .nr-calendar .calendar-view-toggle {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+    border-radius: 12px;
+  }
+  .nr-calendar .view-btn { width: 100%; min-width: 0; min-height: 38px; border-radius: 9px; }
+  .nr-calendar-actions > .btnPrimary {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    border-radius: 13px;
+  }
+
+  .nr-calendar .appointment-presence-legend {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 9px 12px 10px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line-soft);
+    background: color-mix(in srgb, var(--surface-soft) 52%, var(--surface-raised));
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nr-calendar .appointment-presence-legend::-webkit-scrollbar { display: none; }
+  .nr-calendar .appointment-presence-legend > span {
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 6px 0;
+    border: 0;
+    background: transparent;
+    font-size: .62rem;
+  }
+
+  .nr-calendar-scroll { overflow-x: hidden; }
+  .nr-calendar-week-header { min-height: 58px; }
+  .nr-calendar .calendar-header-cell.empty,
+  .nr-calendar .calendar-time-column {
+    width: 50px;
+    min-width: 50px;
+    flex: 0 0 50px;
+  }
+  .nr-calendar .calendar-header-cell:not(.empty),
+  .nr-calendar .calendar-day-column {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  .nr-calendar .calendar-day-name { font-size: .65rem; }
+  .nr-calendar .calendar-day-number { width: 30px; height: 30px; font-size: .82rem; }
+  .nr-calendar .calendar-time-slot,
+  .nr-calendar .calendar-grid-cell { height: 62px; }
+  .nr-calendar .calendar-event {
+    left: 4px;
+    right: 4px;
+    padding: 6px 7px;
+    border-radius: 9px;
+    font-size: .68rem;
+  }
+
+  /* Month view becomes a real compact mobile calendar instead of a desktop grid scroller. */
+  .nr-calendar-scroll[data-view='month'] { overflow-x: hidden; }
+  .nr-calendar-scroll[data-view='month'] .calendar-days-header,
+  .nr-calendar-scroll[data-view='month'] .calendar-month-grid {
+    width: 100%;
+    min-width: 0;
+  }
+  .nr-calendar-scroll[data-view='month'] .calendar-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .nr-calendar-scroll[data-view='month'] .calendar-header-cell {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 0;
+    border-right: 0;
+  }
+  .nr-calendar .calendar-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: minmax(66px, auto);
+  }
+  .nr-calendar .calendar-month-cell {
+    min-width: 0;
+    min-height: 66px;
+    padding: 6px 4px;
+    border-right: 1px solid color-mix(in srgb, var(--line-soft) 65%, transparent);
+  }
+  .nr-calendar .calendar-month-day-number {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    font-size: .72rem;
+  }
+  .nr-calendar .calendar-month-event {
+    width: 8px;
+    height: 8px;
+    min-height: 8px;
+    margin: 3px 2px 0 0;
+    display: inline-block;
+    padding: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    color: transparent;
+    font-size: 0;
+    vertical-align: top;
+  }
+
+  .nr-agenda .schedule-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .nr-agenda .schedule-day-card { padding: 14px; border-radius: 16px; }
+}
+
+@media (max-width: 380px) {
+  .nr-shell.has-mobile-tabbar .nr-page-inner { padding-inline: 10px; }
+  .nr-dashboard-page .stats-grid { gap: 8px; }
+  .nr-dashboard-page .stat-card { min-height: 98px; padding: 11px 10px; }
+  .nr-mobile-tabbar { padding-inline: 4px; }
+  .nr-mobile-tabbar-item { font-size: .57rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nr-mobile-tabbar-icon { transition: none; }
+}
+
+/* Phase 2 — Clientes, Serviços e WhatsApp ----------------------------- */
+.client-mobile-list { display: none; }
+.client-search {
+  margin: 0 16px 14px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid var(--line-soft);
+  border-radius: 13px;
+  background: var(--surface-soft);
+  color: var(--ink-faint);
+}
+.client-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink-strong);
+  font: 600 .79rem/1 var(--font-ui);
+}
+.client-search input::placeholder { color: var(--ink-faint); }
+.client-search button {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.client-filter-toolbar { display:flex; align-items:center; gap:9px; padding:0 16px 14px; }
+.client-filter-toolbar .client-search { flex:1 1 320px; max-width:430px; margin:0; }
+.client-segment-filters { min-width:0; display:flex; align-items:center; gap:6px; overflow-x:auto; scrollbar-width:none; }
+.client-segment-filters::-webkit-scrollbar { display:none; }
+.client-segment-filters button { min-height:36px; flex:0 0 auto; padding:0 10px; border:1px solid var(--line-soft); border-radius:10px; background:var(--surface-raised); color:var(--ink-soft); font:670 .63rem/1 var(--font-ui); cursor:pointer; }
+.client-segment-filters button.is-active { border-color:color-mix(in srgb,var(--brand-action) 28%,var(--line-soft)); background:var(--brand-soft); color:var(--brand-action-hover); }
+.client-count-badge {
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding-inline: 9px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-action);
+  font: 800 .68rem/1 var(--font-ui);
+}
+
+@media (max-width: 640px) {
+  /* Clientes: contact list instead of compressed table. */
+  .client-admin-page {
+    overflow: hidden;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .client-admin-header {
+    padding: 4px 2px 10px;
+    background: transparent;
+  }
+  .client-admin-header .cardTitle { font-size: 1.2rem; }
+  .client-admin-header p { display: none; }
+  .client-search {
+    margin: 0 0 11px;
+    min-height: 48px;
+    padding-inline: 13px;
+    border-radius: 16px;
+    background: var(--surface-raised);
+    box-shadow: 0 5px 16px rgba(3,23,34,.04);
+  }
+  .client-search input { font-size: .78rem; }
+  .client-filter-toolbar { display:grid; gap:8px; padding:0 0 12px; }
+  .client-filter-toolbar .client-search { width:100%; max-width:none; margin:0; }
+  .client-segment-filters { margin-inline:-12px; padding-inline:12px; }
+  .client-desktop-table { display: none; }
+  .client-mobile-list { display: grid; gap: 8px; }
+  .client-mobile-card {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 46px minmax(0,1fr) auto;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: 17px;
+    background: var(--surface-raised);
+    box-shadow: 0 4px 14px rgba(3,23,34,.035);
+  }
+  .client-mobile-avatar {
+    width: 46px;
+    height: 46px;
+    font-size: .76rem;
+    border: 1px solid color-mix(in srgb, var(--line-soft) 78%, transparent);
+  }
+  .client-mobile-main { min-width: 0; display: grid; gap: 4px; }
+  .client-mobile-main > strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-strong);
+    font-size: .82rem;
+    letter-spacing: -.015em;
+  }
+  .client-mobile-main > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-soft);
+    font-size: .65rem;
+  }
+  .client-mobile-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+  .client-mobile-tags em {
+    padding: 4px 6px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    color: var(--ink-faint);
+    font: 700 .52rem/1 var(--font-ui);
+    font-style: normal;
+    white-space: nowrap;
+  }
+  .client-mobile-tags em.is-ok {
+    background: color-mix(in srgb, var(--status-success-bg) 72%, var(--surface-raised));
+    color: var(--status-success-ink);
+  }
+  .client-mobile-value { min-width: 70px; display: grid; justify-items: end; gap: 4px; }
+  .client-mobile-value small { color: var(--ink-faint); font: 650 .52rem/1 var(--font-ui); }
+  .client-mobile-value strong { color: var(--ink-strong); font: 800 .72rem/1 var(--font-ui); white-space: nowrap; }
+
+  /* Serviços: visual catalog and mobile bottom-sheet editor. */
+  .service-admin-page {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .service-admin-header {
+    padding: 4px 2px 11px;
+    align-items: center;
+  }
+  .service-admin-header p { display: none; }
+  .service-admin-header .cardTitle { font-size: 1.2rem; }
+  .service-create-button {
+    width: auto;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-inline: 13px;
+    border-radius: 13px;
+    font-size: .7rem;
+  }
+  .service-mobile-list { gap: 8px; padding: 0; }
+  .service-mobile-card {
+    grid-template-columns: 78px minmax(0,1fr) 42px;
+    gap: 12px;
+    min-height: 92px;
+    padding: 8px;
+    border-radius: 17px;
+    background: var(--surface-raised);
+    box-shadow: 0 4px 14px rgba(3,23,34,.035);
+  }
+  .service-mobile-card > img {
+    width: 78px;
+    height: 76px;
+    border-radius: 13px;
+  }
+  .service-mobile-copy { gap: 8px; }
+  .service-mobile-copy strong { font-size: .83rem; }
+  .service-mobile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .service-mobile-meta span,
+  .service-mobile-meta b {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    padding: 0 7px;
+    border-radius: 999px;
+    font: 750 .57rem/1 var(--font-ui);
+  }
+  .service-mobile-meta span { background: var(--surface-soft); color: var(--ink-soft); }
+  .service-mobile-meta b { background: var(--brand-soft); color: var(--brand-action); }
+  .service-mobile-edit { border-radius: 13px; }
+  .service-editor-dialog {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    max-height: min(88dvh, 780px);
+    margin: 0;
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 0;
+    box-shadow: 0 -24px 60px rgba(3,23,34,.18);
+  }
+  .service-editor-dialog::before {
+    content: '';
+    position: sticky;
+    top: 7px;
+    z-index: 3;
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 7px auto -3px;
+    border-radius: 999px;
+    background: var(--line-strong);
+  }
+  .service-editor-dialog .cardHeader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: color-mix(in srgb, var(--surface-raised) 96%, transparent);
+    backdrop-filter: blur(16px);
+  }
+  .service-editor-dialog .cover-uploader { height: 160px; }
+
+  /* WhatsApp: mobile inbox/chat hierarchy, not a desktop 3-column layout. */
+  .nr-whatsapp { gap: 9px; }
+  .nr-whatsapp-topbar {
+    min-height: 38px;
+    align-items: center;
+    padding: 0 2px;
+  }
+  .nr-whatsapp-topbar .nr-whatsapp-eyebrow,
+  .nr-whatsapp-topbar h2,
+  .nr-whatsapp-topbar p { display: none; }
+  .nr-whatsapp-health {
+    margin-left: auto;
+    min-height: 30px;
+    border: 0;
+    background: transparent;
+    padding-inline: 4px;
+    font-size: .58rem;
+  }
+  .nr-whatsapp-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 3px;
+    padding: 4px;
+    border-radius: 15px;
+    background: var(--surface-soft);
+  }
+  .nr-whatsapp-tabs button {
+    min-height: 50px;
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 18px auto;
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    padding: 5px 2px;
+    border-radius: 11px;
+    font-size: .56rem;
+    line-height: 1;
+  }
+  .nr-whatsapp-tabs button svg { width: 16px; height: 16px; }
+  .nr-whatsapp-tabs button b {
+    position: absolute;
+    transform: translate(11px,-11px);
+    min-width: 16px;
+    height: 16px;
+    padding-inline: 4px;
+  }
+  .nr-whatsapp-inbox {
+    height: calc(100dvh - var(--nr-mobile-topbar-height) - var(--nr-mobile-tabbar-height) - 132px - env(safe-area-inset-bottom));
+    min-height: 430px;
+    border: 0;
+    border-radius: 18px;
+    box-shadow: none;
+    background: var(--surface-raised);
+  }
+  .nr-whatsapp-conversation-pane { border: 0; }
+  .nr-whatsapp-pane-head { padding: 14px 13px 8px; }
+  .nr-whatsapp-pane-head strong { font-size: .94rem; }
+  .nr-whatsapp-pane-head small { font-size: .57rem; }
+  .nr-whatsapp-icon-button { width: 40px; height: 40px; border-radius: 13px; background: var(--brand-action); color: var(--nr-color-on-accent); border-color: var(--brand-action); }
+  .nr-whatsapp-search { min-height: 44px; margin: 0 10px 8px; border-radius: 14px; }
+  .nr-whatsapp-search input { font-size: .72rem; }
+  .nr-whatsapp-conversation-list { padding: 2px 6px 10px; }
+  .nr-whatsapp-conversation {
+    min-height: 78px;
+    grid-template-columns: 46px minmax(0,1fr);
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 15px;
+  }
+  .nr-whatsapp-avatar { width: 46px; height: 46px; font-size: .7rem; }
+  .nr-whatsapp-conversation-line strong { font-size: .75rem; }
+  .nr-whatsapp-conversation-phone { font-size: .56rem; }
+  .nr-whatsapp-conversation-line.is-preview { font-size: .61rem; }
+  .nr-whatsapp-chat-pane {
+    position: relative;
+    grid-template-rows: auto minmax(0,1fr) auto;
+    background: var(--surface-canvas);
+  }
+  .nr-whatsapp-chat-head {
+    min-height: 60px;
+    padding: 8px 10px;
+    background: color-mix(in srgb, var(--surface-raised) 95%, transparent);
+    backdrop-filter: blur(18px);
+  }
+  .nr-whatsapp-chat-back { width: 40px; height: 40px; border-radius: 13px; }
+  .nr-whatsapp-chat-person { min-width: 0; flex: 1; }
+  .nr-whatsapp-chat-person .nr-whatsapp-avatar.is-large { width: 40px; height: 40px; }
+  .nr-whatsapp-chat-person strong { max-width: 36vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nr-whatsapp-assistant-reply { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 13px; }
+  .nr-whatsapp-assistant-reply span { display: none; }
+  .nr-whatsapp-messages {
+    padding: 14px 10px 10px;
+    gap: 7px;
+    background: color-mix(in srgb, var(--surface-canvas) 70%, var(--surface-raised));
+  }
+  .nr-whatsapp-message { max-width: 86%; border-radius: 15px; }
+  .nr-whatsapp-message p { font-size: .7rem; line-height: 1.42; }
+  .nr-whatsapp-composer {
+    margin: 7px 8px 8px;
+    min-height: 50px;
+    border-radius: 17px;
+    box-shadow: 0 8px 22px rgba(3,23,34,.07);
+  }
+  .nr-whatsapp-composer textarea { font-size: .72rem; }
+  .nr-whatsapp-composer-tool, .nr-whatsapp-send { width: 38px; height: 38px; border-radius: 12px; }
+  .nr-whatsapp-empty-inbox {
+    min-height: 420px;
+    padding: 34px 18px;
+    border-radius: 18px;
+  }
+  .nr-whatsapp-automation-hero,
+  .nr-whatsapp-flow-card,
+  .nr-whatsapp-compact-setting,
+  .nr-whatsapp-campaign-editor,
+  .nr-whatsapp-campaign-history,
+  .nr-whatsapp-connection-status,
+  .nr-whatsapp-connection-card,
+  .nr-whatsapp-qr-card { border-radius: 17px; }
+  .nr-whatsapp-campaign-overview { gap: 8px; }
+  .nr-whatsapp-campaign-overview article { border-radius: 16px; }
+  .nr-whatsapp-new-backdrop { align-items: end; padding: 0; }
+  .nr-whatsapp-new-dialog {
+    width: 100%;
+    max-height: 88dvh;
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    border-bottom: 0;
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+  }
+  .nr-whatsapp-new-dialog::before {
+    content: '';
+    width: 42px;
+    height: 4px;
+    justify-self: center;
+    border-radius: 999px;
+    background: var(--nr-whatsapp-line-strong);
+  }
+  .nr-whatsapp-new-dialog footer button { min-height: 44px; }
+}
+
+@media (max-width: 380px) {
+  .client-mobile-card { grid-template-columns: 42px minmax(0,1fr); }
+  .client-mobile-avatar { width: 42px; height: 42px; }
+  .client-mobile-value { grid-column: 2; grid-row: 2; justify-items: start; display: flex; align-items: baseline; gap: 5px; }
+  .service-mobile-card { grid-template-columns: 68px minmax(0,1fr) 40px; gap: 9px; }
+  .service-mobile-card > img { width: 68px; height: 68px; }
+  .nr-whatsapp-tabs button { font-size: .52rem; }
+}
+
+@media (max-width: 640px) {
+  .client-admin-header,
+  .service-admin-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .client-count-badge { width: auto; flex: none; }
+}
+
+@media (max-width: 640px) {
+  .client-admin-header > div,
+  .service-admin-header > div {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .service-admin-header .service-create-button {
+    flex: none;
+    align-self: center;
+  }
+}

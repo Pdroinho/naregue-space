@@ -1,0 +1,97 @@
+/* NaRegua 2.0 — referral workspace. A single editorial hierarchy replaces
+   the previous collection of unrelated dashboard cards. */
+.referral-page {
+  width: min(1200px, 100%);
+  display: grid;
+  gap: 16px;
+  margin-inline: auto;
+}
+
+.referral-loading { width: 100%; height: 360px; border: 1px solid var(--line-soft); }
+.referral-error { min-height: 280px; display: grid; place-items: center; align-content: center; gap: 9px; padding: 32px; border: 1px solid var(--status-danger-border); border-radius: 20px; background: var(--surface-raised); color: var(--status-danger-ink); text-align: center; }
+.referral-error span { max-width: 46ch; color: var(--ink-soft); font-size: .78rem; line-height: 1.55; }
+.referral-error .btn { margin-top: 6px; }
+
+.referral-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 250px);
+  align-items: end;
+  gap: clamp(28px, 5vw, 72px);
+  overflow: hidden;
+  min-height: 230px;
+  padding: clamp(28px, 4vw, 48px);
+  border: 1px solid rgba(247, 240, 228, .12);
+  border-radius: 24px;
+  background: var(--petrol-950);
+  color: var(--cream-50);
+  box-shadow: var(--shadow-sm);
+}
+.referral-hero::before { content: ''; position: absolute; inset: 28px auto 28px 0; width: 4px; background: var(--brand-action); }
+.referral-hero > div:first-child { max-width: 760px; }
+.referral-hero .eyebrow { color: var(--brand-accent-on-dark); font-size: .65rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.referral-hero h1 { max-width: 20ch; margin: 10px 0 12px; color: var(--cream-50); font: 600 clamp(2rem, 3.6vw, 3.25rem)/1.02 var(--font-display); letter-spacing: -.045em; text-wrap: balance; }
+.referral-hero p { max-width: 64ch; margin: 0; color: rgba(247, 240, 228, .7); font-size: .82rem; line-height: 1.65; }
+
+.referral-reward { min-width: 0; display: grid; gap: 8px; align-content: end; padding: 6px 0 6px 24px; border-left: 1px solid rgba(247, 240, 228, .17); }
+.referral-reward strong { color: var(--brand-accent-on-dark); font: 700 clamp(2.2rem, 4vw, 3.4rem)/1 var(--font-mono); letter-spacing: -.07em; }
+.referral-reward span { max-width: 20ch; color: rgba(247, 240, 228, .62); font-size: .68rem; line-height: 1.45; }
+
+.referral-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line-soft); border-radius: 18px; background: var(--surface-raised); box-shadow: var(--shadow-xs); }
+.referral-metrics article { min-width: 0; min-height: 132px; display: grid; align-content: center; gap: 4px; padding: 22px 24px; border-right: 1px solid var(--line-soft); }
+.referral-metrics article:last-child { border-right: 0; }
+.referral-metrics span { color: var(--ink-soft); font-size: .69rem; font-weight: 700; }
+.referral-metrics strong { margin: 4px 0 2px; color: var(--ink-strong); font: 700 clamp(1.45rem, 2.5vw, 2rem)/1 var(--font-mono); letter-spacing: -.045em; }
+.referral-metrics small { color: var(--ink-faint); font-size: .62rem; line-height: 1.45; }
+
+.referral-link-card { display: grid; gap: 18px; padding: clamp(22px, 3vw, 32px); border: 1px solid var(--line-soft); border-radius: 20px; background: var(--surface-raised); box-shadow: var(--shadow-xs); }
+.referral-link-copy { display: flex; align-items: flex-start; gap: 13px; }
+.referral-link-copy > svg { flex: none; margin-top: 2px; color: var(--brand-action); }
+.referral-link-copy h2 { margin: 0; color: var(--ink-strong); font: 700 1.08rem/1.2 var(--font-display); letter-spacing: -.025em; }
+.referral-link-copy p { max-width: 62ch; margin: 5px 0 0; color: var(--ink-soft); font-size: .78rem; line-height: 1.55; }
+.referral-link-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.referral-link-field input { width: 100%; min-width: 0; min-height: var(--nr-control-height); padding: 0 13px; border: 1px solid var(--line-strong); border-radius: var(--nr-radius-control); background: var(--surface-soft); color: var(--ink-body); font: 600 .75rem/1 var(--font-mono); outline: none; }
+.referral-link-field input:focus { border-color: var(--brand-action); box-shadow: var(--focus-ring); }
+.referral-rules { max-width: 100ch; margin: 0; padding-top: 16px; border-top: 1px solid var(--line-soft); color: var(--ink-faint); font-size: .67rem; line-height: 1.6; }
+
+@media (max-width: 760px) {
+  .referral-hero { grid-template-columns: 1fr; min-height: 0; gap: 22px; padding: 28px 24px; }
+  .referral-reward { padding: 16px 0 0; border-top: 1px solid rgba(247, 240, 228, .17); border-left: 0; }
+  .referral-metrics { grid-template-columns: 1fr; }
+  .referral-metrics article { min-height: 106px; border-right: 0; border-bottom: 1px solid var(--line-soft); }
+  .referral-metrics article:last-child { border-bottom: 0; }
+  .referral-link-field { grid-template-columns: 1fr; }
+}
+
+/* Platform-side governance uses the same rhythm without borrowing the
+   customer referral campaign treatment. */
+.dev-referrals { display: grid; gap: 18px; }
+.dev-section-heading { display: grid; gap: 7px; padding: 4px 2px; }
+.dev-section-heading .eyebrow { color: var(--brand-action-hover); font-size: .62rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.dev-section-heading h1 { max-width: 22ch; margin: 0; font: 650 clamp(1.7rem, 3vw, 2.45rem)/1.04 var(--font-display); letter-spacing: -.04em; }
+.dev-section-heading p { max-width: 68ch; margin: 0; color: var(--ink-soft); font-size: .8rem; line-height: 1.58; }
+.dev-referrals-loading { width: 100%; height: 440px; border: 1px solid var(--line-soft); }
+.dev-referrals-error { min-height: 280px; display: grid; place-items: center; align-content: center; gap: 9px; padding: 32px; border: 1px solid var(--status-danger-border); border-radius: 20px; background: var(--surface-raised); text-align: center; }
+.dev-referrals-error span { max-width: 46ch; color: var(--ink-soft); font-size: .78rem; line-height: 1.55; }
+.dev-referrals-error .btn { margin-top: 6px; }
+.dev-referral-grid { min-width: 0; display: grid; grid-template-columns: minmax(320px, .82fr) minmax(420px, 1.18fr); gap: 16px; align-items: start; }
+.dev-referral-form .cardBody { display: grid; gap: 15px; }
+.dev-referral-form .row { align-items: start; }
+.high-discount-confirm { padding: 13px; border: 1px solid var(--warning-strong); border-radius: var(--nr-radius-control); background: var(--warning-soft); }
+.high-discount-confirm small { color: var(--warning-strong); font-size: .65rem; line-height: 1.45; }
+.dev-referral-list .cardBody { display: grid; gap: 0; padding-block: 4px; }
+.dev-referral-row { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 2px; border-bottom: 1px solid var(--line-soft); }
+.dev-referral-row:last-child { border-bottom: 0; }
+.dev-referral-row > div:first-child { min-width: 0; display: grid; gap: 5px; }
+.dev-referral-row > div:first-child strong { overflow: hidden; color: var(--ink-strong); font-size: .77rem; text-overflow: ellipsis; white-space: nowrap; }
+.dev-referral-row > div:first-child span { color: var(--ink-soft); font-size: .66rem; line-height: 1.45; }
+.dev-referral-row > div:last-child { display: flex; align-items: center; gap: 7px; }
+.dev-referral-row .btn { min-height: 36px; }
+
+@media (max-width: 980px) {
+  .dev-referral-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .dev-referral-row { grid-template-columns: 1fr; }
+  .dev-referral-row > div:last-child { justify-content: flex-end; }
+}

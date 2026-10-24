@@ -1,0 +1,95 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_APP_BASE_URL: ${VITE_APP_BASE_URL}
+        VITE_DEV_HOST: ${VITE_DEV_HOST}
+        VITE_SALES_URL: ${VITE_SALES_URL}
+        VITE_SUPPORT_URL: ${VITE_SUPPORT_URL}
+        VITE_PRIVACY_URL: ${VITE_PRIVACY_URL}
+        VITE_TERMS_URL: ${VITE_TERMS_URL}
+        VITE_SUBSCRIPTION_PRICE_CENTS: ${VITE_SUBSCRIPTION_PRICE_CENTS}
+    container_name: naregua-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file: .env
+    volumes:
+      - app-db:/data/db
+      - app-media:/data/media
+      - app-backups:/data/backups
+    environment:
+      - DATABASE_PATH=/data/db/app.db
+      - WHATSAPP_MEDIA_DIR=/data/media
+      - HOST=0.0.0.0
+    networks:
+      - naregua-net
+
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.7
+    container_name: naregua-evolution
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - evolution-instances:/evolution/instances
+    environment:
+      - AUTHENTICATION_TYPE=api_key
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY}
+      - SERVER_URL=https://evo.naregua.space
+      - LANGUAGE=pt-BR
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://evo:evo_pass@evo-postgres:5432/evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - DATABASE_SAVE_DATA_LABELS=true
+      - DATABASE_SAVE_DATA_HISTORIC=true
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://evo-redis:6379
+      - CACHE_REDIS_PREFIX_KEY=naregua_evo
+      - CACHE_REDIS_SAVE_INSTANCES=true
+    depends_on:
+      - evo-postgres
+      - evo-redis
+    networks:
+      - naregua-net
+
+  evo-postgres:
+    image: postgres:16-alpine
+    container_name: naregua-evo-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=evolution
+      - POSTGRES_USER=evo
+      - POSTGRES_PASSWORD=evo_pass
+    volumes:
+      - evo-postgres-data:/var/lib/postgresql/data
+    networks:
+      - naregua-net
+
+  evo-redis:
+    image: redis:7-alpine
+    container_name: naregua-evo-redis
+    restart: unless-stopped
+    volumes:
+      - evo-redis-data:/data
+    networks:
+      - naregua-net
+
+volumes:
+  app-db:
+  app-media:
+  app-backups:
+  evolution-instances:
+  evo-postgres-data:
+  evo-redis-data:
+
+networks:
+  naregua-net:
+    driver: bridge

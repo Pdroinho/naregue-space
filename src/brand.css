@@ -1,0 +1,244 @@
+/* NaRegua 2.0 — final brand layer.
+   This file owns the shared product character after feature-specific layout. */
+
+.nr-shell {
+  background: var(--surface-canvas);
+  color: var(--ink-strong);
+}
+
+.nr-sidebar {
+  border-right-color: var(--line-soft);
+  background: var(--petrol-950);
+  box-shadow: none;
+}
+
+.nr-sidebar-brand {
+  border-bottom-color: var(--line-soft);
+  background: var(--petrol-950);
+}
+
+.nr-sidebar-brand .logo-icon {
+  border: 1px solid rgba(247, 240, 228, .12);
+  background: rgba(247, 240, 228, .04);
+}
+
+.nr-sidebar-wordmark {
+  width: min(112px, 100%);
+  height: 25px;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+}
+.nr-shell.is-sidebar-collapsed .nr-sidebar-wordmark { display: none; }
+.nr-shell.is-sidebar-collapsed .nr-sidebar-collapse {
+  top: 24px;
+  right: -14px;
+  left: auto;
+  width: 28px;
+  height: 28px;
+  transform: none;
+  border-color: rgba(247, 240, 228, .16);
+  background: var(--petrol-900);
+  color: rgba(247, 240, 228, .72);
+}
+
+.nr-sidebar-brand-name { color: var(--cream-50); font-family: var(--font-display); font-weight: 400; }
+.nr-sidebar-brand .logo-icon.is-tenant-logo { padding: 4px; object-fit: contain; background: rgba(247,240,228,.96); }
+.nr-sidebar-nav { mask-image: none; }
+.nr-nav-section { color: rgba(247, 240, 228, .4); }
+.nr-nav-item { color: rgba(247, 240, 228, .7); }
+.nr-nav-item:hover { background: rgba(247, 240, 228, .055); color: var(--cream-50); }
+.nr-nav-item.is-active {
+  border-color: color-mix(in srgb, var(--brand-action) 34%, transparent);
+  background: color-mix(in srgb, var(--brand-action) 14%, var(--petrol-950));
+  color: var(--brand-accent-on-dark);
+  box-shadow: inset 3px 0 0 var(--brand-action);
+}
+.nr-sidebar-collapse, .nr-sidebar-mobile-close {
+  border-color: rgba(247, 240, 228, .12);
+  background: rgba(247, 240, 228, .045);
+  color: rgba(247, 240, 228, .7);
+}
+.nr-sidebar-collapse:hover, .nr-sidebar-mobile-close:hover { background: rgba(247, 240, 228, .09); color: var(--cream-50); }
+.nr-sidebar-account { border-top-color: rgba(247, 240, 228, .1); background: var(--petrol-950); color: var(--cream-100); }
+.nr-sidebar-account [style*='var(--text-muted)'] { color: rgba(247, 240, 228, .5); }
+.user-avatar-mini { display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--brand-action) 32%, transparent); border-radius: 12px; background: var(--brand-soft); color: var(--brand-action-hover); font-weight: 760; }
+
+.nr-main, .nr-page { background: var(--surface-canvas); }
+.nr-topbar {
+  border-bottom-color: var(--line-soft);
+  background: color-mix(in srgb, var(--surface-canvas) 94%, transparent);
+  backdrop-filter: blur(18px);
+}
+.nr-page-title { font-family: var(--font-display); font-weight: 400; letter-spacing: -.025em; }
+.nr-breadcrumb-current { color: var(--brand-action-hover); }
+.nr-page-inner { animation: nr-page-arrive .22s var(--nr-ease-emphasized) both; }
+@keyframes nr-page-arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.search-trigger {
+  width: min(240px, 19vw);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--nr-radius-control);
+  background: var(--surface-raised);
+  color: var(--ink-soft);
+  box-shadow: none;
+}
+.search-trigger:hover, .search-trigger:focus-within { border-color: color-mix(in srgb, var(--brand-action) 42%, var(--line-strong)); }
+.search-trigger:focus-within { box-shadow: var(--focus-ring); }
+
+/* Dashboard surfaces keep the same product rhythm as the shared shell. */
+.nr-dashboard-page { display: grid; gap: 18px; }
+
+.stats-grid { gap: 12px; }
+.stat-card {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--nr-radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-xs);
+}
+.stat-icon { border: 1px solid var(--line-soft); background: var(--surface-soft); color: var(--brand-action-hover); }
+
+.nr-dashboard-upcoming, .nr-dashboard-activity { min-width: 0; }
+.nr-dashboard-booking-link {
+  border: 1px solid color-mix(in srgb, var(--brand-action) 28%, var(--line-soft));
+  background: var(--brand-soft);
+}
+
+/* Dense operational surfaces. */
+.card { border-color: var(--line-soft); background: var(--surface-raised); box-shadow: var(--shadow-xs); }
+.card:hover, .stat-card:hover { transform: none; box-shadow: var(--shadow-xs); }
+.stat-card:hover .stat-icon { transform: none; }
+.cardHeader { background: transparent; }
+.table-scroll { border-radius: var(--nr-radius-card); }
+.card > .table-scroll { border-radius: 0; }
+.nr-calendar-toolbar { border-color: var(--line-soft); background: var(--surface-raised); }
+.nr-calendar-title { font-family: var(--font-display); font-weight: 400; }
+.nr-calendar-week { border-color: var(--line-soft); background: var(--surface-raised); }
+.nr-calendar-week-body > * { border-color: var(--line-soft); }
+
+.settings-subscription-summary {
+  border: 1px solid rgba(247, 240, 228, .11);
+  background: var(--petrol-950);
+  color: var(--cream-50);
+  box-shadow: none;
+}
+.settings-subscription-summary > p { color: rgba(247, 240, 228, .67); }
+.settings-subscription-head > div > small { color: rgba(247, 240, 228, .72); }
+.security-settings-icon { color: var(--brand-action-hover); }
+
+/* Confirmation is the compact variant of the canonical dialog contract. */
+.nr-dialog.nr-confirm-dialog {
+  width: min(440px, 100%);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 22px;
+  overflow: visible;
+}
+.nr-dialog.nr-confirm-dialog > .nr-confirm-tone {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--brand-soft);
+  color: var(--brand-action-hover);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.nr-confirm-tone.danger { background: var(--danger-soft); color: var(--danger-strong); }
+.nr-dialog.nr-confirm-dialog > .nr-confirm-copy { min-height: 0; padding: 0; overflow: visible; }
+.nr-confirm-copy h2 { margin: 0 0 7px; }
+.nr-confirm-copy p, .nr-confirm-description { margin: 0; color: var(--ink-soft); font-size: .86rem; line-height: 1.55; }
+.nr-dialog.nr-confirm-dialog > .nr-confirm-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 8px; padding: 0; border: 0; background: transparent; }
+
+.notifications-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 54px;
+  z-index: 500;
+  width: min(390px, calc(100dvi - 28px));
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  color: var(--ink-strong);
+  box-shadow: var(--shadow-md);
+}
+.notifications-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 16px; border-bottom:1px solid var(--line-soft); }
+.notifications-header h3 { margin:0; color:var(--ink-strong); font-size:.92rem; }
+.notifications-clear { min-height:32px; padding:0 8px; border:0; border-radius:8px; background:transparent; color:var(--brand-action-hover); font:inherit; font-size:.68rem; font-weight:700; cursor:pointer; }
+.notifications-clear:hover:not(:disabled) { background:var(--surface-soft); }
+.notifications-clear:disabled { opacity:.45; cursor:not-allowed; }
+.notifications-body { max-height:min(400px,65dvh); overflow-y:auto; }
+.notifications-loading { padding:14px; }
+.notifications-loading > div { display:grid; gap:9px; }
+.notifications-loading .skeleton { height:52px; }
+.notifications-empty { padding:28px 20px; color:var(--ink-soft); font-size:.8rem; text-align:center; }
+.notification-item { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 11px; padding: 13px 16px; border-bottom: 1px solid var(--line-soft); }
+.notification-item:last-child { border-bottom: 0; }
+.notification-item:hover { background: var(--surface-soft); }
+.notification-mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; background: var(--surface-soft); color: var(--ink-soft); }
+.notification-mark.success { background: var(--success-soft); color: var(--success-strong); }
+.notification-mark.warning { background: var(--warning-soft); color: var(--warning-strong); }
+.notification-mark.danger { background: var(--danger-soft); color: var(--danger-strong); }
+.notification-mark.info { background:var(--status-info-bg); color:var(--status-info-ink); }
+.notification-copy { min-width:0; display:grid; gap:3px; }
+.notification-copy strong { color:var(--ink-strong); font-size:.8rem; }
+.notification-copy span { color:var(--ink-soft); font-size:.75rem; line-height:1.4; }
+.notification-copy time { color:var(--ink-faint); font-size:.65rem; }
+
+.fatal-error-page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--petrol-950); color: var(--cream-100); }
+.fatal-error-card { width: min(460px, 100%); padding: 34px; border: 1px solid rgba(247, 240, 228, .14); border-radius: 20px; background: var(--petrol-900); text-align: center; box-shadow: var(--shadow-lg); }
+.fatal-error-mark { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 18px; border: 1px solid rgba(247, 240, 228, .16); border-radius: 14px; background: var(--copper-500); color: var(--petrol-950); font-family: var(--font-mono); font-weight: 700; }
+.fatal-error-card h1 { margin: 0 0 10px; color: var(--cream-50); }
+.fatal-error-card p { margin: 0 0 22px; color: rgba(247, 240, 228, .65); line-height: 1.6; }
+
+/* Mobile navigation is part of the product, not a floating glass widget. */
+@media (max-width: 900px) {
+  .nr-shell.is-sidebar-collapsed .nr-sidebar-wordmark { display: block; }
+  .nr-mobile-backdrop { background: rgba(1, 10, 15, .76); backdrop-filter: blur(4px); }
+  .nr-sidebar { box-shadow: 24px 0 70px rgba(0, 0, 0, .48); }
+  .nr-mobile-tabbar, .nr-mobile-dock {
+    border-color: rgba(247, 240, 228, .12);
+    background: var(--petrol-950);
+    box-shadow: 0 -14px 36px rgba(0, 0, 0, .34);
+    backdrop-filter: none;
+  }
+  .nr-mobile-tabbar-item, .nr-mobile-dock-item { color: rgba(247, 240, 228, .56); }
+  .nr-mobile-tabbar-item.is-active, .nr-mobile-dock-item.is-active { background: transparent; color: var(--brand-accent-on-dark); box-shadow: none; }
+  .nr-mobile-tabbar-item.is-active .nr-mobile-tabbar-icon, .nr-mobile-dock-item.is-active .nr-mobile-dock-icon { background: color-mix(in srgb, var(--brand-action) 14%, var(--petrol-950)); color: var(--brand-accent-on-dark); }
+  .notifications-popover { position: fixed; top: 68px; right: 12px; }
+}
+
+@media (max-width: 520px) {
+  .nr-page-inner { padding-inline: 12px; }
+  .nr-dashboard-page { gap: 12px; }
+  .notifications-popover { right: 8px; width: calc(100% - 16px); }
+  .nr-dialog.nr-confirm-dialog { width: calc(100% - 24px); margin: 0 12px 12px; padding: 20px; border-width: 1px; border-radius: 18px; }
+  .nr-dialog.nr-confirm-dialog::before { display: none; }
+  .nr-dialog.nr-confirm-dialog > .nr-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nr-page-inner { animation: none; }
+}
+
+/* Collapsed desktop rail is intentionally icon-only. Tenant copy must not reappear
+   through later mobile-shell brand rules with equal specificity. */
+@media (min-width: 901px) {
+  .nr-shell.has-tenant-brand.is-sidebar-collapsed .nr-sidebar-brand-copy,
+  .nr-shell.is-sidebar-collapsed .nr-sidebar-account-copy,
+  .nr-shell.is-sidebar-collapsed .nr-nav-section,
+  .nr-shell.is-sidebar-collapsed .nr-nav-text { display: none; }
+  .nr-shell.is-sidebar-collapsed .nr-sidebar-brand {
+    grid-template-columns: 44px;
+    justify-content: center;
+  }
+}

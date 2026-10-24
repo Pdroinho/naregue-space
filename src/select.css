@@ -1,0 +1,162 @@
+/*
+ * Canonical product dropdown. One implementation for trigger, portal, keyboard,
+ * typeahead and responsive positioning; feature layers only provide option content.
+ */
+
+.nr-select-trigger {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nr-space-3);
+  padding: 0 13px 0 14px;
+  border: 1px solid var(--nr-color-line-strong);
+  border-radius: 13px;
+  background: var(--nr-color-raised);
+  color: var(--nr-color-ink-strong);
+  font: 640 var(--nr-type-body-size)/1.2 var(--nr-font-ui);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--nr-color-ink-strong) 3%, transparent);
+  transition:
+    border-color var(--nr-motion-base) var(--nr-ease-standard),
+    box-shadow var(--nr-motion-base) var(--nr-ease-standard),
+    background-color var(--nr-motion-base) var(--nr-ease-standard);
+}
+
+.nr-select-trigger:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--nr-color-accent) 34%, var(--nr-color-line-strong));
+  background: color-mix(in srgb, var(--nr-color-raised) 94%, var(--nr-color-soft));
+}
+
+.nr-select-trigger:focus-visible,
+.nr-select-trigger.is-open {
+  border-color: color-mix(in srgb, var(--nr-color-accent) 70%, var(--nr-color-line-strong));
+  box-shadow: var(--nr-focus-ring);
+}
+
+.nr-select-trigger.is-invalid { border-color: var(--nr-color-danger); }
+.nr-select-trigger:disabled {
+  cursor: not-allowed;
+  color: var(--nr-color-ink-faint);
+  background: var(--nr-color-soft);
+  opacity: .72;
+}
+
+.nr-select-value {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+}
+.nr-select-value > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nr-select-value.is-placeholder { color: var(--nr-color-ink-faint); }
+.nr-select-leading {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nr-color-ink-soft);
+}
+.nr-select-chevron {
+  flex: 0 0 auto;
+  color: var(--nr-color-ink-faint);
+  transition: transform var(--nr-motion-base) var(--nr-ease-standard), color var(--nr-motion-base) var(--nr-ease-standard);
+}
+.nr-select-trigger.is-open .nr-select-chevron { transform: rotate(180deg); color: var(--nr-color-accent); }
+
+.nr-select-menu {
+  position: fixed;
+  z-index: 16000;
+  overflow: hidden;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--nr-color-line-strong) 88%, transparent);
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--nr-color-raised) 97%, var(--nr-color-soft));
+  box-shadow: 0 20px 52px rgba(3, 23, 34, .17), 0 4px 12px rgba(3, 23, 34, .07);
+  outline: none;
+  transform-origin: top center;
+  animation: nr-select-in var(--nr-motion-fast) var(--nr-ease-emphasized);
+}
+.nr-select-menu.is-top { transform-origin: bottom center; }
+
+.nr-select-menu-scroll {
+  max-height: inherit;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  scroll-padding-block: 5px;
+}
+.nr-select-menu-scroll::-webkit-scrollbar { display: none; }
+
+.nr-select-option {
+  position: relative;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nr-space-3);
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--nr-color-ink-body);
+  font: 620 var(--nr-type-small-size)/1.3 var(--nr-font-ui);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--nr-motion-fast) var(--nr-ease-standard), color var(--nr-motion-fast) var(--nr-ease-standard), box-shadow var(--nr-motion-fast) var(--nr-ease-standard);
+}
+.nr-select-option + .nr-select-option { margin-top: 2px; }
+.nr-select-option.is-highlighted {
+  background: color-mix(in srgb, var(--nr-color-soft) 82%, var(--nr-color-raised));
+  color: var(--nr-color-ink-strong);
+}
+.nr-select-option.is-selected {
+  background: color-mix(in srgb, var(--nr-color-accent-soft) 65%, var(--nr-color-raised));
+  color: var(--nr-color-accent-deep);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nr-color-accent) 17%, transparent);
+}
+.nr-select-option:disabled {
+  cursor: not-allowed;
+  color: var(--nr-color-ink-faint);
+  opacity: .55;
+}
+.nr-select-option-copy { min-width: 0; display: grid; gap: 3px; }
+.nr-select-option-label { min-width: 0; display: inline-flex; align-items: center; gap: 9px; }
+.nr-select-option-label > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nr-select-option-copy small {
+  padding-left: 0;
+  color: var(--nr-color-ink-soft);
+  font: 530 var(--nr-type-caption-size)/1.35 var(--nr-font-ui);
+  white-space: normal;
+}
+.nr-select-option-copy:has(.nr-select-leading) small { padding-left: 35px; }
+.nr-select-empty { padding: var(--nr-space-3); color: var(--nr-color-ink-soft); font: 560 var(--nr-type-small-size)/1.4 var(--nr-font-ui); text-align: center; }
+
+@keyframes nr-select-in {
+  from { opacity: 0; transform: translateY(-4px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .nr-select-menu { border-radius: 18px; padding: 8px; }
+  .nr-select-option { min-height: 52px; padding: 11px 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nr-select-trigger,
+  .nr-select-chevron,
+  .nr-select-menu,
+  .nr-select-option { transition: none; animation: none; }
+}

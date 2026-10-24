@@ -1,0 +1,67 @@
+/* NaRegua 2.0 — services. */
+.service-mobile-list { display:none; }
+.service-desktop-table { min-width:0; }
+.service-cover-thumb { width:68px; height:44px; display:block; object-fit:cover; border:1px solid var(--line-soft); border-radius:10px; }
+.service-loading { padding:20px; }
+.service-loading .skeleton-card { height:160px; }
+.service-name-cell { color:var(--ink-strong); font-weight:680; }
+.service-duration-pill { font-size:.76rem; }
+.service-price-cell { font-family:var(--font-mono); font-size:.82rem; font-weight:650; }
+.service-edit-button { width:32px; height:32px; }
+.cover-uploader {
+  position:relative;
+  height:200px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border:1px dashed var(--line-strong);
+  border-radius:16px;
+  background:var(--surface-soft);
+  color:var(--ink-strong);
+  text-align:center;
+  cursor:pointer;
+  transition:border-color var(--nr-motion-base) var(--nr-ease-standard), background-color var(--nr-motion-base) var(--nr-ease-standard);
+}
+.cover-uploader:hover, .cover-uploader:focus-visible, .cover-uploader[data-dragging='true'] { border-color:var(--brand-action); background:var(--brand-soft); }
+.cover-uploader[data-busy='true'] { cursor:wait; }
+.cover-uploader-image { width:100%; height:100%; display:block; object-fit:cover; }
+.cover-uploader-busy { position:absolute; inset:0; z-index:3; display:grid; place-items:center; background:color-mix(in srgb,var(--surface-raised) 88%,transparent); color:var(--brand-action); }
+.cover-actions-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; background:rgba(1,10,15,.7); opacity:0; transition:opacity var(--nr-motion-base) var(--nr-ease-standard); }
+.cover-uploader:hover .cover-actions-overlay, .cover-uploader:focus-within .cover-actions-overlay { opacity:1; }
+.cover-action { border-color:rgba(247,240,228,.2); background:var(--cream-50); color:var(--petrol-950); }
+.cover-action-danger { border-color:var(--danger-border); background:var(--danger-soft); color:var(--danger-strong); }
+.cover-uploader-empty { padding:24px; display:grid; justify-items:center; gap:5px; pointer-events:none; }
+.cover-uploader-mark { width:48px; height:48px; display:grid; place-items:center; margin-bottom:7px; border:1px solid var(--line-soft); border-radius:14px; background:var(--surface-raised); color:var(--brand-action-hover); }
+.cover-uploader-empty strong { font-size:.88rem; }
+.cover-uploader-empty span { color:var(--ink-soft); font-size:.78rem; }
+.service-editor-actions { align-items:center; margin-top:10px; }
+.service-editor-delete { margin-right:auto; }
+@media (hover:none), (pointer:coarse) { .cover-actions-overlay { opacity:1; align-items:flex-end; justify-content:flex-end; background:rgba(1,10,15,.38); } }
+@media (max-width: 680px) {
+  .service-desktop-table { display:none; }
+  .service-mobile-list { display:grid; gap:9px; padding:12px; }
+  .service-mobile-card {
+    min-width:0;
+    display:grid;
+    grid-template-columns:68px minmax(0,1fr) 42px;
+    align-items:center;
+    gap:12px;
+    padding:10px;
+    border:1px solid var(--line-soft);
+    border-radius:15px;
+    background:var(--surface-soft);
+  }
+  .service-mobile-card > img { width:68px; height:58px; object-fit:cover; border-radius:11px; }
+  .service-mobile-copy { min-width:0; display:grid; gap:4px; }
+  .service-mobile-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-strong); font-size:.88rem; }
+  .service-mobile-copy span { color:var(--ink-soft); font-size:.72rem; }
+  .service-mobile-card .icon-btn { width:42px; height:42px; }
+  .cover-uploader { height:160px; }
+  .service-editor-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .service-editor-actions .btn { width:100%; }
+  .service-editor-delete { grid-column:1/-1; margin:0; }
+}
+@media (max-width: 350px) {
+  .service-mobile-card { grid-template-columns:56px minmax(0,1fr) 40px; gap:9px; padding:8px; }
+  .service-mobile-card > img { width:56px; height:52px; }
+}
