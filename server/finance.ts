@@ -25,7 +25,7 @@ export function financeMonthSnapshot(input: { tenantId: string; timeZone: string
 
   const services = db.prepare(`
     SELECT
-      COALESCE(SUM(s.price_cents), 0) AS serviceEntriesCents,
+      COALESCE(SUM(COALESCE(a.booked_price_cents,s.price_cents)), 0) AS serviceEntriesCents,
       COUNT(a.id) AS confirmedAppointments
     FROM appointments a
     JOIN services s ON s.id = a.service_id

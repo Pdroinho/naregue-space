@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-const overlaySelector = '.nr-overlay, dialog[open], [data-blocking-overlay="true"]'
-const panelSelector = '.nr-dialog, dialog[open], [role="dialog"][aria-modal="true"]'
+const overlaySelector = '.ld-overlay, .modal-overlay, .confirm-layer, dialog[open], [data-blocking-overlay="true"]'
+const panelSelector = '.ld-dialog, .modal-content, .confirm-card, dialog[open], [role="dialog"][aria-modal="true"]'
 const focusableSelector = [
   'button:not([disabled])',
   '[href]',
@@ -27,8 +27,8 @@ function panelFor(overlay: HTMLElement) {
 }
 
 /**
- * Coordinates every transactional dialog without coupling the tour, billing
- * or individual screens to one another.
+ * Normalizes behavior for legacy and new dialogs without coupling the tour,
+ * billing or individual screens to one another.
  */
 export function OverlayCoordinator() {
   useEffect(() => {
@@ -58,7 +58,7 @@ export function OverlayCoordinator() {
         if (!activeOverlay) {
           returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
           const gap = Math.max(0, window.innerWidth - document.documentElement.clientWidth)
-          document.documentElement.style.setProperty('--nr-scroll-lock-gap', `${gap}px`)
+          document.documentElement.style.setProperty('--ld-scroll-lock-gap', `${gap}px`)
           document.body.classList.add('has-blocking-overlay')
         }
         activeOverlay = overlay
@@ -69,7 +69,7 @@ export function OverlayCoordinator() {
 
       activeOverlay = null
       document.body.classList.remove('has-blocking-overlay')
-      document.documentElement.style.removeProperty('--nr-scroll-lock-gap')
+      document.documentElement.style.removeProperty('--ld-scroll-lock-gap')
       if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
       returnFocus = null
     }
@@ -81,6 +81,7 @@ export function OverlayCoordinator() {
       if (!panel) return
 
       if (event.key === 'Escape') {
+        if (event.target instanceof Element && event.target.closest('.ld-select-menu, [data-inline-popover]')) return
         const close = panel.querySelector<HTMLButtonElement>('[data-modal-close], .modal-close, button[aria-label^="Fechar"]')
         if (close && !close.disabled) {
           event.preventDefault()
@@ -118,7 +119,7 @@ export function OverlayCoordinator() {
       observer.disconnect()
       document.removeEventListener('keydown', onKeyDown, true)
       document.body.classList.remove('has-blocking-overlay')
-      document.documentElement.style.removeProperty('--nr-scroll-lock-gap')
+      document.documentElement.style.removeProperty('--ld-scroll-lock-gap')
     }
   }, [])
 

@@ -1,3 +1,6 @@
+let professionalScope = ''
+export function setApiProfessionalScope(value: string) { professionalScope = value }
+
 export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: { message: string; code?: string } }
@@ -21,6 +24,12 @@ function requestHeaders(init?: RequestInit) {
 }
 
 export async function api<T>(path: string, init?: ApiRequestInit): Promise<ApiResult<T>> {
+  if (professionalScope && (!init?.method || init.method === 'GET') && /^\/api\/admin\/(dashboard|appointments|clients|finance)(?:[/?]|$)/.test(path)) {
+    const scopedUrl = new URL(path, window.location.origin); scopedUrl.searchParams.set('professionalId',professionalScope); path=scopedUrl.pathname+scopedUrl.search
+  }
+  if (professionalScope && init?.method === 'POST' && /^\/api\/admin\/finance\/(transactions|expenses)$/.test(path) && typeof init.body === 'string') {
+    init = {...init, body: JSON.stringify({...JSON.parse(init.body), professionalId: professionalScope})}
+  }
   const requestController = new AbortController()
   const externalSignal = init?.signal
   const abortFromExternal = () => requestController.abort(externalSignal?.reason)

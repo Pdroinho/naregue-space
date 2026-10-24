@@ -1,25 +1,28 @@
 {
   "name": "naregua",
   "private": true,
-  "version": "2.2.2",
+  "version": "3.0.0",
   "description": "Gestão completa para barbearias",
   "type": "module",
   "main": "dist/server/index.js",
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"tsx watch server/index.ts\" \"vite\"",
-    "build": "vite build && tsc -p server/tsconfig.json",
+    "build": "node scripts/build.mjs",
     "start": "node dist/server/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p server/tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "prettier -w .",
-    "test": "node --import tsx --test server/domains.test.ts server/billing.test.ts server/dateTime.test.ts server/externalUrl.test.ts server/seo.test.ts server/plans.test.ts server/phone.test.ts server/referrals.test.ts server/mfa.test.ts server/professionalAvailability.test.ts server/publicBooking.test.ts server/professionalSchedule.test.mjs",
+    "test": "node --import ./scripts/test-env.mjs --import tsx --test --test-force-exit server/*.test.ts server/routes/*.test.ts server/middleware/*.test.ts server/support/*.test.ts src/*.test.ts src/features/staff/*.test.ts",
     "check": "npm run typecheck && npm run lint && npm run test && npm run test:migrations && npm run test:security && npm run test:whatsapp && npm run test:release && npm run build",
     "preflight": "node scripts/preflight.mjs",
     "start:production": "NODE_ENV=production node dist/server/index.js",
     "test:migrations": "node --experimental-strip-types --test server/whatsappInboxMigration.test.mjs server/whatsappReliabilityMigration.test.mjs server/auth51Migration.test.mjs server/legalCampaignMigration.test.mjs server/professionalsMigration.test.mjs server/teamAccessMigration.test.mjs",
     "test:security": "node --experimental-strip-types --test server/session.test.mjs server/secretCrypto.test.mjs server/externalUrl.test.mjs server/teamAccessPolicy.test.mjs",
     "test:whatsapp": "node --experimental-strip-types --test server/whatsappIntent.test.mjs server/whatsappWebhook.test.mjs server/whatsappMedia.test.mjs server/marketingCampaign.test.mjs",
-    "test:release": "node scripts/stable-release-audit.mjs"
+    "test:release": "node scripts/stable-release-audit.mjs",
+    "test:ui": "node scripts/check-product-ui.mjs",
+    "test:booking-ui": "node scripts/check-product-ui.mjs --booking-mobile",
+    "test:settings-ui": "node scripts/check-product-ui.mjs --settings"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -33,10 +36,12 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "7.18.2",
-    "zod": "^3.24.1"
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.64.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",

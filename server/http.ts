@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
 import { z } from 'zod'
-import { logger } from './logger.js'
 
 export class HttpError extends Error {
   status: number
@@ -40,8 +39,18 @@ export function handleError(err: unknown, req: Request, res: Response, _next: Ne
     return
   }
 
+  const parserStatus = err && typeof err === 'object' && 'status' in err ? Number(err.status) : 0
+  if ([400,413,415].includes(parserStatus)) {
+    res.status(parserStatus).json({message: parserStatus===413 ? 'Solicitação muito grande.' : parserStatus===415 ? 'Formato de solicitação não aceito.' : 'Solicitação inválida.',code:'INVALID_REQUEST_BODY'});return
+  }
+
   const requestId = res.getHeader('X-Request-Id')
-  logger.error('http.internal_error', { requestId, method: req.method, path: req.path, error: err })
+  console.error('[HTTP] erro interno', {
+    requestId,
+    method: req.method,
+    path: req.path.replace(/(\/domains\/authorize\/)[^/]+/, '$1[redacted]').replace(/(\/professional-invitations\/)[^/]+/, '$1[redacted]'),
+    error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : String(err),
+  })
 
   res.status(500).json({ message: 'Erro interno', code: 'INTERNAL_ERROR', requestId })
 }

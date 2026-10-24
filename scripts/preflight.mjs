@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config({path:process.env.ENV_FILE || '.env'})
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -23,10 +25,14 @@ const required = [
   'LEGAL_CONTACT_EMAIL',
   'PRIVACY_CONTACT_EMAIL',
   'WHATSAPP_PROMOTIONAL_CAMPAIGNS_ENABLED',
-  'INFINITEPAY_HANDLE',
   'DOMAIN_AUTH_SECRET',
 ]
 
+if (process.env.ABACATEPAY_CHECKOUT_ENABLED !== 'true') errors.push('Habilite e homologue ABACATEPAY_CHECKOUT_ENABLED para uma publicação comercial')
+if (process.env.ABACATEPAY_DEV_MODE !== 'false') errors.push('ABACATEPAY_DEV_MODE deve ser false em produção')
+if ((process.env.ABACATEPAY_API_KEY || '').length < 16 || placeholderPatternForPayment(process.env.ABACATEPAY_API_KEY || '')) errors.push('Configure uma chave live AbacatePay válida')
+if ((process.env.ABACATEPAY_WEBHOOK_SECRET || '').length < 32) errors.push('ABACATEPAY_WEBHOOK_SECRET deve conter pelo menos 32 caracteres')
+function placeholderPatternForPayment(value) { return /SUBSTITUA|CHANGE|configure/i.test(value) }
 if (process.env.NODE_ENV !== 'production') errors.push('NODE_ENV deve ser production')
 for (const key of required) {
   if (!process.env[key]?.trim()) errors.push(`Variável ausente: ${key}`)
@@ -152,7 +158,7 @@ for (const output of ['dist/server/index.js', 'dist/client/index.html']) {
   if (!fs.existsSync(path.resolve(output))) errors.push(`Build ausente: ${output}. Execute npm run build antes do start`)
 }
 
-const envPath = path.resolve('.env')
+const envPath = path.resolve(process.env.ENV_FILE || '.env')
 if (fs.existsSync(envPath) && process.platform !== 'win32') {
   const mode = fs.statSync(envPath).mode & 0o777
   if ((mode & 0o077) !== 0) warnings.push(`.env está com permissão ${mode.toString(8)}; recomendado 600 ou 640 com grupo restrito`)

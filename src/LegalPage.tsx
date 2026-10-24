@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { api } from './api'
 import { ArrowRight, ShieldCheck } from './components/Icons'
-import './legal.css'
+import './legal-v56.css'
 
 type LegalSection = { id: string; title: string; paragraphs: string[] }
 
@@ -33,7 +33,7 @@ function providerLabel(config: LegalConfig) {
 
 function ProviderBlock({ config }: { config: LegalConfig }) {
   const provider = config.provider
-  return <div className="nr-legal-provider">
+  return <div className="legal56-provider">
     <strong>{providerLabel(config)}</strong>
     {provider.taxId ? <span>{provider.taxId}</span> : null}
     {provider.address ? <span>{provider.address}</span> : null}
@@ -43,20 +43,20 @@ function ProviderBlock({ config }: { config: LegalConfig }) {
 
 function LegalShell({ config, title, eyebrow, version, children }: { config: LegalConfig; title: string; eyebrow: string; version: string; children: ReactNode }) {
   const updated = useMemo(() => new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${config.documents.updatedAt}T12:00:00Z`)), [config.documents.updatedAt])
-  return <main className="nr-legal-page">
-    <header className="nr-legal-topbar">
-      <a className="nr-legal-brand" href="/" aria-label="Voltar para NaRégua"><img src="/brand/logo-wordmark-approved-web.png" alt="NaRégua" /></a>
-      <a className="nr-legal-back" href="/">Voltar ao início <ArrowRight size={15} /></a>
+  return <main className="legal56-page">
+    <header className="legal56-topbar">
+      <a className="legal56-brand" href="/" aria-label="Voltar para NaRégua"><img src="/brand/logo-wordmark-approved-inverse.png" alt="NaRégua" /></a>
+      <a className="legal56-back" href="/">Voltar ao início <ArrowRight size={15} /></a>
     </header>
-    <section className="nr-legal-hero">
-      <div className="nr-legal-hero-copy"><span>{eyebrow}</span><h1>{title}</h1><p>Versão {version} · atualizada em {updated}</p></div>
-      <div className="nr-legal-trust"><ShieldCheck size={20} /><span>{config.acceptance ? `Versão aceita em ${new Date(config.acceptance.acceptedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}. Conteúdo preservado como comprovante.` : 'Documento versionado e vinculado ao aceite da conta.'}</span></div>
+    <section className="legal56-hero">
+      <div className="legal56-hero-copy"><span>{eyebrow}</span><h1>{title}</h1><p>Versão {version} · atualizada em {updated}</p></div>
+      <div className="legal56-trust"><ShieldCheck size={20} /><span>{config.acceptance ? `Versão aceita em ${new Date(config.acceptance.acceptedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}. Conteúdo preservado como comprovante.` : 'Documento versionado e vinculado ao aceite da conta.'}</span></div>
     </section>
-    <div className="nr-legal-layout">
-      <aside className="nr-legal-aside"><span>Responsável pela plataforma</span><ProviderBlock config={config} /><button type="button" onClick={() => window.print()}>Imprimir ou salvar em PDF</button></aside>
-      <article className="nr-legal-document">{children}</article>
+    <div className="legal56-layout">
+      <aside className="legal56-aside"><span>Responsável pela plataforma</span><ProviderBlock config={config} /><button type="button" onClick={() => window.print()}>Imprimir ou salvar em PDF</button></aside>
+      <article className="legal56-document">{children}</article>
     </div>
-    <footer className="nr-legal-footer"><span>© 2026 NaRégua</span><div><a href="/termos">Termos de Uso</a><a href="/privacidade">Privacidade</a></div></footer>
+    <footer className="legal56-footer"><span>© 2026 NaRégua</span><div><a href="/termos">Termos de Uso</a><a href="/privacidade">Privacidade</a></div></footer>
   </main>
 }
 

@@ -1,3 +1,5 @@
+import { imageToolDefinitions, confirmLogoImageAction } from './assistantImageTools.js'
+import { operationalToolDefinitions, executeOperationalTool, confirmOperationalAction, type OperationType } from './assistantOperations.js'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { getDb } from './db.js'
@@ -6,7 +8,7 @@ import { financeExpenseCategories, financeMonthSnapshot, tenantFinanceTimeZone }
 
 export type AssistantPendingAction = {
   id: string
-  type: 'CREATE_SERVICE' | 'CONFIRM_APPOINTMENT'
+  type: 'CREATE_SERVICE' | 'CONFIRM_APPOINTMENT' | 'UPDATE_BRAND_IMAGE' | OperationType
   title: string
   description: string
   confirmLabel: string
@@ -102,6 +104,8 @@ function storePendingAction(context: AssistantToolContext, input: {
 }
 
 export const assistantToolDefinitions = [
+  ...operationalToolDefinitions,
+  ...imageToolDefinitions,
   {
     type: 'function',
     function: {
@@ -114,7 +118,7 @@ export const assistantToolDefinitions = [
     type: 'function',
     function: {
       name: 'get_finance_overview',
-      description: 'Obtém uma visão financeira confiável do mês atual e do mês anterior, usando o fuso do espaço. Retorna entradas registradas, saídas, saldo, origem das entradas e principais categorias de despesa. Use sempre que o usuário perguntar sobre faturamento, despesas, saldo, evolução financeira ou comparação mensal.',
+      description: 'Obtém uma visão financeira confiável do mês atual e do mês anterior, usando o fuso do espaço. Retorna entradas registradas, saídas, saldo, origem das entradas e principais categorias de despesa. Use sempre que a usuária perguntar sobre faturamento, despesas, saldo, evolução financeira ou comparação mensal.',
       parameters: { type: 'object', properties: {}, additionalProperties: false },
     },
   },
@@ -137,7 +141,7 @@ export const assistantToolDefinitions = [
     type: 'function',
     function: {
       name: 'find_appointments',
-      description: 'Busca agendamentos do tenant atual. O campo status representa o estado do horário; confirmation_status representa a confirmação de presença do cliente. Use quando o usuário perguntar por agenda ou presença. Nunca invente IDs.',
+      description: 'Busca agendamentos do tenant atual. O campo status representa o estado do horário; confirmation_status representa a confirmação de presença do cliente. Use quando a usuária perguntar por agenda ou presença. Nunca invente IDs.',
       parameters: {
         type: 'object',
         properties: {
@@ -171,7 +175,7 @@ export const assistantToolDefinitions = [
     type: 'function',
     function: {
       name: 'prepare_create_service',
-      description: 'Prepara a criação de um novo serviço, mas NÃO grava ainda. Só use quando nome, duração em minutos e preço em centavos estiverem claros. Se houver uma imagem anexada pelo usuário, ela deve ser usada como capa do serviço salvo. O usuário verá um card de confirmação antes da gravação.',
+      description: 'Prepara a criação de um novo serviço, mas NÃO grava ainda. Só use quando nome, duração em minutos e preço em centavos estiverem claros. Se houver uma imagem anexada pela usuária, ela deve ser usada como capa do serviço salvo. A usuária verá um card de confirmação antes da gravação.',
       parameters: {
         type: 'object',
         properties: {
@@ -210,6 +214,7 @@ const serviceArgs = z.object({
 const appointmentIdArgs = z.object({ appointment_id: z.string().uuid() }).strict()
 
 export function executeAssistantTool(context: AssistantToolContext, name: string, rawArgs: unknown): AssistantToolExecution {
+  const operational = executeOperationalTool(context, name, rawArgs); if (operational) return operational
   if (name === 'get_business_snapshot') {
     z.object({}).strict().parse(rawArgs ?? {})
     const timeZone = tenantFinanceTimeZone(context.tenantId)
@@ -266,7 +271,7 @@ export function executeAssistantTool(context: AssistantToolContext, name: string
     const currentNewClients = Number(newClientsRow?.currentNewClients ?? 0)
     const revenueChangePercent = previous.entriesCents > 0
       ? Number((((current.entriesCents - previous.entriesCents) / previous.entriesCents) * 100).toFixed(1))
-      : current.entriesCents > 0 ? 100 : 0
+      : null
     return {
       toolResult: {
         ok: true,
@@ -288,10 +293,10 @@ export function executeAssistantTool(context: AssistantToolContext, name: string
         goals: {
           revenueGoalCents,
           currentRevenueCents: current.entriesCents,
-          revenueProgressPercent: Math.min(100, Number(((current.entriesCents / Math.max(1, revenueGoalCents)) * 100).toFixed(1))),
+          revenueProgressPercent: revenueGoalCents > 0 ? Math.min(100, Number(((current.entriesCents / revenueGoalCents) * 100).toFixed(1))) : 0,
           newClientsGoal,
           currentNewClients,
-          newClientsProgressPercent: Math.min(100, Number(((currentNewClients / Math.max(1, newClientsGoal)) * 100).toFixed(1))),
+          newClientsProgressPercent: newClientsGoal > 0 ? Math.min(100, Number(((currentNewClients / newClientsGoal) * 100).toFixed(1))) : 0,
         },
         semantics: {
           entries: 'Agendamentos confirmados no período + entradas manuais.',
@@ -419,6 +424,8 @@ export function executeAssistantTool(context: AssistantToolContext, name: string
 }
 
 export function confirmAssistantAction(context: AssistantToolContext, actionId: string) {
+  const image = confirmLogoImageAction(context, actionId); if (image) return image
+  const operational = confirmOperationalAction(context, actionId); if (operational) return operational
   const tx = db.transaction(() => {
     const raw = db.prepare(`SELECT * FROM assistant_pending_actions WHERE id = ? AND tenant_id = ? AND user_id = ?`).get(actionId, context.tenantId, context.userId)
     const action = pendingActionSchema.safeParse(raw)

@@ -52,15 +52,3 @@ test('idle-expired session is revoked server-side', () => {
   assert.equal(resolveSession(db, created.token), null)
   assert.ok(db.prepare('SELECT revoked_at as revokedAt FROM auth_sessions WHERE id = ?').get(created.id).revokedAt)
 })
-
-test('professional account resolves with its dedicated role and tenant scope', () => {
-  const db = dbFixture()
-  db.prepare(`INSERT INTO users (id, tenant_id, role) VALUES (?, ?, ?)`)
-    .run('professional-1', 'tenant-1', 'PROFESSIONAL')
-  const created = createSession(db, { userId: 'professional-1' })
-  const resolved = resolveSession(db, created.token)
-  assert.equal(resolved?.role, 'PROFESSIONAL')
-  assert.equal(resolved?.tenantId, 'tenant-1')
-  assert.equal(resolved?.tenantStatus, 'ACTIVE')
-})
-

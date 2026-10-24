@@ -91,5 +91,5 @@ export function AssistantMarkdown({ text }: { text: string }) {
   }
 
   flushAll()
-  return <div className="nr-assistant-insight-markdown">{blocks}</div>
+  return <div className="assistant35-markdown">{blocks}</div>
 }

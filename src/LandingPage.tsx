@@ -1,3 +1,4 @@
+import { PUBLIC_TEAM_PLANS, validTeamPlans, orderedTeamPlans, type TeamPlan } from './teamPlans'
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { api } from './api'
 import {
@@ -8,7 +9,7 @@ import {
   X,
 } from './components/Icons'
 import { LandingCheckout } from './components/LandingCheckout'
-import { currencyBRLFromCents, type BillingPlan, type PublicBillingCatalog } from './commercial'
+import { currencyBRLFromCents } from './commercial'
 import './landing.css'
 
 const productViews = [
@@ -43,7 +44,7 @@ const faqItems = [
   ['Preciso saber mexer com sistemas?', 'Não. Depois da compra, um setup guiado ajuda a organizar marca, horários e serviços. A operação fica clara desde o primeiro acesso.'],
   ['Meus clientes precisam instalar aplicativo?', 'Não. Eles acessam seu link pelo navegador, escolhem serviço, data e horário e seguem pelo celular.'],
   ['O Mestre AI é obrigatório?', 'Não. Ele é um assistente opcional para interpretar indicadores e sugerir próximos passos. Agenda, clientes, caixa e gestão continuam funcionando sem IA.'],
-  ['Como funcionam os pagamentos?', 'Você escolhe mensal, trimestral, semestral ou anual. O checkout mostra o valor total antes da confirmação e usa os meios disponibilizados pela InfinitePay.'],
+  ['Como funcionam os pagamentos?', 'Você escolhe um plano mensal conforme o tamanho da equipe. O checkout mostra o valor total antes da confirmação e usa os meios disponibilizados pela AbacatePay.'],
 ] as const
 
 function BrandWordmark({ inverse = false }: { inverse?: boolean }) {
@@ -74,9 +75,8 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
-  const [checkoutCycle, setCheckoutCycle] = useState<BillingPlan['cycle']>('ANNUAL')
-  const [plans, setPlans] = useState<BillingPlan[]>([])
-  const [firstMonthPromoCents, setFirstMonthPromoCents] = useState<number | null>(null)
+  const [checkoutCycle, setCheckoutCycle] = useState<TeamPlan['code']>('TEAM_3')
+  const [plans, setPlans] = useState<readonly TeamPlan[]>(PUBLIC_TEAM_PLANS)
   const [pricingError, setPricingError] = useState<string | null>(null)
   const [activeView, setActiveView] = useState(0)
   const [referralToken] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('ref')?.trim() ?? '')
@@ -89,10 +89,9 @@ export function LandingPage() {
   useEffect(() => {
     document.body.classList.add('landing-body')
     document.title = 'NaRégua — gestão para barbearias que querem crescer'
-    api<PublicBillingCatalog>('/api/public/billing/plans').then((result) => {
+    api<{ teamPlans: TeamPlan[] }>('/api/public/billing/plans').then((result) => {
       if (!result.ok) { setPricingError(result.error.message); return }
-      setPlans(result.data.plans)
-      setFirstMonthPromoCents(result.data.firstMonthPromoCents)
+      if (validTeamPlans(result.data.teamPlans)) setPlans(orderedTeamPlans(result.data.teamPlans))
       setPricingError(null)
     })
     const syncHeader = () => setHeaderScrolled(window.scrollY > 12)
@@ -124,9 +123,8 @@ export function LandingPage() {
   }, [])
 
   const activeProduct = productViews[activeView]
-  const monthlyPlan = plans.find((plan) => plan.cycle === 'MONTHLY') ?? null
 
-  function buy(cycle: BillingPlan['cycle'] = 'ANNUAL') {
+  function buy(cycle: TeamPlan['code'] = 'TEAM_3') {
     setCheckoutCycle(cycle)
     setCheckoutOpen(true)
   }
@@ -141,7 +139,7 @@ export function LandingPage() {
 
     <div className="nr-sales-announcement">
       <div className="nr-sales-container">
-        <span>Software de gestão para barbearias <i /> {firstMonthPromoCents !== null ? <>1º mês do mensal por <strong>{currencyBRLFromCents(firstMonthPromoCents)}</strong></> : <>Gestão da agenda ao caixa</>}</span>
+        <span>Software de gestão para barbearias <i /> {plans[0]?.amountCents !== null ? <>Planos mensais a partir de <strong>{currencyBRLFromCents(plans[0]?.amountCents)}</strong></> : <>Gestão da agenda ao caixa</>}</span>
         <a href="#preco">Ver planos <ArrowRight size={14} /></a>
       </div>
     </div>
@@ -158,7 +156,7 @@ export function LandingPage() {
         </nav>
         <div className="nr-sales-nav-actions">
           <a className="nr-sales-login" href="/login">Acessar</a>
-          <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-nav" location="header" onClick={() => buy('ANNUAL')}>Começar agora</Cta>
+          <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-nav" location="header" onClick={() => buy('TEAM_3')}>Começar agora</Cta>
           <button type="button" className="nr-sales-menu" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menuOpen}>{menuOpen ? <X size={21} /> : <Menu size={21} />}</button>
         </div>
       </div>
@@ -172,7 +170,7 @@ export function LandingPage() {
           <h1>Mais cadeira ocupada.<br /><em>Menos rotina no improviso.</em></h1>
           <p>Agenda online, clientes, WhatsApp e caixa trabalham no mesmo ritmo — para você atender bem sem carregar a barbearia inteira na cabeça.</p>
           <div className="nr-sales-hero-actions">
-            <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-xl" location="hero" onClick={() => buy('ANNUAL')}>Começar com minha barbearia <ArrowRight size={18} /></Cta>
+            <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-xl" location="hero" onClick={() => buy('TEAM_3')}>Começar com minha barbearia <ArrowRight size={18} /></Cta>
             <a className="nr-sales-button nr-sales-button-outline nr-sales-button-xl" href="#produto">Ver o produto por dentro</a>
           </div>
           <div className="nr-sales-hero-proof"><span><i aria-hidden="true" /> Sem taxa por agendamento</span><span><i aria-hidden="true" /> Cliente sem app</span><span><i aria-hidden="true" /> Setup guiado</span></div>
@@ -301,21 +299,14 @@ export function LandingPage() {
             <div className="nr-sales-pricing-includes"><span><i aria-hidden="true" /> Agenda + link online</span><span><i aria-hidden="true" /> WhatsApp Center</span><span><i aria-hidden="true" /> Caixa</span><span><i aria-hidden="true" /> Mestre AI</span></div>
           </div>
           <div className="nr-sales-plan-grid nr-sales-reveal">
-            {pricingError ? <div className="nr-sales-pricing-error" role="alert"><strong>Planos temporariamente indisponíveis.</strong><span>{pricingError}</span><button type="button" onClick={() => window.location.reload()}>Tentar novamente</button></div> : !monthlyPlan || firstMonthPromoCents === null ? <div className="nr-sales-pricing-loading" role="status">Carregando valores atuais…</div> : plans.map((plan) => {
-              const regularTotal = monthlyPlan.amountCents * plan.months
-              const savingsCents = Math.max(0, regularTotal - plan.amountCents)
-              const isAnnual = plan.cycle === 'ANNUAL'
-              return <article key={plan.cycle} className={isAnnual ? 'is-featured' : ''}>
-                <div className="nr-sales-plan-name"><span>{plan.label}</span>{isAnnual ? <small>Melhor valor</small> : plan.cycle === 'MONTHLY' ? <small>Oferta de entrada</small> : savingsCents > 0 ? <small>Economize {currencyBRLFromCents(savingsCents)}</small> : null}</div>
-                {plan.cycle === 'MONTHLY'
-                  ? <div className="nr-sales-plan-price"><strong>{currencyBRLFromCents(firstMonthPromoCents)}</strong><span>1º mês</span><small>depois {currencyBRLFromCents(plan.monthlyEquivalentCents)}/mês</small></div>
-                  : <div className="nr-sales-plan-price"><strong>{currencyBRLFromCents(plan.monthlyEquivalentCents)}</strong><span>/mês</span><small>{currencyBRLFromCents(plan.amountCents)} a cada {plan.months} meses</small></div>}
-                <Cta className="nr-sales-plan-button" location={`pricing-${plan.cycle.toLowerCase()}`} onClick={() => buy(plan.cycle)}>{isAnnual ? 'Quero o melhor valor' : `Escolher ${plan.label.toLowerCase()}`} <ArrowRight size={15} /></Cta>
-              </article>
-            })}
+            {pricingError ? <div className="nr-sales-pricing-error" role="alert"><strong>Planos temporariamente indisponíveis.</strong><span>{pricingError}</span><button type="button" onClick={() => window.location.reload()}>Tentar novamente</button></div> : plans.map((plan) => <article key={plan.code} className={plan.code === 'TEAM_6' ? 'is-featured' : ''}>
+              <div className="nr-sales-plan-name"><span>{plan.label}</span></div>
+              <div className="nr-sales-plan-price"><strong>{currencyBRLFromCents(plan.amountCents)}</strong><span>/mês</span><small>Até {plan.seats} profissionais na sua barbearia</small></div>
+              <Cta className="nr-sales-plan-button" location={`pricing-${plan.code.toLowerCase()}`} onClick={() => buy(plan.code)}>Escolher plano <ArrowRight size={15} /></Cta>
+            </article>)}
           </div>
         </div>
-        <div className="nr-sales-container nr-sales-payment-note"><ShieldCheck size={17} /><span>Pagamento processado pela InfinitePay. Pix ou cartão conforme disponibilidade do checkout.</span></div>
+        <div className="nr-sales-container nr-sales-payment-note"><ShieldCheck size={17} /><span>Pagamento processado pela AbacatePay. Pix ou cartão conforme disponibilidade do checkout.</span></div>
       </section>
 
       <section className="nr-sales-faq" id="duvidas">
@@ -332,7 +323,7 @@ export function LandingPage() {
           <span className="nr-sales-kicker">Sua barbearia no controle</span>
           <h2>Pronto para colocar sua operação <em>NaRégua?</em></h2>
           <p>Menos tempo apagando incêndio. Mais tempo atendendo, acompanhando o negócio e fazendo a barbearia crescer.</p>
-          <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-xl" location="final" onClick={() => buy('ANNUAL')}>Começar agora <ArrowRight size={18} /></Cta>
+          <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-xl" location="final" onClick={() => buy('TEAM_3')}>Começar agora <ArrowRight size={18} /></Cta>
         </div>
       </section>
     </main>
@@ -345,7 +336,7 @@ export function LandingPage() {
       </div>
     </footer>
 
-    <LandingCheckout open={checkoutOpen} onClose={() => setCheckoutOpen(false)} referralToken={referralToken || undefined} initialCycle={checkoutCycle} />
+    <LandingCheckout open={checkoutOpen} onClose={() => setCheckoutOpen(false)} referralToken={referralToken || undefined} initialTeamPlan={checkoutCycle} />
   </div>
 }
 

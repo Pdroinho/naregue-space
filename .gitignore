@@ -19,3 +19,9 @@ coverage/
 
 .DS_Store
 Thumbs.db
+
+.validation/
+.validation-*.log
+.validation-*.json
+*.zip
+.impeccable/review/

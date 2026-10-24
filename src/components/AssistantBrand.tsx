@@ -9,5 +9,5 @@ export function AssistantMark({ className = '', ...props }: HTMLAttributes<HTMLS
 }
 
 export function AssistantWordmark({ className = '', muted = false }: { className?: string; muted?: boolean }) {
-  return <span className={`assistant-brand-wordmark ${muted ? 'is-muted' : ''} ${className}`.trim()}>Mestre</span>
+  return <span className={`assistant-brand-wordmark ${muted ? 'is-muted' : ''} ${className}`.trim()}>Mestre AI</span>
 }

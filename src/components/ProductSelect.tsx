@@ -1,6 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown } from './Icons'
+import { Check, ChevronDown } from './Icons'
 
 export type ProductSelectOption = {
   value: string
@@ -48,7 +48,7 @@ export function ProductSelect({
   menuClassName = '',
 }: ProductSelectProps) {
   const reactId = useId()
-  const listboxId = `nr-select-${reactId.replace(/:/g, '')}`
+  const listboxId = `ld-select-${reactId.replace(/:/g, '')}`
   const triggerRef = useRef<HTMLButtonElement>(null)
   const listboxRef = useRef<HTMLDivElement>(null)
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -68,27 +68,24 @@ export function ProductSelect({
     if (restoreFocus) requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }))
   }
 
-  function measure() {
+  const measure = useCallback(() => {
     const trigger = triggerRef.current
     if (!trigger) return
     const rect = trigger.getBoundingClientRect()
     const viewportPadding = 12
     const gap = 6
-    const estimatedContentHeight = options.reduce((height, option) => height + (option.description ? 58 : 48), 12)
-    const maxPreferredHeight = Math.min(360, Math.max(60, estimatedContentHeight))
+    const maxPreferredHeight = Math.min(320, Math.max(56, options.length * 44 + 12))
     const spaceBelow = window.innerHeight - rect.bottom - viewportPadding
     const spaceAbove = rect.top - viewportPadding
     const side: 'top' | 'bottom' = spaceBelow >= Math.min(maxPreferredHeight, 220) || spaceBelow >= spaceAbove ? 'bottom' : 'top'
     const availableHeight = Math.max(56, Math.min(maxPreferredHeight, side === 'bottom' ? spaceBelow - gap : spaceAbove - gap))
-    const hasDetailedOptions = options.some((option) => Boolean(option.description || option.leading))
-    const preferredWidth = hasDetailedOptions ? 260 : 180
-    const width = Math.min(Math.max(rect.width, preferredWidth), window.innerWidth - viewportPadding * 2)
+    const width = Math.min(Math.max(rect.width, 180), window.innerWidth - viewportPadding * 2)
     const left = Math.min(Math.max(viewportPadding, rect.left), Math.max(viewportPadding, window.innerWidth - viewportPadding - width))
     const top = side === 'bottom'
       ? Math.min(window.innerHeight - viewportPadding - availableHeight, rect.bottom + gap)
       : Math.max(viewportPadding, rect.top - gap - availableHeight)
     setPosition({ left, top, width, maxHeight: availableHeight, side })
-  }
+  }, [options.length])
 
   function openMenu(preferredIndex?: number) {
     if (disabled || options.length === 0) return
@@ -139,8 +136,7 @@ export function ProductSelect({
     }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      if (open) close()
-      else openMenu()
+      if (open) close(); else openMenu()
       return
     }
     if (event.key.length === 1 && !open) {
@@ -194,7 +190,7 @@ export function ProductSelect({
       window.removeEventListener('resize', onLayoutChange)
       window.removeEventListener('scroll', onLayoutChange, true)
     }
-  }, [open, options.length])
+  }, [open, measure])
 
   useEffect(() => {
     if (!open || highlighted < 0) return
@@ -217,7 +213,7 @@ export function ProductSelect({
       <button
         ref={triggerRef}
         type="button"
-        className={`nr-select-trigger nr-select-trigger--${size} ${open ? 'is-open' : ''} ${invalid ? 'is-invalid' : ''} ${className}`.trim()}
+        className={`ld-select-trigger ld-select-trigger--${size} ${open ? 'is-open' : ''} ${invalid ? 'is-invalid' : ''} ${className}`.trim()}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -227,11 +223,11 @@ export function ProductSelect({
         onClick={() => open ? close() : openMenu()}
         onKeyDown={onTriggerKeyDown}
       >
-        <span className={`nr-select-value ${selected ? '' : 'is-placeholder'}`.trim()}>
-          {selected?.leading ? <span className="nr-select-leading" aria-hidden="true">{selected.leading}</span> : null}
+        <span className={`ld-select-value ${selected ? '' : 'is-placeholder'}`.trim()}>
+          {selected?.leading ? <span className="ld-select-leading" aria-hidden="true">{selected.leading}</span> : null}
           <span>{selected?.label ?? placeholder}</span>
         </span>
-        <ChevronDown size={15} className="nr-select-chevron" aria-hidden="true" />
+        <ChevronDown size={15} className="ld-select-chevron" aria-hidden="true" />
       </button>
 
       {open && position && typeof document !== 'undefined' ? createPortal(
@@ -240,13 +236,13 @@ export function ProductSelect({
           id={listboxId}
           role="listbox"
           tabIndex={-1}
-          className={`nr-select-menu is-${position.side} ${menuClassName}`.trim()}
+          className={`ld-select-menu is-${position.side} ${menuClassName}`.trim()}
           style={menuStyle}
           aria-label={ariaLabel}
           aria-activedescendant={highlighted >= 0 ? `${listboxId}-option-${highlighted}` : undefined}
           onKeyDown={onListboxKeyDown}
         >
-          <div className="nr-select-menu-scroll">
+          <div className="ld-select-menu-scroll">
             {options.map((option, index) => (
               <button
                 type="button"
@@ -257,21 +253,22 @@ export function ProductSelect({
                 aria-selected={option.value === value}
                 aria-disabled={option.disabled || undefined}
                 disabled={option.disabled}
-                className={`nr-select-option ${option.value === value ? 'is-selected' : ''} ${index === highlighted ? 'is-highlighted' : ''}`.trim()}
+                className={`ld-select-option ${option.value === value ? 'is-selected' : ''} ${index === highlighted ? 'is-highlighted' : ''}`.trim()}
                 onPointerMove={() => { if (!option.disabled) setHighlighted(index) }}
                 onClick={() => selectIndex(index)}
                 tabIndex={-1}
               >
-                <span className="nr-select-option-copy">
-                  <span className="nr-select-option-label">
-                    {option.leading ? <span className="nr-select-leading" aria-hidden="true">{option.leading}</span> : null}
+                <span className="ld-select-option-copy">
+                  <span className="ld-select-option-label">
+                    {option.leading ? <span className="ld-select-leading" aria-hidden="true">{option.leading}</span> : null}
                     <span>{option.label}</span>
                   </span>
                   {option.description ? <small>{option.description}</small> : null}
                 </span>
+                {option.value === value ? <Check size={15} className="ld-select-check" aria-hidden="true" /> : null}
               </button>
             ))}
-            {options.length === 0 ? <div className="nr-select-empty">Nenhuma opção disponível</div> : null}
+            {options.length === 0 ? <div className="ld-select-empty">Nenhuma opção disponível</div> : null}
           </div>
         </div>,
         document.body,

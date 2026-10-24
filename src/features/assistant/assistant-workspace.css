@@ -1,0 +1,299 @@
+/* Reuse product cards, tabs, controls and dialogs. This layer arranges the work area. */
+.assistant-workspace {
+  max-width: 1200px;
+  margin-inline: auto;
+  display: grid;
+  gap: var(--ld-space-6);
+  min-width: 0;
+}
+.assistant-workspace > .ld-agenda-tabs {
+  max-width: 100%;
+}
+.assistant-work-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ld-space-5);
+  margin-bottom: var(--ld-space-5);
+}
+.assistant-work-heading h2,
+.assistant-work-form h2 {
+  font-size: var(--ld-type-section-size);
+  margin: 0 0 var(--ld-space-2);
+}
+.assistant-quick-periods,
+.assistant-support-actions {
+  display: flex;
+  gap: var(--ld-space-2);
+  flex-wrap: wrap;
+}
+.assistant-report-filter {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: start;
+  gap: var(--ld-space-4);
+  padding: var(--ld-space-5);
+  margin: 0 0 var(--ld-space-5);
+}
+.assistant-report-filter > .btn {
+  align-self: start;
+  margin-top: 28px;
+}
+.assistant-report-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ld-space-4);
+  margin-bottom: var(--ld-space-5);
+}
+.assistant-report-metrics article {
+  padding: var(--ld-space-5);
+  margin: 0;
+  display: grid;
+  gap: var(--ld-space-2);
+}
+.assistant-report-metrics strong {
+  font: 760 var(--ld-type-page-size)/1 var(--ld-font-ui);
+}
+.assistant-report-metrics span {
+  font-size: var(--ld-type-small-size);
+  color: var(--ld-color-ink-soft);
+  line-height: var(--ld-type-small-line);
+}
+.assistant-appointments,
+.assistant-reminder-list {
+  display: grid;
+  gap: var(--ld-space-3);
+}
+.assistant-appointment,
+.assistant-reminder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ld-space-5);
+  padding: var(--ld-space-5);
+  margin: 0;
+  min-width: 0;
+}
+.assistant-appointment > div:first-child,
+.assistant-reminder > div:first-child {
+  min-width: 0;
+}
+.assistant-appointment time {
+  font-size: var(--ld-type-small-size);
+  color: var(--ld-color-accent);
+  font-weight: 700;
+}
+.assistant-appointment h3,
+.assistant-reminder h3 {
+  font-size: var(--ld-type-subsection-size);
+  margin: var(--ld-space-2) 0;
+  overflow-wrap: anywhere;
+}
+.assistant-appointment p,
+.assistant-reminder p {
+  font-size: var(--ld-type-small-size);
+  color: var(--ld-color-ink-soft);
+  line-height: var(--ld-type-small-line);
+}
+.assistant-appointment small {
+  display: block;
+  margin-top: var(--ld-space-2);
+}
+.assistant-attendance-actions {
+  display: flex;
+  gap: var(--ld-space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.assistant-work-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ld-space-3);
+  margin-top: var(--ld-space-5);
+  font-size: var(--ld-type-small-size);
+}
+.assistant-work-form {
+  max-width: var(--ld-content-form-width);
+  padding: var(--ld-space-6);
+  display: grid;
+  gap: var(--ld-space-4);
+  margin: 0;
+}
+.assistant-work-form > .label {
+  display: grid;
+  gap: var(--ld-space-2);
+}
+.assistant-work-form textarea.input {
+  min-height: 120px;
+  line-height: var(--ld-type-body-line);
+  resize: vertical;
+}
+.assistant-work-form > .btn {
+  justify-self: start;
+}
+.assistant-work-empty {
+  padding: var(--ld-space-8);
+  text-align: center;
+  margin: 0;
+}
+.assistant-operation-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--ld-space-3);
+}
+.assistant-operation-description {
+  white-space: pre-wrap;
+  font-size: var(--ld-type-body-size);
+  line-height: var(--ld-type-body-line);
+  overflow-wrap: anywhere;
+}
+.assistant-credit-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ld-space-4);
+  padding: var(--ld-space-5);
+  margin: 0;
+  font-size: var(--ld-type-body-size);
+}
+.assistant-context-action {
+  gap: var(--ld-space-2);
+}
+.assistant-context-action svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.has-blocking-overlay .assistant34-launcher {
+  visibility: hidden;
+  pointer-events: none;
+}
+@media (max-width: 800px) {
+  .assistant-report-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .assistant-work-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .assistant-appointment,
+  .assistant-reminder {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .assistant-attendance-actions {
+    justify-content: flex-start;
+  }
+  .assistant-context-action strong {
+    display: none;
+  }
+}
+@media (max-width: 650px) {
+  .assistant-workspace {
+    gap: var(--ld-space-5);
+  }
+  .assistant-workspace > .ld-agenda-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: var(--ld-space-2);
+  }
+  .assistant-workspace > .ld-agenda-tabs > .ld-agenda-tab {
+    min-height: var(--ld-touch-target);
+    font-size: var(--ld-type-small-size);
+  }
+  .assistant-report-filter {
+    grid-template-columns: 1fr 1fr;
+    padding: var(--ld-space-4);
+  }
+  .assistant-report-filter > .btn {
+    grid-column: 1/-1;
+    margin-top: 0;
+  }
+  .assistant-report-metrics {
+    gap: var(--ld-space-3);
+  }
+  .assistant-report-metrics article {
+    padding: var(--ld-space-4);
+  }
+  .assistant-work-form {
+    padding: var(--ld-space-5);
+  }
+  .assistant-work-form > .btn,
+  .assistant-quick-periods > .btn {
+    width: 100%;
+  }
+  .assistant-quick-periods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .assistant-attendance-actions > .btn {
+    flex: 1;
+  }
+  .assistant-operation-footer > .btn {
+    flex: 1;
+    min-width: 0;
+  }
+  .assistant-credit-status {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .assistant-credit-status > .btn {
+    width: 100%;
+  }
+  .assistant-report-filter .ld-date-picker {
+    grid-column: 1/-1;
+  }
+  .assistant-support-actions > .btn {
+    flex: 1;
+  }
+}
+
+.assistant-context-action .assistant-brand-mark {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+@media (max-width: 650px) {
+  .assistant-report-filter {
+    grid-template-columns: 1fr;
+  }
+}
+
+.assistant-credit-area{display:grid;gap:var(--ld-space-3)}.assistant-credit-area>.btn{justify-self:start}.assistant-credit-history{padding:var(--ld-space-5);margin:0}.assistant-credit-history h3{font-size:var(--ld-type-subsection-size);margin:0 0 var(--ld-space-4)}.assistant-credit-history article{display:flex;align-items:center;justify-content:space-between;gap:var(--ld-space-4);padding-block:var(--ld-space-3);border-top:1px solid var(--ld-color-line-soft);font-size:var(--ld-type-small-size)}.assistant-credit-history small{display:block;margin-top:var(--ld-space-1);color:var(--ld-color-ink-soft)}
+
+.assistant-chat-capabilities { border-bottom:1px solid var(--ld-color-border); flex:none; }
+.assistant-chat-capabilities summary {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;cursor:pointer;font-size:13px;font-weight:600;list-style:none;}
+.assistant-chat-capabilities summary::-webkit-details-marker {display:none;}
+.assistant-chat-capabilities summary:focus-visible {outline:2px solid var(--ld-color-accent);outline-offset:-3px;}
+.assistant-chat-capabilities summary>span {font-size:20px;font-weight:400;}
+.assistant-chat-capabilities[open] summary>span {transform:rotate(45deg);}
+.assistant-chat-capabilities-body {padding:0 20px 16px;display:grid;gap:12px;font-size:13px;}
+.assistant-chat-capabilities-body p {margin:0;}
+.assistant-chat-examples {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.assistant-chat-examples .btn {justify-content:space-between;white-space:normal;text-align:left;min-width:0;}
+.assistant-chat-capabilities-body small {color:var(--ld-color-muted-foreground);}
+@media(max-width:480px){.assistant-chat-examples{grid-template-columns:1fr}.assistant-chat-capabilities summary{padding-inline:16px}.assistant-chat-capabilities-body{padding-inline:16px}.assistant34-starters{grid-template-columns:1fr}}
+/* The chat owns the available height; discovery never creates an empty grid row. */
+.assistant34 {display:flex;flex-direction:column;}
+.assistant34>.assistant34-header,.assistant34>.assistant34-disabled {flex:none;}
+.assistant34>.assistant34-workspace {flex:1;min-height:0;height:auto;grid-row:auto;}
+.assistant-credit-area>.btn {margin-left:auto;font-size:12px;min-height:36px;}
+@media(max-width:768px){.ld-shell.has-mobile-tabbar .assistant-workspace .assistant34--page{height:calc(100dvh - 224px);min-height:340px;}.assistant34-empty{align-content:center;}.assistant34-empty-main{align-self:center;}}
+
+/* Confirmation is a neutral receipt: text and icon carry success, not competing fills. */
+.assistant34 .assistant35-action.is-done {background:var(--ld-color-raised);border-color:var(--l34-line-strong);}
+.assistant34 .assistant35-action.is-done small {color:var(--l34-body);font-weight:600;}
+.assistant34 .assistant35-action-done {color:var(--l34-ink);}
+.assistant34 .assistant35-action-done svg {color:var(--l34-accent);}
+.assistant34 .assistant35-action.is-done .btn {background:transparent;color:var(--l34-ink);border:1px solid var(--l34-line-strong);margin-top:8px;min-height:40px;}
+.assistant34 .assistant35-action.is-done .btn:hover {background:var(--l34-accent-soft);}
+/* Compact fallback for surfaces without a header entry; hidden throughout ADMIN. */
+.assistant34-launcher {width:48px;height:48px;min-width:48px;padding:0;justify-content:center;border-radius:50%;}
+.assistant34-launcher .assistant-launcher-tooltip {position:absolute;bottom:calc(100% + 10px);right:0;white-space:nowrap;padding:8px 12px;border-radius:8px;background:var(--ld-color-ink-strong);color:var(--ld-color-raised);font-size:12px;opacity:0;visibility:hidden;pointer-events:none;}
+@media(hover:hover){.assistant34-launcher:hover .assistant-launcher-tooltip{opacity:1;visibility:visible;}}
+.assistant34-launcher:focus-visible .assistant-launcher-tooltip {opacity:1;visibility:visible;}
+@media(max-width:768px){.assistant-context-action {min-width:44px;min-height:44px;}.assistant34-launcher{width:44px;height:44px;min-width:44px;}}
+
+.assistant-reminders-heading {margin-bottom:20px}.assistant-reminders-heading h2 {font-size:1.25rem;margin:0 0 8px}.assistant-reminder-create {margin-block:16px 24px}.assistant-reminder-create>summary {display:inline-flex;cursor:pointer;list-style:none}.assistant-reminder-create>summary::-webkit-details-marker {display:none}.assistant-reminder-create .assistant-work-form {margin-top:16px}.assistant-reminders-filter {max-width:280px;margin-bottom:16px}.assistant-reminder-list .assistant-reminder strong {overflow-wrap:anywhere;font-size:.875rem}.assistant-reminder-list .assistant-reminder p {font-size:.8125rem}

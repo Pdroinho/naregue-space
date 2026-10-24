@@ -54,7 +54,7 @@ test('migration 38 creates legal evidence, marketing preference and campaign que
 test('legal evidence remains append-only even when the same bundle is accepted again', () => {
   const db = baseDb()
   db.exec(migration38Sql())
-  db.prepare(`INSERT INTO tenants (id, name) VALUES ('t1', 'Barbearia Central')`).run()
+  db.prepare(`INSERT INTO tenants (id, name) VALUES ('t1', 'Studio')`).run()
   db.prepare(`INSERT INTO users (id, tenant_id, email) VALUES ('u1', 't1', 'admin@example.com')`).run()
   const insert = db.prepare(`INSERT INTO user_legal_acceptances (id, user_id, tenant_id, bundle_version, bundle_hash, terms_version, privacy_version, source, snapshot_json, accepted_at) VALUES (?, 'u1', 't1', 'v1', ?, 't1', 'p1', 'TEST', '{}', ?)` )
   insert.run('a1', 'hash-a', '2026-08-14T00:00:00Z')
@@ -67,7 +67,7 @@ test('legal evidence remains append-only even when the same bundle is accepted a
 test('campaign queue constraints reject invalid recipient state', () => {
   const db = baseDb()
   db.exec(migration38Sql())
-  db.prepare(`INSERT INTO tenants (id, name) VALUES ('t1', 'Barbearia Central')`).run()
+  db.prepare(`INSERT INTO tenants (id, name) VALUES ('t1', 'Studio')`).run()
   db.prepare(`INSERT INTO users (id, tenant_id, email) VALUES ('u1', 't1', 'admin@example.com')`).run()
   db.prepare(`INSERT INTO whatsapp_marketing_campaigns (id, tenant_id, created_by_user_id, name, message_text, status, total_recipients, created_at) VALUES ('c1','t1','u1','Teste','Mensagem','QUEUED',1,'2026-08-14T00:00:00Z')`).run()
   assert.throws(() => db.prepare(`INSERT INTO whatsapp_marketing_recipients (id, campaign_id, tenant_id, client_user_id, phone_normalized, client_name, status, created_at) VALUES ('r1','c1','t1','u1','5511999999999','Maria','INVALID','2026-08-14T00:00:00Z')`).run())

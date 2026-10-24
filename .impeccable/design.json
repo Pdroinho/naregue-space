@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T23:50:32.816207+00:00",
+  "title": "Design System: NaRégua",
+  "extensions": {
+    "colorMeta": {
+      "brand-action": {
+        "role": "primary",
+        "displayName": "Copper action",
+        "tonalRamp": [
+          "#4b2416",
+          "#71361f",
+          "#934526",
+          "#b85a30",
+          "#d9743c",
+          "#e99d74",
+          "#f1bea0",
+          "#fdf2ea"
+        ]
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-xs",
+        "value": "0 1px 2px rgba(2, 17, 25, .06)",
+        "purpose": "Shared light-mode cards"
+      },
+      {
+        "name": "shadow-sm",
+        "value": "0 9px 26px rgba(2, 17, 25, .08)",
+        "purpose": "Low elevation"
+      },
+      {
+        "name": "shadow-md",
+        "value": "0 20px 54px rgba(2, 17, 25, .13)",
+        "purpose": "Medium elevation"
+      },
+      {
+        "name": "shadow-lg",
+        "value": "0 30px 80px rgba(2, 17, 25, .18)",
+        "purpose": "High elevation"
+      },
+      {
+        "name": "shadow-dialog",
+        "value": "0 38px 100px rgba(2, 17, 25, .34), 0 4px 16px rgba(2, 17, 25, .14)",
+        "purpose": "Light-mode dialogs"
+      }
+    ],
+    "motion": [
+      {
+        "name": "nr-motion-fast",
+        "value": "120ms",
+        "purpose": "Transform feedback"
+      },
+      {
+        "name": "nr-motion-base",
+        "value": "170ms",
+        "purpose": "Shared control transitions"
+      },
+      {
+        "name": "nr-motion-slow",
+        "value": "240ms",
+        "purpose": "Slower contextual motion"
+      },
+      {
+        "name": "nr-ease-standard",
+        "value": "cubic-bezier(.2, .75, .25, 1)",
+        "purpose": "Standard transition curve"
+      },
+      {
+        "name": "nr-ease-emphasized",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Emphasized transition curve"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "shared-controls-max",
+        "value": "640px"
+      },
+      {
+        "name": "admin-header-max",
+        "value": "767px"
+      },
+      {
+        "name": "booking-mobile-max",
+        "value": "820px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary Button extracted from the incumbent shared system.",
+      "html": "<button class=\"ds-primary\">Salvar alterações</button>",
+      "css": ".ds-primary{min-height:44px;padding:0 16px;border:1px solid var(--line-strong);border-radius:var(--nr-radius-control);font-size:.84rem;font-weight:720;line-height:1;letter-spacing:-.01em;cursor:pointer;font-family:var(--font-ui);transition:background-color var(--nr-motion-base) var(--nr-ease-standard);background:var(--brand-action);color:var(--nr-color-on-accent);border-color:var(--brand-action)}.ds-primary:hover{background:var(--brand-action-hover-bg);transform:translateY(-1px)}.ds-primary:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary Button extracted from the incumbent shared system.",
+      "html": "<button class=\"ds-secondary\">Ver todos</button>",
+      "css": ".ds-secondary{min-height:44px;padding:0 16px;border:1px solid var(--line-strong);border-radius:var(--nr-radius-control);font-size:.84rem;font-weight:720;line-height:1;letter-spacing:-.01em;cursor:pointer;font-family:var(--font-ui);transition:background-color var(--nr-motion-base) var(--nr-ease-standard);background:var(--surface-raised);color:var(--ink-body)}.ds-secondary:hover{background:var(--surface-soft);color:var(--ink-strong)}.ds-secondary:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text Field extracted from the incumbent shared system.",
+      "html": "<label class=\"ds-label\">Nome<input class=\"ds-input\" value=\"Amanda Oliveira\" /></label>",
+      "css": ".ds-label{display:grid;gap:8px;color:var(--ink-body);font:720 .76rem/1.35 var(--font-ui)}.ds-input{min-height:44px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:var(--nr-radius-control);background:var(--surface-raised);color:var(--ink-strong);font:.875rem var(--font-ui)}.ds-input:hover{border-color:color-mix(in srgb,var(--brand-action) 35%,var(--line-strong))}.ds-input:focus{outline:none;border-color:var(--brand-action);box-shadow:var(--focus-ring)}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card extracted from the incumbent shared system.",
+      "html": "<article class=\"ds-card\"><h2>Próximos agendamentos</h2><p>Consulte a agenda da equipe.</p></article>",
+      "css": ".ds-card{padding:20px;border:1px solid var(--line-soft);border-radius:var(--nr-radius-card);background:var(--surface-raised);color:var(--ink-strong);box-shadow:var(--shadow-xs);font-family:var(--font-ui)}.ds-card h2{margin:0;font-size:1.06rem;font-weight:760;letter-spacing:-.025em}.ds-card p{margin:4px 0 0;color:var(--ink-soft);font-size:.82rem;line-height:1.55}"
+    },
+    {
+      "name": "Neutral Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Neutral Chip extracted from the incumbent shared system.",
+      "html": "<span class=\"ds-chip\">Agendado</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:24px;padding:3px 9px;border:1px solid var(--line-soft);border-radius:var(--nr-radius-pill);background:var(--surface-soft);color:var(--ink-body);font:720 var(--nr-type-caption-size) var(--font-ui)}"
+    },
+    {
+      "name": "Active Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Active Navigation extracted from the incumbent shared system.",
+      "html": "<nav aria-label=\"Principal\"><button class=\"ds-nav\" aria-current=\"page\">Agenda</button></nav>",
+      "css": ".ds-nav{min-height:44px;padding:9px 11px;border:1px solid color-mix(in srgb,var(--brand-action) 20%,var(--line-soft));border-radius:12px;background:var(--brand-soft);color:var(--brand-action);box-shadow:inset 3px 0 0 color-mix(in srgb,var(--brand-action) 86%,transparent);font:610 .88rem var(--font-ui);cursor:pointer}.ds-nav:hover{background:color-mix(in srgb,var(--surface-soft) 80%,transparent);color:var(--ink-strong)}.ds-nav:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Precision of the barbershop",
+    "overview": "NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.\n\nOperational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. Existing landing composition is inherited rather than a template for every workflow.",
+    "keyCharacteristics": [
+      "Cream reading surfaces and petroleum structure.",
+      "Manrope interface with local Hugeicons Stroke Rounded.",
+      "Restrained copper actions and real barber photography."
+    ],
+    "rules": [
+      {
+        "name": "The Product Neutrals Rule",
+        "body": "Tenant branding changes the accent family and logo, never product surfaces or semantic colors.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do preserve the original NaRégua monogram and approved assets.",
+      "Do use one primary action per context and real empty, loading and error states.",
+      "Do adapt mobile composition and honor reduced motion."
+    ],
+    "donts": [
+      "Don't let tenant accents recolor neutral surfaces or semantic states.",
+      "Don't invent testimonials, metrics or generated product screenshots.",
+      "Don't introduce gradients except as readability masks over photography."
+    ]
+  }
+}

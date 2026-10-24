@@ -1,4 +1,4 @@
-export type Role = 'DEV' | 'ADMIN' | 'PROFESSIONAL' | 'CLIENT'
+export type Role = 'DEV' | 'ADMIN' | 'CLIENT' | 'STAFF'
 
 export type AppointmentConfirmationStatus =
   | 'NOT_REQUESTED'
@@ -15,7 +15,12 @@ export type TenantPublic = {
   name: string
   primaryColor: string
   logoUrl: string | null
+  logoLayout?: 'SYMBOL_NAME' | 'FULL'
+  logoSize?: 'S' | 'M' | 'L'
+  backgroundColor?: string | null
+  secondaryColor?: string | null
   publicBaseUrl?: string | null
+  billingRecovery?: boolean
 }
 
 export type TenantDev = TenantPublic & {
@@ -35,57 +40,23 @@ export type SessionUser = {
   tenantId: string | null
   tenantSlug: string | null
   subscriptionStatus?: string | null
-  professionalId?: string | null
-  photoUrl?: string | null
-  professionalColor?: string | null
-}
-
-export type PublicProfessional = {
-  id: string
-  name: string
-  nickname: string | null
-  color: string
-  photoUrl: string | null
-  inheritsHours: boolean
-  serviceIds: string[]
-}
-
-export type Professional = {
-  id: string
-  name: string
-  nickname: string | null
-  phone: string | null
-  email: string | null
-  color: string
-  photoUrl: string | null
-  active: boolean
-  inheritsHours: boolean
-  sortOrder: number
-  serviceIds: string[]
-  hours: Array<{ id: string; professionalId: string; weekday: number; startMinute: number; endMinute: number }>
-  createdAt: string
-  updatedAt: string
-  userId: string | null
-  accessStatus: 'OWNER' | 'ACTIVE' | 'INVITED' | 'NONE'
-  inviteExpiresAt: string | null
+  billingRecovery?: boolean
 }
 
 export type CalendarEvent = {
   id: string
   title: string
+  professionalName?: string | null
   clientName: string
   start: string // ISO date string
   end: string // ISO date string
   color?: string
   textColor?: string
   status: 'confirmed' | 'pending' | 'cancelled'
+  attendanceStatus?:string
   confirmationStatus?: AppointmentConfirmationStatus
   confirmationSentAt?: string | null
   confirmationRespondedAt?: string | null
   appointmentReminderSentAt?: string | null
   clientPhone?: string | null
-  professionalId?: string
-  professionalName?: string
-  professionalColor?: string
-  professionalPhotoUrl?: string | null
 }

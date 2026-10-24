@@ -9,7 +9,7 @@ fi
 
 BACKUP="$1"
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-DB_PATH="${DATABASE_PATH:-/data/app.db}"
+DB_PATH="${DATABASE_PATH:-/data/db/app.db}"
 DB_DIR="$(dirname "$DB_PATH")"
 STAMP="$(date -u +'%Y-%m-%dT%H-%M-%SZ')"
 PREVIOUS="$DB_PATH.before-restore-$STAMP"

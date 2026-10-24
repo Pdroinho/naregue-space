@@ -1,53 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AlertTriangle, ShieldCheck, Info, XCircle } from './Icons'
-import { ModalRoot } from './ModalRoot'
+import { createPortal } from 'react-dom'
+import { AlertTriangle, CheckCircle2, Info, XCircle } from './Icons'
 
-type ToastTone = 'success' | 'error' | 'info' | 'warning'
-
-type ToastItem = {
-  id: number
-  message: string
-  tone: ToastTone
-  timeoutMs: number
-}
-
-type ConfirmOptions = {
-  title?: string
-  message: string
-  confirmLabel?: string
-  cancelLabel?: string
-  danger?: boolean
-}
-
-type ConfirmRequest = ConfirmOptions & {
-  resolve: (value: boolean) => void
-}
-
-let nextToastId = 1
-const toastListeners = new Set<(item: ToastItem) => void>()
-const confirmListeners = new Set<(request: ConfirmRequest) => void>()
-
-export function notify(message: string, tone: ToastTone = 'info', timeoutMs = 4200) {
-  const text = String(message ?? '').trim()
-  if (!text) return
-  const item: ToastItem = { id: nextToastId++, message: text, tone, timeoutMs }
-  for (const listener of toastListeners) listener(item)
-}
-
-export function confirmAction(options: ConfirmOptions) {
-  return new Promise<boolean>((resolve) => {
-    const request: ConfirmRequest = { ...options, resolve }
-    const listener = [...confirmListeners].at(-1)
-    if (!listener) {
-      resolve(false)
-      return
-    }
-    listener(request)
-  })
-}
+import { toastListeners, confirmListeners, type ToastItem, type ConfirmRequest } from '../lib/feedback'
 
 const toneIcon = {
-  success: ShieldCheck,
+  success: CheckCircle2,
   error: XCircle,
   warning: AlertTriangle,
   info: Info,
@@ -135,25 +93,25 @@ export function FeedbackCenter() {
         })}
       </div>
 
-      {confirmRequest ? (
-        <ModalRoot onMouseDown={(event) => {
+      {confirmRequest ? createPortal(
+        <div className="confirm-layer" data-blocking-overlay="true" onMouseDown={(event) => {
           if (event.target === event.currentTarget) settleConfirm(false)
         }}>
           <section
-            className={`nr-dialog nr-confirm-dialog ${confirmRequest.danger ? 'danger' : ''}`}
+            className={`confirm-card ${confirmRequest.danger ? 'danger' : ''}`}
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
             aria-describedby="confirm-message"
           >
-            <div className={`nr-confirm-tone ${confirmRequest.danger ? 'danger' : 'neutral'}`} aria-hidden="true">
+            <div className={`confirm-tone ${confirmRequest.danger ? 'danger' : 'neutral'}`} aria-hidden="true">
               {confirmRequest.danger ? 'Atenção' : 'Confirmação'}
             </div>
-            <div className="nr-confirm-copy">
+            <div className="confirm-copy">
               <h2 id="confirm-title">{confirmRequest.title ?? 'Confirmar ação'}</h2>
               <p id="confirm-message">{confirmRequest.message}</p>
             </div>
-            <div className="nr-confirm-actions">
+            <div className="confirm-actions">
               <button type="button" className="btn" data-modal-close onClick={() => settleConfirm(false)}>
                 {confirmRequest.cancelLabel ?? 'Cancelar'}
               </button>
@@ -167,7 +125,8 @@ export function FeedbackCenter() {
               </button>
             </div>
           </section>
-        </ModalRoot>
+        </div>,
+        document.body,
       ) : null}
     </>
   )

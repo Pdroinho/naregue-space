@@ -138,3 +138,7 @@ export const PlayCircle = icon('play-circle.svg')
 export const RefreshCw = icon('reload.svg')
 export const ExternalLink = icon('link-square-02.svg')
 export const Paperclip = icon('attachment-02.svg')
+
+export const Check = createIcon('tick-02.svg')
+
+export const CheckCircle2 = createIcon('tick-02.svg')

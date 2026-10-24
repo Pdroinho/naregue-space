@@ -1,29 +1,12 @@
 [Unit]
-Description=Backup do banco NaRégua
-After=local-fs.target
+Description=NaRegua consistent encrypted Docker backup
+After=docker.service
+Requires=docker.service
 
 [Service]
 Type=oneshot
-EnvironmentFile=/opt/naregua/app/.env
-User=naregua
-Group=naregua
-Environment=DATABASE_PATH=/opt/naregua/db_data/app.db
-Environment=BACKUP_DIR=/opt/naregua/backups
-ExecStart=/opt/naregua/app/deploy/backup.sh
+EnvironmentFile=/etc/naregua-backup.env
+ExecStart=/opt/lashdesigner/app/deploy/backup-host.sh
+UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
-PrivateDevices=true
-ProtectSystem=strict
-ProtectHome=true
-ProtectKernelTunables=true
-ProtectKernelModules=true
-ProtectControlGroups=true
-RestrictSUIDSGID=true
-LockPersonality=true
-RestrictRealtime=true
-SystemCallArchitectures=native
-RestrictAddressFamilies=AF_UNIX
-CapabilityBoundingSet=
-AmbientCapabilities=
-ReadWritePaths=/opt/naregua/db_data /opt/naregua/backups
-UMask=0077

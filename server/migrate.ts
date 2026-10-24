@@ -1,3 +1,8 @@
+import { bridgeNareguaTeamSchema, createNareguaPaymentAndPriceSchema } from './nareguaUpgrade.js'
+import { createSupportSchema } from './support/schema.js'
+import { createPaymentReferralSchema } from './paymentReferralSchema.js'
+import { createAssistantOperationsSchema } from './assistantOperationsSchema.js'
+import { createPasswordRecoverySchema } from './passwordRecoverySchema.js'
 import { getDb } from './db.js'
 import { ensureWhatsAppInboxSchema } from './whatsappInboxMigration.js'
 import { ensureWhatsappReliabilitySchema } from './whatsappReliabilityMigration.js'
@@ -5,8 +10,7 @@ import { ensurePlatformSettingsV51, ensureProfessionalWhatsappMfaSchema } from '
 import { ensureProfessionalTeamSchema } from './professionalsMigration.js'
 import { ensureTeamAccessSchema } from './teamAccessMigration.js'
 
-export function migrate() {
-  const db = getDb()
+export function migrate(db = getDb()) {
 
   db.exec(`
     PRAGMA foreign_keys = ON;
@@ -1106,5 +1110,120 @@ export function migrate() {
 
   apply(39, () => ensureProfessionalTeamSchema(db))
   apply(40, () => ensureTeamAccessSchema(db))
+
+  apply(101, () => bridgeNareguaTeamSchema(db))
+  // Payment preparation is additive. No checkout switches providers until the
+  // merchant credentials and authenticated confirmation path are homologated.
+  apply(102, () => {
+    db.exec(`
+      CREATE TABLE payment_checkout_intents (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        plan_code TEXT NOT NULL CHECK (plan_code IN ('TEAM_3','TEAM_6','TEAM_15')),
+        amount_cents INTEGER NOT NULL CHECK (amount_cents >= 500),
+        payment_link_id INTEGER UNIQUE,
+        checkout_url TEXT,
+        order_id INTEGER UNIQUE,
+        status TEXT NOT NULL CHECK (status IN ('CREATING','PENDING','PAID','FAILED','REFUNDED')),
+        created_at TEXT NOT NULL,
+        paid_at TEXT,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+      );
+      CREATE INDEX idx_payment_checkout_intents_tenant ON payment_checkout_intents(tenant_id, status);
+
+      CREATE TABLE payment_webhook_inbox (
+        id TEXT PRIMARY KEY,
+        event_name TEXT NOT NULL,
+        order_id INTEGER NOT NULL,
+        payment_link_id INTEGER,
+        payload_hash TEXT NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('PENDING','APPLIED','IGNORED','FAILED')),
+        received_at TEXT NOT NULL,
+        processed_at TEXT,
+        error_code TEXT,
+        UNIQUE (event_name, order_id)
+      );
+      CREATE INDEX idx_payment_webhook_inbox_pending ON payment_webhook_inbox(status, received_at);
+    `)
+  })
+
+  // Round-robin verification of paid Payment orders catches reversals even
+  // when the provider notification is delayed or never delivered.
+  apply(103, () => {
+    db.exec(`
+      ALTER TABLE payment_checkout_intents ADD COLUMN provider_checked_at TEXT;
+      CREATE INDEX idx_payment_paid_review ON payment_checkout_intents(status, provider_checked_at, paid_at);
+    `)
+  })
+
+  // One-time invitations link a STAFF user to exactly one professional in
+  // the same tenant. Raw invite tokens never enter the database.
+  apply(104, () => {
+    db.exec(`
+      ALTER TABLE users ADD COLUMN staff_access_disabled_at TEXT;
+      CREATE TABLE professional_invitations (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        professional_id TEXT NOT NULL,
+        token_hash TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        consumed_at TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (tenant_id, professional_id) REFERENCES professionals(tenant_id, id) ON DELETE CASCADE
+      );
+      CREATE INDEX idx_professional_invitations_person ON professional_invitations(tenant_id, professional_id, expires_at);
+    `)
+  })
+
+  // Distinguish provider reversals from manual administrative suspensions.
+  apply(105, () => {
+    db.exec('ALTER TABLE tenants ADD COLUMN suspension_reason TEXT')
+  })
+
+  apply(106, () => createSupportSchema(db))
+  apply(107, () => createPaymentReferralSchema(db))
+  apply(108, () => createAssistantOperationsSchema(db))
+  apply(109, () => db.exec('ALTER TABLE professionals ADD COLUMN removed_at TEXT'))
+  apply(110, () => db.exec(`
+
+    ALTER TABLE professionals ADD COLUMN instagram TEXT;
+    ALTER TABLE professionals ADD COLUMN tiktok TEXT;
+    ALTER TABLE tenants ADD COLUMN logo_layout TEXT NOT NULL DEFAULT 'SYMBOL_NAME';
+    ALTER TABLE tenants ADD COLUMN logo_size TEXT NOT NULL DEFAULT 'M';
+    ALTER TABLE tenants ADD COLUMN brand_background TEXT;
+    ALTER TABLE tenants ADD COLUMN brand_secondary TEXT;
+  `))
+
+  apply(111, () => createPasswordRecoverySchema(db))
+  apply(112, () => db.exec(`
+    ALTER TABLE whatsapp_marketing_campaigns ADD COLUMN image_data_url TEXT;
+    ALTER TABLE whatsapp_marketing_recipients ADD COLUMN dispatch_started_at TEXT;
+    UPDATE whatsapp_marketing_recipients SET dispatch_started_at=COALESCE(sent_at,claimed_at,created_at) WHERE status IN ('SENT','SENDING','FAILED') AND attempts>0;
+    CREATE INDEX idx_marketing_frequency ON whatsapp_marketing_recipients(tenant_id, phone_normalized, dispatch_started_at);
+    CREATE TABLE whatsapp_campaign_delivery_guard (
+      tenant_id TEXT PRIMARY KEY REFERENCES tenants(id) ON DELETE CASCADE,
+      next_allowed_at TEXT NOT NULL
+    );
+  `))
+
+  apply(113, () => createNareguaPaymentAndPriceSchema(db))
+
+  apply(114, () => db.exec(`
+    INSERT OR IGNORE INTO professional_invitations(id,tenant_id,professional_id,token_hash,email,phone,expires_at,created_at)
+      SELECT i.id,i.tenant_id,i.professional_id,i.token_hash,i.email,COALESCE(p.phone,''),i.expires_at,i.created_at
+      FROM professional_invites i JOIN professionals p ON p.id=i.professional_id AND p.tenant_id=i.tenant_id
+      WHERE i.accepted_at IS NULL AND i.revoked_at IS NULL AND p.user_id IS NULL;
+  `))
+
+  apply(115, () => db.exec(`
+    ALTER TABLE abacatepay_checkouts ADD COLUMN reversal_event TEXT;
+    CREATE TABLE abacatepay_webhook_events(
+      event_id TEXT PRIMARY KEY, event_type TEXT NOT NULL,
+      checkout_id INTEGER NOT NULL REFERENCES abacatepay_checkouts(id),
+      payload_hash TEXT NOT NULL, received_at TEXT NOT NULL
+    );
+  `))
 
 }

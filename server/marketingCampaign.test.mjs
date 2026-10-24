@@ -19,7 +19,7 @@ test('an existing explicit reply instruction is not duplicated', () => {
 
 test('campaign variables are rendered only from the intended placeholders', () => {
   assert.equal(
-    renderMarketingCampaignMessage('Oi {{nome}}! Novidade do {{espaco}}.', { clientName: 'Marina', tenantName: 'Barber Central' }),
-    'Oi Marina! Novidade do Barber Central.',
+    renderMarketingCampaignMessage('Oi {{nome}}! Novidade do {{espaco}}.', { clientName: 'Marina', tenantName: 'Studio Bela' }),
+    'Oi Marina! Novidade do Studio Bela.',
   )
 })

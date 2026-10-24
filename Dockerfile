@@ -39,13 +39,12 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/deploy/backup.sh /app/deploy/restore-container.sh /app/deploy/backup-crypto.mjs ./deploy/
 
-RUN mkdir -p /data /media /backups \
-    && chown -R node:node /app /data /media /backups \
-    && chmod 750 /data /media /backups \
+RUN mkdir -p /data/db /data/media /data/backups \
+    && chown -R node:node /app /data \
+    && chmod 750 /data /data/db /data/media /data/backups \
     && chmod 750 /app/deploy/backup.sh /app/deploy/restore-container.sh /app/deploy/backup-crypto.mjs
 
 USER node
-VOLUME ["/data", "/media", "/backups"]
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD curl --fail --silent http://127.0.0.1:3000/api/ready || exit 1
 ENTRYPOINT ["/usr/bin/tini", "--"]

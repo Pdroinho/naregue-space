@@ -10,21 +10,13 @@ function syncBrowserTheme(theme: ThemeMode, primaryColor?: string) {
   const root = document.documentElement
   root.style.colorScheme = theme
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-  if (meta) meta.content = theme === 'dark' ? '#031722' : (primaryColor ?? '#d9743c')
+  if (meta) meta.content = theme === 'dark' ? '#031722' : (primaryColor ?? '#b85a30')
 }
 
 export function initTheme() {
-  const root = document.documentElement
-  const savedTheme = (() => {
-    try {
-      const value = window.localStorage.getItem('theme')
-      return value === 'dark' || value === 'light' ? value : null
-    } catch {
-      return null
-    }
-  })()
-  const theme: ThemeMode = savedTheme ?? 'light'
-  root.dataset.theme = theme
+  let theme: ThemeMode = 'light'
+  try { if (window.localStorage.getItem('theme') === 'dark') theme = 'dark' } catch { /* optional storage */ }
+  document.documentElement.dataset.theme = theme
   syncBrowserTheme(theme)
 }
 
@@ -108,6 +100,40 @@ export function toggleDevTheme(): DevThemeMode {
   return next
 }
 
+const TENANT_SURFACE_KEYS = [
+  '--gray-50',
+  '--surface-canvas',
+  '--surface-panel',
+  '--surface-raised',
+  '--surface-soft',
+  '--surface-muted',
+  '--line-soft',
+  '--line-strong',
+  '--ld-color-canvas',
+  '--ld-color-canvas-warm',
+  '--ld-color-panel',
+  '--ld-color-paper',
+  '--ld-color-raised',
+  '--ld-color-soft',
+  '--ld-color-soft-warm',
+  '--ld-color-muted',
+  '--ld-color-line-soft',
+  '--ld-color-line-strong',
+] as const
+
+function applyTenantSurfaces(_backgroundColor?: string | null) {
+  const root=document.documentElement
+  for(const key of TENANT_SURFACE_KEYS)root.style.removeProperty(key)
+  const values:Record<string,string>={
+    '--ld-color-canvas':'var(--surface-canvas)','--ld-color-canvas-warm':'var(--surface-canvas)',
+    '--ld-color-panel':'var(--surface-panel)','--ld-color-paper':'var(--surface-panel)',
+    '--ld-color-raised':'var(--surface-raised)','--ld-color-soft':'var(--surface-soft)',
+    '--ld-color-soft-warm':'var(--surface-soft)','--ld-color-muted':'var(--surface-muted)',
+    '--ld-color-line-soft':'var(--line-soft)','--ld-color-line-strong':'var(--line-strong)',
+  }
+  for(const [key,value] of Object.entries(values))root.style.setProperty(key,value)
+}
+
 export function clearTenantTheme() {
   const root = document.documentElement
   const activeTheme: ThemeMode = root.dataset.mode === 'dev'
@@ -132,10 +158,10 @@ export function clearTenantTheme() {
     '--primary-900-rgb',
     '--accent2',
     '--accent3',
-    '--primary-on-light',
     '--primary-on-dark',
     '--primary-on-dark-soft',
     '--ring',
+    ...TENANT_SURFACE_KEYS,
   ]) {
     root.style.removeProperty(key)
   }
@@ -159,7 +185,7 @@ export function applyPrimaryColor(hexColor: string) {
     const h = hex.trim().replace('#', '')
     if (h.length === 3) return `#${h[0]}${h[0]}${h[1]}${h[1]}${h[2]}${h[2]}`
     if (h.length === 6) return `#${h}`
-    return '#d7784a'
+    return '#d9743c'
   }
 
   const hexToRgb = (hex: string) => {
@@ -193,30 +219,9 @@ export function applyPrimaryColor(hexColor: string) {
     return 0.2126 * rl + 0.7152 * gl + 0.0722 * bl
   }
 
-  const contrastRatio = (a: string, b: string) => {
-    const aLuminance = luminance(a)
-    const bLuminance = luminance(b)
-    return (Math.max(aLuminance, bLuminance) + 0.05) / (Math.min(aLuminance, bLuminance) + 0.05)
-  }
-
-  const readableTone = (color: string, background: string, minimum = 4.5) => {
-    const normalized = normalizeHex(color)
-    if (contrastRatio(normalized, background) >= minimum) return normalized
-
-    const target = contrastRatio('#fffdf8', background) >= contrastRatio('#071014', background)
-      ? '#fffdf8'
-      : '#071014'
-    let low = 0
-    let high = 1
-    for (let index = 0; index < 14; index += 1) {
-      const amount = (low + high) / 2
-      if (contrastRatio(mix(normalized, target, amount), background) >= minimum) high = amount
-      else low = amount
-    }
-    return mix(normalized, target, high)
-  }
-
   const primary = normalizeHex(hexColor)
+  const primaryLuminance=luminance(primary)
+  const primaryText=1.05/(primaryLuminance+.05)>=4.5?'#ffffff':(primaryLuminance+.05)/(luminance('#0b0d12')+.05)>=4.5?'#0b0d12':'#000000'
   const primaryRgb = hexToRgb(primary)
   const primaryRgbStr = `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`
 
@@ -225,21 +230,11 @@ export function applyPrimaryColor(hexColor: string) {
   const primary200 = mix(primary, '#ffffff', 0.72)
   const primary300 = mix(primary, '#ffffff', 0.56)
   const primary400 = mix(primary, '#ffffff', 0.38)
-  const primary600Base = mix(primary, '#000000', 0.12)
-  const primary700Base = mix(primary, '#000000', 0.24)
-  const primary800 = mix(primary, '#000000', 0.36)
-  const primary900 = mix(primary, '#000000', 0.5)
-
-  const darkForeground = '#071014'
-  const lightForeground = '#fffdf8'
-  const primaryText = contrastRatio(darkForeground, primary600Base) >= contrastRatio(lightForeground, primary600Base)
-    ? darkForeground
-    : lightForeground
-  const primary600 = readableTone(primary600Base, primaryText)
-  const primary700 = readableTone(primary700Base, primaryText)
-  const primaryOnLight = readableTone(primary700Base, '#f4efe6', 5)
-  const primaryOnDark = readableTone(primary, '#021119', 5)
-  const primaryOnDarkSoft = readableTone(primary, '#021119', 3)
+  let primary600 = mix(primary, '#000000', 0.12)
+  for(let shade=.14;1.05/(luminance(primary600)+.05)<4.5 && shade<=1;shade+=.02)primary600=mix(primary,'#000000',shade)
+  const primary700 = mix(primary600, '#000000', 0.12)
+  const primary800 = mix(primary600, '#000000', 0.24)
+  const primary900 = mix(primary600, '#000000', 0.42)
 
   const primary900Rgb = hexToRgb(primary900)
   const primary900RgbStr = `${primary900Rgb.r}, ${primary900Rgb.g}, ${primary900Rgb.b}`
@@ -263,15 +258,16 @@ export function applyPrimaryColor(hexColor: string) {
   root.style.setProperty('--primary-800', primary800)
   root.style.setProperty('--primary-900', primary900)
   root.style.setProperty('--primary-900-rgb', primary900RgbStr)
-  root.style.setProperty('--accent2', mix(primary, '#f2e8d6', 0.55))
-  root.style.setProperty('--accent3', mix(primary, '#0b2a3a', 0.55))
-  root.style.setProperty('--primary-on-light', primaryOnLight)
-  root.style.setProperty('--primary-on-dark', primaryOnDark)
-  root.style.setProperty('--primary-on-dark-soft', primaryOnDarkSoft)
+  root.style.setProperty('--accent2', mix(primary, '#c7b2ff', 0.55))
+  root.style.setProperty('--accent3', mix(primary, '#ffd1e8', 0.55))
+  root.style.setProperty('--primary-on-dark', mix(primary, '#ffffff', 0.48))
+  root.style.setProperty('--primary-on-dark-soft', mix(primary, '#ffffff', 0.24))
   root.style.setProperty('--ring', mix(primary, '#ffffff', 0.25))
 }
 
 export function applyTenantTheme(tenant: TenantPublic | null) {
   if (!tenant) return
   applyPrimaryColor(tenant.primaryColor)
+  applyTenantSurfaces(tenant.backgroundColor)
+  if (tenant.secondaryColor && /^#[0-9a-f]{6}$/i.test(tenant.secondaryColor)) document.documentElement.style.setProperty('--accent2', `color-mix(in srgb, ${tenant.secondaryColor} 20%, #ffffff 80%)`)
 }

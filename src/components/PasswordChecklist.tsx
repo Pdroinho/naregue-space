@@ -1,3 +1,5 @@
+import { Check } from './Icons'
+
 type PasswordChecklistProps = {
   password: string
   confirmation?: string
@@ -20,7 +22,9 @@ export function PasswordChecklist({ password, confirmation, id }: PasswordCheckl
           key={rule.label}
           aria-label={`${rule.label}: ${rule.met ? 'atendido' : 'pendente'}`}
         >
-          <span className="passwordChecklistIcon" aria-hidden="true" />
+          <span className="passwordChecklistIcon" aria-hidden="true">
+            {rule.met ? <Check size={12} /> : null}
+          </span>
           <span>{rule.label}</span>
         </span>
       ))}

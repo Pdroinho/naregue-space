@@ -1,5 +1,2 @@
-import { AssistantConversation } from './AssistantConversation'
-
-export function BusinessAssistant() {
-  return <section className="nr-assistant-page"><AssistantConversation variant="page" /></section>
-}
+import { AssistantWorkspace } from '../features/assistant/AssistantWorkspace'
+export function BusinessAssistant() { return <AssistantWorkspace /> }

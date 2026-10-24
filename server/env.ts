@@ -3,7 +3,14 @@ import { isIP } from 'node:net'
 import { domainToASCII } from 'node:url'
 import { z } from 'zod'
 
-dotenv.config()
+dotenv.config({ path: process.env.ENV_FILE || '.env' })
+
+const _insecureSecrets = new Set([
+  'change-me-in-production-please',
+  'coloque-uma-senha-secreta-e-longa-aqui-123',
+  'troque-por-um-segredo-longo-e-aleatorio',
+])
+
 
 const isPublicHostname = (raw: string) => {
   const value = raw.trim().toLowerCase().replace(/\.$/, '')
@@ -38,17 +45,28 @@ const envSchema = z.object({
       return raw ? Number(raw) : 3000
     })
     .pipe(z.number().int().positive().max(65535)),
-  HOST: z.string().trim().min(1).default(process.env.NODE_ENV === 'production' ? '127.0.0.1' : '0.0.0.0'),
   DATABASE_PATH: z.string().default(process.env.NODE_ENV === 'production' ? '../db_data/app.db' : './data/app.db'),
   WHATSAPP_MEDIA_DIR: z.string().default(process.env.NODE_ENV === 'production' ? '../media' : './data/whatsapp-media'),
   APP_ENCRYPTION_KEY: z.string().optional(),
   INFINITEPAY_HANDLE: z.string().min(2).optional(),
   INFINITEPAY_BASE_URL: z.string().url().default('https://api.checkout.infinitepay.io'),
+  INTERNAL_PROXY_IPS: z.string().default('127.0.0.1,::1'),
+  HOST: z.string().default(process.env.NODE_ENV === 'production' ? '127.0.0.1' : '0.0.0.0'),
+  ABACATEPAY_API_KEY: z.string().min(16).optional(),
+  ABACATEPAY_WEBHOOK_SECRET: z.string().min(32).optional(),
+  ABACATEPAY_CHECKOUT_ENABLED: envBoolean(false),
+  ABACATEPAY_DEV_MODE: envBoolean(true),
   APP_BASE_URL: z.string().url().optional(),
+  SUBSCRIPTION_PRICE_CENTS: z.coerce.number().int().positive().default(59880),
+  PLAN_MONTHLY_CENTS: z.coerce.number().int().positive().default(5990),
+  PLAN_QUARTERLY_CENTS: z.coerce.number().int().positive().default(16990),
+  PLAN_SEMIANNUAL_CENTS: z.coerce.number().int().positive().default(32990),
+  PLAN_ANNUAL_CENTS: z.coerce.number().int().positive().default(59880),
   OPENROUTER_API_KEY: z.string().min(20).optional(),
   OPENROUTER_BASE_URL: z.string().url().default('https://openrouter.ai/api/v1'),
   OPENROUTER_MODEL: z.string().min(2).default('deepseek/deepseek-v4-flash-0731'),
-  OPENROUTER_SETUP_MODEL: z.string().min(2).default('google/gemini-3.1-flash-lite'),
+  ASSISTANT_SETUP_USE_PRIMARY_MODEL: envBoolean(true),
+  OPENROUTER_SETUP_MODEL: z.string().min(2).optional(),
   OPENROUTER_VISION_MODEL: z.string().min(2).default('google/gemini-3.1-flash-lite'),
   OPENROUTER_BATCH_MODEL: z.string().min(2).default('deepseek/deepseek-v4-flash-0731'),
   // Legacy aliases kept for installations upgrading from an OpenAI-compatible setup.
@@ -77,6 +95,7 @@ const envSchema = z.object({
   VITE_SUPPORT_URL: z.string().url().optional(),
   VITE_PRIVACY_URL: z.string().url().optional(),
   VITE_TERMS_URL: z.string().url().optional(),
+  VITE_SUBSCRIPTION_PRICE_CENTS: z.coerce.number().int().positive().optional(),
   LEGAL_PROVIDER_NAME: z.string().trim().min(2).max(160).optional(),
   LEGAL_PROVIDER_TAX_ID: z.string().trim().min(5).max(40).optional(),
   LEGAL_PROVIDER_ADDRESS: z.string().trim().min(8).max(300).optional(),
@@ -84,7 +103,7 @@ const envSchema = z.object({
   PRIVACY_CONTACT_EMAIL: z.string().email().optional(),
   WHATSAPP_PROMOTIONAL_CAMPAIGNS_ENABLED: envBoolean(false),
   WHATSAPP_CAMPAIGN_MAX_RECIPIENTS: z.coerce.number().int().min(1).max(500).default(50),
-  WHATSAPP_CAMPAIGN_SEND_INTERVAL_SECONDS: z.coerce.number().int().min(8).max(300).default(15),
+  WHATSAPP_CAMPAIGN_SEND_INTERVAL_SECONDS: z.coerce.number().int().min(8).max(300).default(60),
   CUSTOM_DOMAIN_CNAME_TARGET: z.string().optional(),
   CUSTOM_DOMAIN_IPV4: z.string().optional(),
   CUSTOM_DOMAIN_IPV6: z.string().optional(),
@@ -100,6 +119,12 @@ export type Env = Omit<EnvParsed, 'APP_ENCRYPTION_KEY'> & { APP_ENCRYPTION_KEY: 
 
 export const env: Env = (() => {
   const parsed = envSchema.parse(process.env)
+  if (parsed.ABACATEPAY_CHECKOUT_ENABLED && (!parsed.ABACATEPAY_API_KEY || !parsed.ABACATEPAY_WEBHOOK_SECRET)) {
+    throw new Error('AbacatePay habilitado exige API key e segredo do webhook.')
+  }
+  if (parsed.NODE_ENV === 'production' && parsed.ABACATEPAY_CHECKOUT_ENABLED && parsed.ABACATEPAY_DEV_MODE) {
+    throw new Error('AbacatePay em produ??o exige ABACATEPAY_DEV_MODE=false e chave live homologada.')
+  }
   const encryptionKeyCandidate = (parsed.APP_ENCRYPTION_KEY ?? '').trim()
   const encryptionKey = (() => {
     if (/^[A-Za-z0-9_-]{43,}$/.test(encryptionKeyCandidate) && Buffer.from(encryptionKeyCandidate, 'base64url').length >= 32) {
@@ -174,7 +199,6 @@ export const env: Env = (() => {
     for (const address of splitCsv(parsed.CUSTOM_DOMAIN_IPV6)) {
       if (isIP(address) !== 6) throw new Error(`CUSTOM_DOMAIN_IPV6 contém endereço inválido: ${address}`)
     }
-    if (!parsed.INFINITEPAY_HANDLE) missing.push('INFINITEPAY_HANDLE')
     if (!parsed.LEGAL_PROVIDER_NAME) missing.push('LEGAL_PROVIDER_NAME')
     if (!parsed.LEGAL_PROVIDER_TAX_ID) missing.push('LEGAL_PROVIDER_TAX_ID')
     if (!parsed.LEGAL_PROVIDER_ADDRESS) missing.push('LEGAL_PROVIDER_ADDRESS')

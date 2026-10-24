@@ -1,7 +1,8 @@
+import './report-review.css'
 import { useCallback, useEffect, useState } from 'react'
-import { AlertCircle, Copy, ExternalLink, Globe, RefreshCw, ShieldCheck, Star, Trash2 } from './Icons'
+import { AlertCircle, Check, CheckCircle2, Copy, ExternalLink, RefreshCw, ShieldCheck, Star, Trash2 } from './Icons'
 import { api } from '../api'
-import { confirmAction } from './FeedbackCenter'
+import { confirmAction } from '../lib/feedback'
 
 type DomainItem = {
   id: string
@@ -45,7 +46,7 @@ function CopyValue({ value }: { value: string }) {
       title="Copiar valor"
     >
       <code>{value}</code>
-      {copied ? <ShieldCheck size={15} /> : <Copy size={15} />}
+      {copied ? <Check size={15} /> : <Copy size={15} />}
     </button>
   )
 }
@@ -55,14 +56,16 @@ export function CustomDomainsSettings() {
   const [domain, setDomain] = useState('')
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [loadFailed, setLoadFailed] = useState(false)
   const [creating, setCreating] = useState(false)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setLoadFailed(false)
     const result = await api<{ domains: DomainItem[] }>('/api/admin/domains')
     if (result.ok) setDomains(result.data.domains)
-    else setMessage({ type: 'error', text: result.error.message })
+    else { setLoadFailed(true); setMessage({ type: 'error', text: result.error.message }) }
     setLoading(false)
   }, [])
 
@@ -71,6 +74,7 @@ export function CustomDomainsSettings() {
   }, [load])
 
   const createDomain = async () => {
+    if (creating || loading || loadFailed || domains.length >= 5) return
     const normalized = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
     if (!normalized) return
     setCreating(true)
@@ -151,7 +155,7 @@ export function CustomDomainsSettings() {
             </div>
           </div>
         </div>
-        <span className="domain-security-pill"><ShieldCheck size={15} /> DNS verificado</span>
+        <span className={`domain-security-pill ${!loading && !loadFailed && domains.some(item => item.status === 'ACTIVE') ? '' : 'is-pending'}`}><ShieldCheck size={15} /> {loading ? 'Verificando domínios…' : loadFailed ? 'Verificação indisponível' : domains.some(item => item.status === 'ACTIVE') ? 'Domínio verificado' : domains.length ? 'Verificação pendente' : 'Verificação após cadastro'}</span>
       </div>
 
       <div className="cardBody custom-domains-body">
@@ -165,7 +169,7 @@ export function CustomDomainsSettings() {
               onKeyDown={(event) => {
                 if (event.key === 'Enter') void createDomain()
               }}
-              placeholder="agenda.suabarbearia.com.br"
+              placeholder="agenda.seusalao.com.br"
               inputMode="url"
               aria-label="Domínio personalizado"
               autoCapitalize="none"
@@ -173,7 +177,7 @@ export function CustomDomainsSettings() {
               spellCheck={false}
             />
           </div>
-          <button type="button" className="btn btnPrimary" onClick={() => void createDomain()} disabled={creating || !domain.trim() || domains.length >= 5}>
+          <button type="button" className="btn btnPrimary" onClick={() => void createDomain()} disabled={creating || loading || loadFailed || !domain.trim() || domains.length >= 5}>
             {domains.length >= 5 ? 'Limite atingido' : creating ? 'Adicionando...' : 'Conectar domínio'}
           </button>
         </div>
@@ -182,9 +186,9 @@ export function CustomDomainsSettings() {
 
         {loading ? (
           <div className="domain-loading skeleton" />
-        ) : domains.length === 0 ? (
+        ) : loadFailed ? (<div className="domain-empty"><strong>Não foi possível carregar seus domínios</strong><button type="button" className="btn btnPrimary" onClick={() => void load()}>Tentar novamente</button></div>) : domains.length === 0 ? (
           <div className="domain-empty">
-            <span className="empty-state-icon" aria-hidden="true"><Globe size={24} /></span>
+            <img decoding="async" src="/icons/hugeicons/globe-02.svg" alt="" aria-hidden="true" loading="lazy" />
             <strong>Nenhum domínio conectado</strong>
             <span>Você continuará usando o subdomínio padrão até adicionar um endereço próprio.</span>
           </div>
@@ -197,7 +201,7 @@ export function CustomDomainsSettings() {
                     <div className="domain-name-line">
                       <strong>{item.domain}</strong>
                       <span className={`domain-status ${item.status.toLowerCase()}`}>
-                        {item.status === 'ACTIVE' ? <i className="domain-status-dot" aria-hidden="true" /> : item.status === 'ERROR' ? <AlertCircle size={14} /> : <RefreshCw size={14} />}
+                        {item.status === 'ACTIVE' ? <CheckCircle2 size={14} /> : item.status === 'ERROR' ? <AlertCircle size={14} /> : <RefreshCw size={14} />}
                         {item.status === 'ACTIVE' ? 'Ativo' : item.status === 'ERROR' ? 'Revisar DNS' : 'Aguardando DNS'}
                       </span>
                       {item.isPrimary && <span className="domain-primary"><Star size={13} /> Principal</span>}

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Compass, X } from './Icons'
-import { readStorage, writeStorage } from '../storage'
 
 export type ProductTourStep = {
   selector?: string
@@ -49,12 +48,12 @@ export function ProductTour({
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const step = steps[index]
 
-  const storageKey = useMemo(() => `naregua:tour:${tourKey}:v3`, [tourKey])
+  const storageKey = useMemo(() => `naregua:tour:${tourKey}:v4`, [tourKey])
   const active = open && enabled
 
   const remember = useCallback(() => {
     try {
-      writeStorage(storageKey, new Date().toISOString())
+      localStorage.setItem(storageKey, new Date().toISOString())
     } catch {
       // O tour continua funcional mesmo quando o navegador bloqueia armazenamento local.
     }
@@ -78,7 +77,7 @@ export function ProductTour({
     window.setTimeout(() => dialogRef.current?.focus(), 0)
     return () => {
       document.body.classList.remove('has-product-tour')
-      const blockingOverlay = document.querySelector('.nr-overlay, [data-blocking-overlay="true"], dialog[open]')
+      const blockingOverlay = document.querySelector('.ld-overlay, .modal-overlay, .confirm-layer, [data-blocking-overlay="true"], dialog[open]')
       if (!blockingOverlay) previousFocusRef.current?.focus()
     }
   }, [active])
@@ -154,7 +153,7 @@ export function ProductTour({
 
   useEffect(() => {
     if (!active) return
-    const hasBlockingOverlay = () => Boolean(document.querySelector('.nr-overlay, [data-blocking-overlay="true"], dialog[open]'))
+    const hasBlockingOverlay = () => Boolean(document.querySelector('.ld-overlay, .confirm-layer, [data-blocking-overlay="true"], dialog[open]'))
     const closeWhenBlocked = () => {
       if (hasBlockingOverlay()) onClose()
     }
@@ -194,19 +193,19 @@ export function ProductTour({
   if (typeof document === 'undefined') return null
 
   return createPortal(
-    <div className="nr-tour-layer" data-product-tour="true" aria-live="polite">
+    <div className="ld-tour-layer" data-product-tour="true" aria-live="polite">
       {rect ? (
         <div
-          className="nr-tour-spotlight"
+          className="ld-tour-spotlight"
           style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }}
         />
       ) : (
-        <div className="nr-tour-backdrop" />
+        <div className="ld-tour-backdrop" />
       )}
 
       <div
         ref={dialogRef}
-        className="nr-tour-card"
+        className="ld-tour-card"
         style={tooltipStyle}
         role="dialog"
         aria-modal="true"
@@ -214,16 +213,16 @@ export function ProductTour({
         aria-describedby="product-tour-description"
         tabIndex={-1}
       >
-        <div className="nr-tour-topline">
-          <div className="nr-tour-kicker">
-            <Compass className="nr-tour-brand-mark" size={18} weight="duotone" aria-hidden="true" /> {step.eyebrow ?? 'Tour guiado'}
+        <div className="ld-tour-topline">
+          <div className="ld-tour-kicker">
+            <Compass className="ld-tour-brand-mark" size={18} weight="duotone" aria-hidden="true" /> {step.eyebrow ?? 'Tour guiado'}
           </div>
-          <button type="button" className="nr-tour-close" onClick={dismiss} aria-label="Fechar e não exibir novamente">
+          <button type="button" className="ld-tour-close" onClick={dismiss} aria-label="Fechar e não exibir novamente">
             <X size={18} />
           </button>
         </div>
 
-        <div className="nr-tour-progress" aria-hidden="true">
+        <div className="ld-tour-progress" aria-hidden="true">
           {steps.map((_, itemIndex) => (
             <span key={itemIndex} className={itemIndex <= index ? 'active' : ''} />
           ))}
@@ -233,12 +232,12 @@ export function ProductTour({
         <p id="product-tour-description">{step.description}</p>
         <span className="sr-only">Etapa {index + 1} de {steps.length}</span>
 
-        <div className="nr-tour-footer">
-          <div className="nr-tour-counter">
+        <div className="ld-tour-footer">
+          <div className="ld-tour-counter">
             <span>{index + 1} de {steps.length}</span>
-            {index < steps.length - 1 && <button type="button" className="nr-tour-skip" onClick={finish}>Pular tour</button>}
+            {index < steps.length - 1 && <button type="button" className="ld-tour-skip" onClick={finish}>Pular tour</button>}
           </div>
-          <div className="nr-tour-actions">
+          <div className="ld-tour-actions">
             {index > 0 && (
               <button type="button" className="btn btn-ghost" onClick={() => setIndex((current) => current - 1)}>
                 Voltar
@@ -259,14 +258,4 @@ export function ProductTour({
     </div>,
     document.body,
   )
-}
-
-export function shouldAutoStartTour(tourKey: string) {
-  if (typeof window === 'undefined') return false
-  try {
-    const prefix = `naregua:tour:${tourKey}`
-    return !['v3', 'v2', 'v1'].some((version) => readStorage(`${prefix}:${version}`))
-  } catch {
-    return true
-  }
 }

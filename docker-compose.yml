@@ -13,6 +13,11 @@ services:
         VITE_SUBSCRIPTION_PRICE_CENTS: ${VITE_SUBSCRIPTION_PRICE_CENTS}
     container_name: naregua-app
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
     ports:
       - "127.0.0.1:3000:3000"
     env_file: .env
@@ -24,6 +29,7 @@ services:
       - DATABASE_PATH=/data/db/app.db
       - WHATSAPP_MEDIA_DIR=/data/media
       - HOST=0.0.0.0
+      - INTERNAL_PROXY_IPS=127.0.0.1,::1,172.30.41.1
     networks:
       - naregua-net
 
@@ -42,7 +48,7 @@ services:
       - LANGUAGE=pt-BR
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
-      - DATABASE_CONNECTION_URI=postgresql://evo:evo_pass@evo-postgres:5432/evolution
+      - DATABASE_CONNECTION_URI=postgresql://evo:${EVOLUTION_DB_PASSWORD:?Configure EVOLUTION_DB_PASSWORD}@evo-postgres:5432/evolution
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_MESSAGE_UPDATE=true
@@ -67,7 +73,7 @@ services:
     environment:
       - POSTGRES_DB=evolution
       - POSTGRES_USER=evo
-      - POSTGRES_PASSWORD=evo_pass
+      - POSTGRES_PASSWORD=${EVOLUTION_DB_PASSWORD:?Configure EVOLUTION_DB_PASSWORD}
     volumes:
       - evo-postgres-data:/var/lib/postgresql/data
     networks:
@@ -93,3 +99,7 @@ volumes:
 networks:
   naregua-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.41.0/24
+          gateway: 172.30.41.1

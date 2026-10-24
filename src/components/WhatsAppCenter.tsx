@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { WhatsappCampaignComposer } from './WhatsappCampaignComposer'
+import { confirmAction } from '../lib/feedback'
+import { PersonalReminders } from '../features/assistant/PersonalReminders'
+import { useEffectEvent, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { api } from '../api'
+import { whatsappConnectionState as statusToUi } from '../whatsappConnectionState'
 import {
   ArrowRight,
   Bell,
   Calendar,
   ChevronLeft,
+  CheckCircle2,
   Clock,
   Megaphone,
   MessageSquare,
@@ -14,7 +19,6 @@ import {
   RefreshCw,
   Search,
   Send,
-  ShieldCheck,
   Settings,
   Sparkles,
   Smartphone,
@@ -23,9 +27,8 @@ import {
   XCircle,
 } from './Icons'
 import { ProductSelect } from './ProductSelect'
-import { ModalRoot } from './ModalRoot'
 
-type View = 'conversations' | 'automations' | 'campaigns' | 'connection'
+type View = 'conversations' | 'automations' | 'campaigns' | 'reminders' | 'connection'
 
 type WhatsAppInstance = {
   id: string
@@ -122,6 +125,7 @@ type CampaignsResponse = {
   enabled: boolean
   maxRecipients: number
   sendIntervalSeconds: number
+  plannedRecipients?: number
   campaigns: MarketingCampaign[]
 }
 
@@ -130,20 +134,13 @@ const defaultSettings: WhatsAppSettings = {
   confirmationOffsetHours: 24,
   confirmationRetryHours: 8,
   noResponseCutoffHours: 4,
-  confirmationMessage: 'Oi {{nome}}! Seu horário de {{servico}} no {{espaco}} está chegando. Responda 1 para confirmar ou 2 se não puder comparecer.',
+  confirmationMessage: 'Oi {{nome}}! Seu horário de {{servico}} com {{profissional}} no {{espaco}} está chegando. Responda 1 para confirmar ou 2 se não puder comparecer.',
   autoCancelDeclined: false,
   remindersEnabled: true,
   reminderOffsetHours: 2,
-  reminderMessage: 'Oi {{nome}}! Passando para lembrar que seu horário de {{servico}} é hoje às {{hora}} no {{espaco}}. Até já!',
+  reminderMessage: 'Oi {{nome}}! Passando para lembrar que seu horário de {{servico}} com {{profissional}} é hoje às {{hora}} no {{espaco}}. Até já!',
   promoEnabled: false,
   promoMessage: 'Oi {{nome}}, temos uma novidade especial para você esta semana no {{espaco}}. Responda esta mensagem para saber mais.',
-}
-
-function statusToUi(raw: string | null) {
-  const value = String(raw ?? '').toLowerCase()
-  if (value.includes('open') || value.includes('connected')) return 'connected' as const
-  if (value.includes('qr') || value.includes('scan') || value.includes('pair') || value.includes('connecting')) return 'qr_scan' as const
-  return 'disconnected' as const
 }
 
 function money(cents: number) {
@@ -216,8 +213,9 @@ function confirmationCopy(status: string) {
 function previewTemplate(template: string) {
   return template
     .replaceAll('{{nome}}', 'Maria')
-    .replaceAll('{{servico}}', 'Corte + barba')
-    .replaceAll('{{espaco}}', 'Barbearia Central')
+    .replaceAll('{{servico}}', 'Corte degradê')
+    .replaceAll('{{profissional}}', 'Beatriz')
+    .replaceAll('{{espaco}}', 'Studio Bella')
     .replaceAll('{{data}}', '15/10')
     .replaceAll('{{hora}}', '14:00')
     .replaceAll('{{codigo}}', '')
@@ -237,7 +235,7 @@ function sameMessages(a: ChatMessage[], b: ChatMessage[]) {
 
 function MiniToggle({ checked, onChange, label }: { checked: boolean; onChange: (checked: boolean) => void; label: string }) {
   return (
-    <button type="button" className={`nr-whatsapp-toggle ${checked ? 'is-on' : ''}`} onClick={() => onChange(!checked)} aria-pressed={checked} aria-label={label}>
+    <button type="button" className={`wa39-toggle ${checked ? 'is-on' : ''}`} onClick={() => onChange(!checked)} aria-pressed={checked} aria-label={label}>
       <span />
     </button>
   )
@@ -247,7 +245,10 @@ export function WhatsAppCenter() {
   const [view, setView] = useState<View>('conversations')
   const [instance, setInstance] = useState<WhatsAppInstance | null>(null)
   const [connectionState, setConnectionState] = useState<string | null>(null)
+  const [statusPending, setStatusPending] = useState(true)
+  const statusRequestRef = useRef(0)
   const status = statusToUi(connectionState)
+  const connected = status === 'connected'
   const [settings, setSettings] = useState<WhatsAppSettings>(defaultSettings)
   const [settingsBusy, setSettingsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -269,12 +270,12 @@ export function WhatsAppCenter() {
   const [newPhone, setNewPhone] = useState('')
   const [newMessage, setNewMessage] = useState('')
   const [testPhone, setTestPhone] = useState('')
-  const [campaignName, setCampaignName] = useState('')
   const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([])
   const [campaignsEnabled, setCampaignsEnabled] = useState(false)
   const [campaignMaxRecipients, setCampaignMaxRecipients] = useState(50)
-  const [campaignSendIntervalSeconds, setCampaignSendIntervalSeconds] = useState(15)
+  const [campaignRecipients, setCampaignRecipients] = useState(0)
   const [campaignBusy, setCampaignBusy] = useState(false)
+  const tabsRef = useRef<HTMLElement>(null)
   const messagesViewportRef = useRef<HTMLDivElement>(null)
   const messagesRef = useRef<ChatMessage[]>([])
   const lastInboxActivityRef = useRef(Date.now())
@@ -301,22 +302,34 @@ export function WhatsAppCenter() {
 
   async function loadCampaigns() {
     const res = await api<CampaignsResponse>('/api/admin/whatsapp/campaigns')
-    if (!res.ok) return
+    if (!res.ok) { setError(res.error.message); return }
     setCampaigns(res.data.campaigns)
     setCampaignsEnabled(res.data.enabled)
     setCampaignMaxRecipients(res.data.maxRecipients)
-    setCampaignSendIntervalSeconds(res.data.sendIntervalSeconds)
+    setCampaignRecipients(res.data.plannedRecipients ?? 0)
   }
 
   async function refreshStatus() {
-    const res = await api<{ state: string }>('/api/admin/whatsapp/status')
-    if (res.ok) {
-      setConnectionState(res.data.state)
-      if (statusToUi(res.data.state) === 'connected') setQrCode(null)
+    const request = ++statusRequestRef.current
+    if (connectionState === null) setStatusPending(true)
+    try {
+      const res = await api<{ state: string }>('/api/admin/whatsapp/status')
+      if (request !== statusRequestRef.current) return
+      if (res.ok) {
+        setConnectionState(res.data.state)
+        if (statusToUi(res.data.state) === 'connected') setQrCode(null)
+        else setView('connection')
+      } else {
+        setConnectionState(null)
+        setError(res.error.message)
+      }
+    } finally {
+      if (request === statusRequestRef.current) setStatusPending(false)
     }
   }
 
   async function refreshConnection() {
+    setError(null)
     setConnectionBusy(true)
     await Promise.all([refreshStatus(), loadDiagnostics(), loadInstance()])
     setConnectionBusy(false)
@@ -363,16 +376,35 @@ export function WhatsAppCenter() {
     if (mode === 'initial') setMessageLoading(false)
   }
 
+  const refreshStatusEffect=useEffectEvent(refreshStatus)
+  const loadConversationsEffect=useEffectEvent(loadConversations)
+  const loadMessagesEffect=useEffectEvent(loadMessages)
+  const invalidateStatusEffect=useEffectEvent(()=>{statusRequestRef.current++})
   useEffect(() => {
     let alive = true
-    Promise.all([loadInstance(), loadSettings(), refreshStatus(), loadConversations(false), loadDiagnostics(), loadCampaigns()]).catch(() => {
+    Promise.all([loadInstance(), refreshStatusEffect()]).then(async () => {
+      if (!alive) return
+      await Promise.all([loadDiagnostics(), loadSettings()])
+    }).catch(() => {
       if (alive) setError('Não foi possível carregar a Central de WhatsApp agora.')
     })
-    return () => { alive = false }
+    return () => { alive = false; invalidateStatusEffect() }
   }, [])
 
   useEffect(() => {
-    if (view !== 'conversations') return
+    if (connected) {
+      void Promise.all([loadConversationsEffect(false), loadCampaigns()])
+      return
+    }
+    if (connectionState === null) return
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void refreshStatusEffect()
+    }, 10_000)
+    return () => window.clearInterval(timer)
+  }, [connected, connectionState])
+
+  useEffect(() => {
+    if (view !== 'conversations' || !connected) return
     let stopped = false
     let timer = 0
 
@@ -383,8 +415,8 @@ export function WhatsAppCenter() {
     const refresh = async () => {
       if (stopped) return
       if (document.visibilityState === 'visible') {
-        await loadConversations(true)
-        if (selectedId) await loadMessages(selectedId, 'poll')
+        await loadConversationsEffect(true)
+        if (selectedId) await loadMessagesEffect(selectedId, 'poll')
       }
       if (!stopped) timer = window.setTimeout(() => void refresh(), nextDelay())
     }
@@ -409,29 +441,29 @@ export function WhatsAppCenter() {
       window.removeEventListener('keydown', markActivity)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [view, selectedId])
+  }, [view, selectedId, connected])
 
   useEffect(() => {
-    if (!selectedId || view !== 'conversations') {
+    if (!selectedId || view !== 'conversations' || !connected) {
       messagesRef.current = []
       setMessages([])
       return
     }
-    void loadMessages(selectedId, 'initial')
-  }, [selectedId, view])
+    void loadMessagesEffect(selectedId, 'initial')
+  }, [selectedId, view, connected])
 
   useEffect(() => {
     if (view === 'connection' || view === 'campaigns') void loadDiagnostics()
-    if (view === 'campaigns') void loadCampaigns()
-  }, [view])
+    if (view === 'campaigns' && connected) void loadCampaigns()
+  }, [view, connected])
 
   useEffect(() => {
-    if (view !== 'campaigns' || !campaigns.some((item) => item.status === 'QUEUED' || item.status === 'RUNNING')) return
+    if (view !== 'campaigns' || !connected || !campaigns.some((item) => item.status === 'QUEUED' || item.status === 'RUNNING')) return
     const timer = window.setInterval(() => {
       if (document.visibilityState === 'visible') void Promise.all([loadCampaigns(), loadDiagnostics()])
     }, 8000)
     return () => window.clearInterval(timer)
-  }, [view, campaigns])
+  }, [view, campaigns, connected])
 
   const filteredConversations = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -501,31 +533,9 @@ export function WhatsAppCenter() {
     if (!res.ok) setError(res.error.message)
   }
 
-  async function createCampaign() {
-    if (campaignBusy) return
-    const name = campaignName.trim() || `Campanha ${new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date())}`
-    if (!settings.promoEnabled) { setError('Ative e salve o modelo promocional antes de criar a campanha.'); return }
-    if (settings.promoMessage.trim().length < 10) { setError('Escreva uma mensagem promocional antes de criar a campanha.'); return }
-    setCampaignBusy(true)
-    setError(null)
-    const saved = await api<{ ok: true }>('/api/admin/whatsapp/settings', { method: 'PUT', body: JSON.stringify(settings) })
-    if (!saved.ok) {
-      setCampaignBusy(false)
-      setError(saved.error.message)
-      return
-    }
-    const res = await api<{ ok: true; campaign: MarketingCampaign }>('/api/admin/whatsapp/campaigns', {
-      method: 'POST',
-      body: JSON.stringify({ name, message: settings.promoMessage }),
-    })
-    setCampaignBusy(false)
-    if (!res.ok) { setError(res.error.message); return }
-    setCampaignName('')
-    await Promise.all([loadCampaigns(), loadDiagnostics()])
-  }
-
   async function cancelCampaign(campaignId: string) {
     if (campaignBusy) return
+    if (!(await confirmAction({ title: 'Cancelar campanha?', message: 'Os envios que ainda não começaram serão cancelados. Uma mensagem já em envio pode chegar à cliente.', confirmLabel: 'Cancelar campanha', danger: true }))) return
     setCampaignBusy(true)
     setError(null)
     const res = await api<{ ok: true }>(`/api/admin/whatsapp/campaigns/${encodeURIComponent(campaignId)}/cancel`, { method: 'POST' })
@@ -542,6 +552,7 @@ export function WhatsAppCenter() {
     else {
       setQrCode(res.data.qrCode)
       if (res.data.state) setConnectionState(res.data.state)
+      if (!res.data.qrCode && statusToUi(res.data.state ?? null) !== 'connected') setError('Não foi possível gerar o QR Code agora. Verifique a conexão e tente novamente; se persistir, abra um chamado em Suporte.')
     }
     setConnectionBusy(false)
   }
@@ -559,133 +570,153 @@ export function WhatsAppCenter() {
     const lastInbound = [...messages].reverse().find((item) => item.direction === 'INBOUND')?.text || selectedConversation.lastMessage
     window.dispatchEvent(new CustomEvent('naregua:assistant-open', {
       detail: {
-        prompt: `Me ajude a responder este cliente pelo WhatsApp. Cliente: ${contactTitle(selectedConversation)}. Mensagem mais recente: "${lastInbound}". ${selectedConversation.upcomingAppointment ? `Próximo agendamento: ${selectedConversation.upcomingAppointment.serviceName} em ${appointmentDate(selectedConversation.upcomingAppointment.startsAt)}.` : 'Sem próximo agendamento.'} Escreva uma resposta curta, acolhedora e pronta para eu revisar antes de enviar.`,
+        prompt: `Me ajude a responder esto cliente pelo WhatsApp. Cliente: ${contactTitle(selectedConversation)}. Mensagem mais recente: "${lastInbound}". ${selectedConversation.upcomingAppointment ? `Próximo agendamento: ${selectedConversation.upcomingAppointment.serviceName} em ${appointmentDate(selectedConversation.upcomingAppointment.startsAt)}.` : 'Sem próximo agendamento.'} Escreva uma resposta curta, acolhedora e pronta para eu revisar antes de enviar.`,
       },
     }))
   }
 
-  const nav: Array<{ id: View; label: string; icon: typeof MessageSquare; badge?: number }> = [
+  useEffect(() => {
+    const tabs = tabsRef.current
+    if (!tabs) return
+    const reveal = () => {
+      const active = tabs.querySelector<HTMLElement>('.is-active')
+      if (!active) return
+      const rail = tabs.getBoundingClientRect(), item = active.getBoundingClientRect()
+      if (item.left < rail.left) tabs.scrollLeft -= rail.left-item.left+6
+      else if (item.right > rail.right) tabs.scrollLeft += item.right-rail.right+6
+    }
+    reveal()
+    const observer = new ResizeObserver(reveal); observer.observe(tabs)
+    return () => observer.disconnect()
+  }, [view, connected])
+
+  const nav: Array<{ id: View; label: string; icon: typeof MessageSquare; badge?: number }> = connected ? [
     { id: 'conversations', label: 'Conversas', icon: MessageSquare, badge: unreadTotal },
     { id: 'automations', label: 'Automações', icon: Bell },
+    { id: 'reminders', label: 'Meus lembretes', icon: Clock },
     { id: 'campaigns', label: 'Campanhas', icon: Megaphone },
     { id: 'connection', label: 'Conexão', icon: Settings },
-  ]
+  ] : []
 
   return (
-    <div className="nr-whatsapp">
-      <header className="nr-whatsapp-topbar">
+    <div className="wa39">
+      <header className="wa39-topbar">
         <div>
-          <span className="nr-whatsapp-eyebrow">Central de relacionamento</span>
+          <span className="wa39-eyebrow">Central de relacionamento</span>
           <h2>WhatsApp</h2>
           <p>Conversas, confirmações e relacionamento com clientes em um único fluxo.</p>
         </div>
-        <div className={`nr-whatsapp-health is-${status}`}>
+        <div className={`wa39-health is-${statusPending || connectionState === null ? 'unknown' : status}`}>
           <i />
-          <span>{status === 'connected' ? 'Conectado' : status === 'qr_scan' ? 'Aguardando leitura' : 'Desconectado'}</span>
+          <span>{statusPending ? 'Verificando…' : connectionState === null ? 'Não verificado' : status === 'connected' ? 'Conectado' : status === 'qr_scan' ? 'Aguardando leitura' : 'Desconectado'}</span>
         </div>
       </header>
 
-      <nav className="nr-whatsapp-tabs" aria-label="Seções do WhatsApp">
+      {statusPending ? <section className="wa39-connection-status" role="status" aria-live="polite" aria-label="Consultando conexão do WhatsApp"><RefreshCw size={22} aria-hidden="true" /><div><h3>Verificando seu WhatsApp…</h3><p>Aguarde enquanto consultamos a conexão do espaço.</p></div></section> : null}
+
+      {connected ? <nav ref={tabsRef} className="wa39-tabs" aria-label="Seções do WhatsApp">
         {nav.map((item) => {
           const Icon = item.icon
           return (
-            <button type="button" key={item.id} className={view === item.id ? 'is-active' : ''} onClick={() => setView(item.id)}>
+            <button type="button" key={item.id} aria-pressed={view === item.id} className={view === item.id ? 'is-active' : ''} onClick={() => setView(item.id)}>
               <Icon size={17} />
               <span>{item.label}</span>
               {item.badge ? <b>{Math.min(item.badge, 99)}</b> : null}
             </button>
           )
         })}
-      </nav>
+      </nav> : null}
 
-      {error ? <div className="nr-whatsapp-alert" role="alert"><XCircle size={17} /><span>{error}</span><button type="button" onClick={() => setError(null)} aria-label="Fechar aviso"><X size={15} /></button></div> : null}
+      {!connected && connectionState !== null ? <p role="status">Conecte o WhatsApp para acessar conversas, automações e campanhas.</p> : null}
 
-      {view === 'conversations' && !conversationLoading && conversations.length === 0 ? (
-        <section className="nr-whatsapp-empty-inbox">
-          <div className="nr-whatsapp-empty-orb"><MessageSquare size={26} /></div>
+      {error ? <div className="wa39-alert" role="alert"><XCircle size={17} /><span>{error}</span><button type="button" onClick={() => setError(null)} aria-label="Fechar aviso"><X size={15} /></button></div> : null}
+
+      {connected && view === 'conversations' && !conversationLoading && conversations.length === 0 ? (
+        <section className="wa39-empty-inbox">
+          <div className="wa39-empty-orb"><MessageSquare size={26} /></div>
           <span>Caixa de entrada</span>
-          <h3>Pronto para conversar.</h3>
-          <p>Inicie uma conversa ou aguarde a primeira mensagem. Tudo aparecerá aqui.</p>
+          <h3>Suas conversas começam aqui.</h3>
+          <p>Inicie uma conversa ou aguarde uma mensagem de cliente. As respostas recebidas entram automaticamente nesta central.</p>
           <button type="button" onClick={() => setNewConversationOpen(true)}><Plus size={17} /> Nova conversa</button>
           <small>{status === 'connected' ? 'WhatsApp conectado e pronto para receber mensagens.' : 'Conecte o WhatsApp para receber respostas.'}</small>
         </section>
       ) : null}
 
-      {view === 'conversations' && (conversationLoading || conversations.length > 0) ? (
-        <section className={`nr-whatsapp-inbox ${mobileChatOpen ? 'is-mobile-chat-open' : ''}`}>
-          <aside className="nr-whatsapp-conversation-pane">
-            <div className="nr-whatsapp-pane-head">
+      {connected && view === 'conversations' && (conversationLoading || conversations.length > 0) ? (
+        <section className={`wa39-inbox ${mobileChatOpen ? 'is-mobile-chat-open' : ''}`}>
+          <aside className="wa39-conversation-pane">
+            <div className="wa39-pane-head">
               <div><strong>Conversas</strong><small>{conversations.length} contato{conversations.length === 1 ? '' : 's'}</small></div>
-              <button type="button" className="nr-whatsapp-icon-button" onClick={() => setNewConversationOpen(true)} aria-label="Nova conversa"><Plus size={18} /></button>
+              <button type="button" className="wa39-icon-button" onClick={() => setNewConversationOpen(true)} aria-label="Nova conversa"><Plus size={18} /></button>
             </div>
-            <label className="nr-whatsapp-search">
+            <label className="wa39-search">
               <Search size={16} />
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar nome ou número" />
             </label>
-            <div className="nr-whatsapp-conversation-list">
-              {conversationLoading ? <div className="nr-whatsapp-skeleton-list"><i /><i /><i /></div> : filteredConversations.length ? filteredConversations.map((item) => (
-                <button type="button" key={item.id} className={`nr-whatsapp-conversation ${selectedId === item.id ? 'is-active' : ''}`} onClick={() => { setSelectedId(item.id); setMobileChatOpen(true) }}>
-                  <span className="nr-whatsapp-avatar">{contactInitials(item)}</span>
-                  <span className="nr-whatsapp-conversation-copy">
-                    <span className="nr-whatsapp-conversation-line"><strong>{contactTitle(item)}</strong><time>{relativeTime(item.lastMessageAt)}</time></span>
-                    <span className="nr-whatsapp-conversation-phone">{phoneLabel(item.phone)}</span>
-                    <span className="nr-whatsapp-conversation-line is-preview"><span>{item.lastDirection === 'OUTBOUND' ? 'Você: ' : ''}{item.lastMessage || 'Nova conversa'}</span>{item.unreadCount ? <b>{item.unreadCount}</b> : null}</span>
+            <div className="wa39-conversation-list">
+              {conversationLoading ? <div className="wa39-skeleton-list"><i /><i /><i /></div> : filteredConversations.length ? filteredConversations.map((item) => (
+                <button type="button" key={item.id} className={`wa39-conversation ${selectedId === item.id ? 'is-active' : ''}`} onClick={() => { setSelectedId(item.id); setMobileChatOpen(true) }}>
+                  <span className="wa39-avatar">{contactInitials(item)}</span>
+                  <span className="wa39-conversation-copy">
+                    <span className="wa39-conversation-line"><strong>{contactTitle(item)}</strong><time>{relativeTime(item.lastMessageAt)}</time></span>
+                    <span className="wa39-conversation-phone">{phoneLabel(item.phone)}</span>
+                    <span className="wa39-conversation-line is-preview"><span>{item.lastDirection === 'OUTBOUND' ? 'Você: ' : ''}{item.lastMessage || 'Nova conversa'}</span>{item.unreadCount ? <b>{item.unreadCount}</b> : null}</span>
                   </span>
                 </button>
               )) : (
-                <div className="nr-whatsapp-empty-list"><Search size={23} /><strong>Nenhum resultado</strong><p>Tente buscar pelo nome ou pelo número do cliente.</p></div>
+                <div className="wa39-empty-list"><Search size={23} /><strong>Nenhum resultado</strong><p>Tente buscar pelo nome ou pelo número do cliente.</p></div>
               )}
             </div>
           </aside>
 
-          <main className="nr-whatsapp-chat-pane">
+          <main className="wa39-chat-pane">
             {selectedConversation ? (
               <>
-                <header className="nr-whatsapp-chat-head">
-                  <button type="button" className="nr-whatsapp-chat-back" onClick={() => setMobileChatOpen(false)} aria-label="Voltar para conversas"><ChevronLeft size={18} /></button>
-                  <div className="nr-whatsapp-chat-person">
-                    <span className="nr-whatsapp-avatar is-large">{contactInitials(selectedConversation)}</span>
+                <header className="wa39-chat-head">
+                  <button type="button" className="wa39-chat-back" onClick={() => setMobileChatOpen(false)} aria-label="Voltar para conversas"><ChevronLeft size={18} /></button>
+                  <div className="wa39-chat-person">
+                    <span className="wa39-avatar is-large">{contactInitials(selectedConversation)}</span>
                     <div><strong>{contactTitle(selectedConversation)}</strong><span>{phoneLabel(selectedConversation.phone)}</span></div>
                   </div>
-                  <button type="button" className="nr-whatsapp-assistant-reply" onClick={askAssistantForReply}><Sparkles size={16} /><span>Sugerir resposta</span></button>
+                  <button type="button" className="wa39-assistant-reply" onClick={askAssistantForReply}><Sparkles size={16} /><span>Sugerir resposta</span></button>
                 </header>
-                <div className="nr-whatsapp-messages" ref={messagesViewportRef} aria-live="polite">
-                  {messageLoading && !messages.length ? <div className="nr-whatsapp-chat-loading">Carregando conversa…</div> : null}
-                  {!messageLoading && !messages.length ? <div className="nr-whatsapp-chat-thread-empty"><MessageSquare size={22} /><strong>Conversa pronta</strong><span>Envie a primeira mensagem para começar.</span></div> : null}
+                <div className="wa39-messages" ref={messagesViewportRef} aria-live="polite">
+                  {messageLoading && !messages.length ? <div className="wa39-chat-loading">Carregando conversa…</div> : null}
+                  {!messageLoading && !messages.length ? <div className="wa39-chat-thread-empty"><MessageSquare size={22} /><strong>Conversa pronta</strong><span>Envie a primeira mensagem para começar.</span></div> : null}
                   {messages.map((message) => (
-                    <article key={message.id} className={`nr-whatsapp-message is-${message.direction.toLowerCase()} ${message.source === 'AUTOMATION' ? 'is-automation' : ''}`}>
-                      {message.messageType !== 'TEXT' ? <small className="nr-whatsapp-media-label">{message.messageType === 'IMAGE' ? 'Imagem' : message.messageType === 'AUDIO' ? 'Áudio' : message.messageType === 'DOCUMENT' ? 'Documento' : 'Mensagem'}</small> : null}
-                      {message.mediaStatus === 'READY' && message.messageType === 'IMAGE' ? <img className="nr-whatsapp-message-image" src={`/api/admin/whatsapp/messages/${message.id}/media`} alt={message.text || 'Imagem recebida'} loading="lazy" /> : null}
-                      {message.mediaStatus === 'READY' && message.messageType === 'AUDIO' ? <audio className="nr-whatsapp-message-audio" src={`/api/admin/whatsapp/messages/${message.id}/media`} controls preload="none" /> : null}
-                      {message.mediaStatus === 'READY' && message.messageType === 'DOCUMENT' ? <a className="nr-whatsapp-message-document" href={`/api/admin/whatsapp/messages/${message.id}/media`} target="_blank" rel="noreferrer">{message.mediaFileName || 'Abrir documento'}</a> : null}
-                      {message.messageType !== 'TEXT' && message.mediaStatus === 'PENDING' ? <small className="nr-whatsapp-media-state">Preparando mídia…</small> : null}
-                      {message.messageType !== 'TEXT' && message.mediaStatus === 'FAILED' ? <small className="nr-whatsapp-media-state is-error">Mídia indisponível no momento</small> : null}
+                    <article key={message.id} className={`wa39-message is-${message.direction.toLowerCase()} ${message.source === 'AUTOMATION' ? 'is-automation' : ''}`}>
+                      {message.messageType !== 'TEXT' ? <small className="wa39-media-label">{message.messageType === 'IMAGE' ? 'Imagem' : message.messageType === 'AUDIO' ? 'Áudio' : message.messageType === 'DOCUMENT' ? 'Documento' : 'Mensagem'}</small> : null}
+                      {message.mediaStatus === 'READY' && message.messageType === 'IMAGE' ? <img className="wa39-message-image" src={`/api/admin/whatsapp/messages/${message.id}/media`} alt={message.text || 'Imagem recebida'} loading="lazy" /> : null}
+                      {message.mediaStatus === 'READY' && message.messageType === 'AUDIO' ? <audio className="wa39-message-audio" src={`/api/admin/whatsapp/messages/${message.id}/media`} controls preload="none" /> : null}
+                      {message.mediaStatus === 'READY' && message.messageType === 'DOCUMENT' ? <a className="wa39-message-document" href={`/api/admin/whatsapp/messages/${message.id}/media`} target="_blank" rel="noreferrer">{message.mediaFileName || 'Abrir documento'}</a> : null}
+                      {message.messageType !== 'TEXT' && message.mediaStatus === 'PENDING' ? <small className="wa39-media-state">Preparando mídia…</small> : null}
+                      {message.messageType !== 'TEXT' && message.mediaStatus === 'FAILED' ? <small className="wa39-media-state is-error">Mídia indisponível no momento</small> : null}
                       {(message.messageType === 'TEXT' || message.text) ? <p>{message.text}</p> : message.mediaStatus !== 'READY' ? <p>{message.messageType === 'IMAGE' ? 'Imagem recebida' : message.messageType === 'AUDIO' ? 'Áudio recebido' : message.messageType === 'DOCUMENT' ? 'Documento recebido' : 'Mensagem recebida'}</p> : null}
                       <footer>
                         <time>{messageTime(message.sentAt)}</time>
                         {message.source === 'AUTOMATION' ? <span>Automação</span> : null}
-                        {message.direction === 'OUTBOUND' && deliveryCopy(message.deliveryStatus) ? <span className={`nr-whatsapp-delivery is-${String(message.deliveryStatus).toLowerCase()}`}>{deliveryCopy(message.deliveryStatus)}</span> : null}
+                        {message.direction === 'OUTBOUND' && deliveryCopy(message.deliveryStatus) ? <span className={`wa39-delivery is-${String(message.deliveryStatus).toLowerCase()}`}>{deliveryCopy(message.deliveryStatus)}</span> : null}
                       </footer>
                     </article>
                   ))}
                 </div>
-                <form className="nr-whatsapp-composer" onSubmit={sendMessage}>
-                  <button type="button" className="nr-whatsapp-composer-tool" title="Anexos entram em uma próxima etapa" aria-label="Anexar arquivo"><Paperclip size={18} /></button>
+                <form className="wa39-composer" onSubmit={sendMessage}>
+                  <button type="button" className="wa39-composer-tool" title="Anexos entram em uma próxima etapa" aria-label="Anexar arquivo"><Paperclip size={18} /></button>
                   <textarea value={composer} onChange={(event) => setComposer(event.target.value)} placeholder="Escreva uma mensagem…" rows={1} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void sendMessage() } }} />
-                  <button type="submit" className="nr-whatsapp-send" disabled={sending || !composer.trim()} aria-label="Enviar mensagem"><Send size={18} /></button>
+                  <button type="submit" className="wa39-send" disabled={sending || !composer.trim()} aria-label="Enviar mensagem"><Send size={18} /></button>
                 </form>
               </>
             ) : (
-              <div className="nr-whatsapp-chat-empty"><div><MessageSquare size={28} /><strong>Escolha uma conversa</strong><p>Selecione um cliente na lista para abrir o atendimento.</p></div></div>
+              <div className="wa39-chat-empty"><div><MessageSquare size={28} /><strong>Escolha uma conversa</strong><p>Selecione um cliente na lista para abrir o atendimento.</p></div></div>
             )}
           </main>
 
-          {selectedConversation ? <aside className="nr-whatsapp-context-pane">
-            <section className="nr-whatsapp-context-profile">
-              <span className="nr-whatsapp-avatar is-profile">{contactInitials(selectedConversation)}</span>
+          {selectedConversation ? <aside className="wa39-context-pane">
+            <section className="wa39-context-profile">
+              <span className="wa39-avatar is-profile">{contactInitials(selectedConversation)}</span>
               <strong>{contactTitle(selectedConversation)}</strong>
               <span>{phoneLabel(selectedConversation.phone)}</span>
-              <div className="nr-whatsapp-context-tags">
+              <div className="wa39-context-tags">
                 {selectedConversation.client ? <span><Users size={13} /> Cliente</span> : <span>Novo contato</span>}
                 {selectedConversation.client?.marketingOptIn ? <span>Marketing autorizado</span> : null}
               </div>
@@ -695,21 +726,21 @@ export function WhatsAppCenter() {
               const item = selectedConversation.upcomingAppointment
               const confirmation = confirmationCopy(item.confirmationStatus)
               return (
-                <section className="nr-whatsapp-context-card">
+                <section className="wa39-context-card">
                   <header><span>Próximo horário</span><Calendar size={16} /></header>
                   <strong>{item.serviceName}</strong>
                   <p>{appointmentDate(item.startsAt)}</p>
-                  <div className="nr-whatsapp-appointment-price">{money(item.priceCents)}</div>
-                  <span className={`nr-whatsapp-status is-${confirmation.tone}`}>{confirmation.label}</span>
-                  <div className="nr-whatsapp-context-actions">
+                  <div className="wa39-appointment-price">{money(item.priceCents)}</div>
+                  <span className={`wa39-status is-${confirmation.tone}`}>{confirmation.label}</span>
+                  <div className="wa39-context-actions">
                     {!['CONFIRMED','MANUALLY_CONFIRMED'].includes(item.confirmationStatus) ? <button type="button" onClick={() => void presenceAction('resend')}>Reenviar confirmação</button> : null}
                     {!['CONFIRMED','MANUALLY_CONFIRMED'].includes(item.confirmationStatus) ? <button type="button" onClick={() => void presenceAction('manual')}>Confirmar manualmente</button> : null}
                   </div>
                 </section>
               )
-            })() : <section className="nr-whatsapp-context-card is-empty"><Clock size={17} /><strong>Sem próximo horário</strong><p>O próximo agendamento aparece aqui automaticamente.</p></section>}
+            })() : <section className="wa39-context-card is-empty"><Clock size={17} /><strong>Sem próximo horário</strong><p>O próximo agendamento aparece aqui automaticamente.</p></section>}
 
-            <section className="nr-whatsapp-context-stats">
+            <section className="wa39-context-stats">
               <div><span>Atendimentos</span><strong>{selectedConversation.client?.appointmentsCount ?? 0}</strong></div>
               <div><span>Última mensagem</span><strong>{relativeTime(selectedConversation.lastMessageAt) || '—'}</strong></div>
             </section>
@@ -717,130 +748,125 @@ export function WhatsAppCenter() {
         </section>
       ) : null}
 
-      {view === 'automations' ? (
-        <section className="nr-whatsapp-automation-layout">
-          <div className="nr-whatsapp-automation-main">
-            <article className="nr-whatsapp-automation-hero">
+      {connected && view === 'automations' ? (
+        <section className="wa39-automation-layout">
+          <div className="wa39-automation-main">
+            <article className="wa39-automation-hero">
               <div><span>Agenda automática</span><h3>Confirmação de presença</h3><p>Defina o fluxo uma vez. O NaRégua acompanha as respostas e destaca apenas o que precisa de você.</p></div>
               <MiniToggle checked={settings.confirmationsEnabled} onChange={(checked) => setSettings((value) => ({ ...value, confirmationsEnabled: checked }))} label="Ativar confirmação automática" />
             </article>
 
-            <div className="nr-whatsapp-flow-card">
-              <div className="nr-whatsapp-flow-step">
+            <div className="wa39-flow-card">
+              <div className="wa39-flow-step">
                 <b>1</b>
                 <label><span>Pedir confirmação</span><ProductSelect value={String(settings.confirmationOffsetHours)} onChange={(next) => setSettings((value) => ({ ...value, confirmationOffsetHours: Number(next) }))} ariaLabel="Quando pedir confirmação" size="compact" options={[{ value: '12', label: '12h antes' }, { value: '24', label: '24h antes' }, { value: '48', label: '48h antes' }]} /></label>
               </div>
-              <ArrowRight className="nr-whatsapp-flow-arrow" size={18} />
-              <div className="nr-whatsapp-flow-step">
+              <ArrowRight className="wa39-flow-arrow" size={18} />
+              <div className="wa39-flow-step">
                 <b>2</b>
                 <label><span>Se não responder, lembrar</span><ProductSelect value={String(settings.confirmationRetryHours)} onChange={(next) => setSettings((value) => ({ ...value, confirmationRetryHours: Number(next) }))} ariaLabel="Quando reenviar confirmação" size="compact" options={[{ value: '4', label: '4h depois' }, { value: '8', label: '8h depois' }, { value: '12', label: '12h depois' }]} /></label>
               </div>
-              <ArrowRight className="nr-whatsapp-flow-arrow" size={18} />
-              <div className="nr-whatsapp-flow-step">
+              <ArrowRight className="wa39-flow-arrow" size={18} />
+              <div className="wa39-flow-step">
                 <b>3</b>
                 <label><span>Sem resposta vira pendência</span><ProductSelect value={String(settings.noResponseCutoffHours)} onChange={(next) => setSettings((value) => ({ ...value, noResponseCutoffHours: Number(next) }))} ariaLabel="Quando transformar ausência de resposta em pendência" size="compact" options={[{ value: '2', label: '2h antes' }, { value: '4', label: '4h antes' }, { value: '6', label: '6h antes' }]} /></label>
               </div>
             </div>
 
-            <div className="nr-whatsapp-reply-rule"><ShieldCheck size={17} /><div><strong>Resposta simples para o cliente</strong><span>O cliente responde <b>1</b> para confirmar ou <b>2</b> para avisar que não poderá ir. Nenhum código aleatório é necessário no fluxo normal.</span></div></div>
+            <div className="wa39-reply-rule"><CheckCircle2 size={17} /><div><strong>Resposta simples para o cliente</strong><span>Ela responde <b>1</b> para confirmar ou <b>2</b> para avisar que não poderá ir. Nenhum código aleatório é necessário no fluxo normal.</span></div></div>
 
-            <label className="nr-whatsapp-template"><span>Mensagem de confirmação</span><textarea value={settings.confirmationMessage} onChange={(e) => setSettings((value) => ({ ...value, confirmationMessage: e.target.value }))} /></label>
-            <div className="nr-whatsapp-variable-row"><span>Variáveis</span>{['{{nome}}','{{servico}}','{{data}}','{{hora}}','{{espaco}}'].map((item) => <button type="button" key={item} onClick={() => setSettings((value) => ({ ...value, confirmationMessage: `${value.confirmationMessage} ${item}` }))}>{item}</button>)}</div>
+            <label className="wa39-template"><span>Mensagem de confirmação</span><textarea value={settings.confirmationMessage} onChange={(e) => setSettings((value) => ({ ...value, confirmationMessage: e.target.value }))} /></label>
+            <div className="wa39-variable-row"><span>Variáveis</span>{['{{nome}}','{{servico}}','{{profissional}}','{{data}}','{{hora}}','{{espaco}}'].map((item) => <button type="button" key={item} onClick={() => setSettings((value) => ({ ...value, confirmationMessage: `${value.confirmationMessage} ${item}` }))}>{item}</button>)}</div>
 
-            <article className="nr-whatsapp-compact-setting">
+            <article className="wa39-compact-setting">
               <div><strong>Cancelar automaticamente se o cliente recusar</strong><p>Desligado por padrão: a recusa aparece para você decidir o que fazer.</p></div>
               <MiniToggle checked={settings.autoCancelDeclined} onChange={(checked) => setSettings((value) => ({ ...value, autoCancelDeclined: checked }))} label="Cancelar automaticamente" />
             </article>
 
-            <article className="nr-whatsapp-reminder-setting">
-              <div className="nr-whatsapp-reminder-head"><div><span>Depois da confirmação</span><strong>Lembrete final</strong><p>Enviado somente para quem já confirmou presença.</p></div><MiniToggle checked={settings.remindersEnabled} onChange={(checked) => setSettings((value) => ({ ...value, remindersEnabled: checked }))} label="Ativar lembrete final" /></div>
-              {settings.remindersEnabled ? <div className="nr-whatsapp-reminder-fields"><label><span>Enviar</span><ProductSelect value={String(settings.reminderOffsetHours)} onChange={(next) => setSettings((value) => ({ ...value, reminderOffsetHours: Number(next) }))} ariaLabel="Quando enviar lembrete final" size="compact" options={[{ value: '1', label: '1 hora antes' }, { value: '2', label: '2 horas antes' }, { value: '3', label: '3 horas antes' }, { value: '4', label: '4 horas antes' }]} /></label><label className="nr-whatsapp-template"><span>Mensagem do lembrete</span><textarea value={settings.reminderMessage} onChange={(e) => setSettings((value) => ({ ...value, reminderMessage: e.target.value }))} /></label></div> : null}
+            <article className="wa39-reminder-setting">
+              <div className="wa39-reminder-head"><div><span>Depois da confirmação</span><strong>Lembrete final</strong><p>Enviado somente para quem já confirmou presença.</p></div><MiniToggle checked={settings.remindersEnabled} onChange={(checked) => setSettings((value) => ({ ...value, remindersEnabled: checked }))} label="Ativar lembrete final" /></div>
+              {settings.remindersEnabled ? <div className="wa39-reminder-fields"><label><span>Enviar</span><ProductSelect value={String(settings.reminderOffsetHours)} onChange={(next) => setSettings((value) => ({ ...value, reminderOffsetHours: Number(next) }))} ariaLabel="Quando enviar lembrete final" size="compact" options={[{ value: '1', label: '1 hora antes' }, { value: '2', label: '2 horas antes' }, { value: '3', label: '3 horas antes' }, { value: '4', label: '4 horas antes' }]} /></label><label className="wa39-template"><span>Mensagem do lembrete</span><textarea value={settings.reminderMessage} onChange={(e) => setSettings((value) => ({ ...value, reminderMessage: e.target.value }))} /></label></div> : null}
             </article>
 
-            <footer className="nr-whatsapp-savebar"><span>{settings.updatedAt ? `Atualizado ${relativeTime(settings.updatedAt)}` : 'Revise antes de salvar.'}</span><button type="button" onClick={() => void saveSettings()} disabled={settingsBusy}>{settingsBusy ? 'Salvando…' : 'Salvar automações'}</button></footer>
+            <footer className="wa39-savebar"><span>{settings.updatedAt ? `Atualizado ${relativeTime(settings.updatedAt)}` : 'Revise antes de salvar.'}</span><button type="button" onClick={() => void saveSettings()} disabled={settingsBusy}>{settingsBusy ? 'Salvando…' : 'Salvar automações'}</button></footer>
           </div>
 
-          <aside className="nr-whatsapp-preview-card">
-            <div className="nr-whatsapp-preview-head"><span>Prévia</span><small>Como o cliente recebe</small></div>
-            <div className="nr-whatsapp-preview-chat">
-              <div className="nr-whatsapp-preview-day">Amanhã</div>
+          <aside className="wa39-preview-card">
+            <div className="wa39-preview-head"><span>Prévia</span><small>Como o cliente recebe</small></div>
+            <div className="wa39-preview-chat">
+              <div className="wa39-preview-day">Amanhã</div>
               <p className="is-out">{previewTemplate(settings.confirmationMessage)}</p>
               <p className="is-in">1</p>
-              <div className="nr-whatsapp-preview-system"><ShieldCheck size={14} /> Presença confirmada</div>
+              <div className="wa39-preview-system"><CheckCircle2 size={14} /> Presença confirmada</div>
             </div>
-            <label className="nr-whatsapp-test-field"><span>Enviar um teste</span><input value={testPhone} onChange={(e) => setTestPhone(e.target.value)} placeholder="(11) 99999-9999" /><button type="button" onClick={() => void sendTest('confirmation')} disabled={status !== 'connected'}>Testar</button></label>
+            <label className="wa39-test-field"><span>Enviar um teste</span><input value={testPhone} onChange={(e) => setTestPhone(e.target.value)} placeholder="(11) 99999-9999" /><button type="button" onClick={() => void sendTest('confirmation')} disabled={status !== 'connected'}>Testar</button></label>
           </aside>
         </section>
       ) : null}
 
-      {view === 'campaigns' ? (
-        <section className="nr-whatsapp-campaigns">
-          <div className="nr-whatsapp-section-intro"><span>Relacionamento</span><h3>Campanhas para quem escolheu receber.</h3><p>O NaRégua usa somente a audiência com consentimento promocional ativo e revalida essa autorização no momento de cada envio.</p></div>
-          <div className="nr-whatsapp-campaign-overview">
-            <article><div className="nr-whatsapp-stat-icon"><Users size={18} /></div><span>Audiência autorizada</span><strong>{diagnostics ? diagnostics.optedInClients : '—'}</strong><small>de {diagnostics ? diagnostics.totalClients : '—'} clientes · limite de {campaignMaxRecipients} por campanha</small></article>
-            <article><div className="nr-whatsapp-stat-icon"><Megaphone size={18} /></div><span>Envio operacional</span><strong className="is-text">{campaignsEnabled ? `1 mensagem a cada ${campaignSendIntervalSeconds}s` : 'Desativado no servidor'}</strong><small>{campaignsEnabled ? 'Fila com revalidação de consentimento, tentativas e histórico.' : 'A liberação exige configuração explícita de produção.'}</small></article>
+      {connected && view === 'reminders' ? <PersonalReminders /> : null}
+
+      {connected && view === 'campaigns' ? (
+        <section className="wa39-campaigns">
+          <div className="wa39-section-intro"><span>Novidades do espaço</span><h3>Uma boa mensagem, para quem quer receber.</h3><p>Compartilhe novidades com texto e imagem. Você confere tudo antes de enviar.</p></div>
+          <div className="wa39-campaign-overview">
+            <article><div className="wa39-stat-icon"><Users size={18} /></div><span>Audiência autorizada</span><strong>{diagnostics?.optedInClients ?? '—'}</strong><small>Até {campaignMaxRecipients} clientes por campanha.</small></article>
+            <article><div className="wa39-stat-icon"><Megaphone size={18} /></div><span>Disponíveis agora</span><strong>{campaignRecipients}</strong><small>Quem recebeu uma campanha nos últimos 7 dias não recebe outra agora.</small></article>
           </div>
+          <WhatsappCampaignComposer enabled={campaignsEnabled} recipients={campaignRecipients} settings={settings} onMessage={message=>setSettings(value=>({...value,promoMessage:message}))} onDone={()=>Promise.all([loadCampaigns(),loadDiagnostics()])} />
+          <p className="form-help campaign-channel-note">Envie novidades que seus clientes esperam receber. Evite repetir ofertas; se precisar ampliar a campanha, fale com o suporte.</p>
 
-          {!campaignsEnabled ? <div className="nr-whatsapp-campaign-gate"><ShieldCheck size={18} /><div><strong>Disparos protegidos por feature flag</strong><p>O editor e o histórico continuam disponíveis, mas novas campanhas só entram na fila quando <code>WHATSAPP_PROMOTIONAL_CAMPAIGNS_ENABLED=true</code> estiver configurado no servidor.</p></div></div> : null}
-
-          <article className="nr-whatsapp-campaign-editor">
-            <header><div><span>Campanha promocional</span><strong>Mensagem e audiência consentida</strong><small>A instrução de saída é acrescentada automaticamente se o texto ainda não tiver SAIR/PARE/PARAR/STOP.</small></div><MiniToggle checked={settings.promoEnabled} onChange={(checked) => setSettings((value) => ({ ...value, promoEnabled: checked }))} label="Ativar modelo promocional" /></header>
-            <label className="nr-whatsapp-campaign-name"><span>Nome interno</span><input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} maxLength={80} placeholder="Ex.: Agenda de setembro" /></label>
-            <label className="nr-whatsapp-template"><span>Mensagem</span><textarea value={settings.promoMessage} onChange={(e) => setSettings((value) => ({ ...value, promoMessage: e.target.value }))} maxLength={1400} /></label>
-            <div className="nr-whatsapp-variable-row"><span>Variáveis</span>{['{{nome}}','{{espaco}}'].map((item) => <button type="button" key={item} onClick={() => setSettings((value) => ({ ...value, promoMessage: `${value.promoMessage} ${item}` }))}>{item}</button>)}</div>
-            <div className="nr-whatsapp-campaign-compliance"><ShieldCheck size={16} /><p>Somente clientes com consentimento ativo entram na audiência. Se alguém retirar a autorização antes do envio, essa pessoa é ignorada. Responder <strong>SAIR</strong>, <strong>PARE</strong>, <strong>PARAR</strong> ou <strong>STOP</strong> remove a autorização promocional.</p></div>
-            <div className="nr-whatsapp-campaign-actions"><label><span>Testar em um número</span><input value={testPhone} onChange={(e) => setTestPhone(e.target.value)} placeholder="(11) 99999-9999" /></label><button type="button" onClick={() => void sendTest('promo')} disabled={status !== 'connected'}>Enviar teste</button><button type="button" onClick={() => void saveSettings()} disabled={settingsBusy}>Salvar modelo</button><button type="button" className="is-primary" onClick={() => void createCampaign()} disabled={campaignBusy || !campaignsEnabled || !settings.promoEnabled || !(diagnostics?.optedInClients ?? 0)}>{campaignBusy ? 'Preparando…' : `Criar campanha para ${diagnostics?.optedInClients ?? 0} autorizados`}</button></div>
-          </article>
-
-          <section className="nr-whatsapp-campaign-history" aria-label="Histórico de campanhas">
+          <section className="wa39-campaign-history" aria-label="Histórico de campanhas">
             <header><div><span>Histórico</span><strong>Campanhas recentes</strong></div><button type="button" onClick={() => void loadCampaigns()} disabled={campaignBusy}><RefreshCw size={14} /> Atualizar</button></header>
-            {campaigns.length ? <div className="nr-whatsapp-campaign-list">{campaigns.map((campaign) => {
+            {campaigns.length ? <div className="wa39-campaign-list">{campaigns.map((campaign) => {
               const finished = campaign.sentCount + campaign.failedCount + campaign.skippedCount
               const progress = campaign.totalRecipients ? Math.min(100, Math.round((finished / campaign.totalRecipients) * 100)) : 0
               const active = campaign.status === 'QUEUED' || campaign.status === 'RUNNING'
-              return <article className="nr-whatsapp-campaign-row" key={campaign.id}>
-                <div className="nr-whatsapp-campaign-row-main"><div><strong>{campaign.name}</strong><span>{new Date(campaign.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></div><b className={`is-${campaign.status.toLowerCase()}`}>{campaign.status === 'QUEUED' ? 'Na fila' : campaign.status === 'RUNNING' ? 'Enviando' : campaign.status === 'COMPLETED' ? 'Concluída' : campaign.status === 'CANCELLED' ? 'Cancelada' : 'Falhou'}</b></div>
-                <div className="nr-whatsapp-campaign-progress"><i><span style={{ width: `${progress}%` }} /></i><small>{campaign.sentCount} enviadas · {campaign.skippedCount} ignoradas · {campaign.failedCount} falharam · {campaign.totalRecipients} total</small></div>
+              return <article className="wa39-campaign-row" key={campaign.id}>
+                <div className="wa39-campaign-row-main"><div><strong>{campaign.name}</strong><span>{new Date(campaign.createdAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</span></div><b className={`is-${campaign.status.toLowerCase()}`}>{campaign.status === 'QUEUED' ? 'Na fila' : campaign.status === 'RUNNING' ? 'Enviando' : campaign.status === 'COMPLETED' ? 'Concluída' : campaign.status === 'CANCELLED' ? 'Cancelada' : 'Interrompida'}</b></div>
+                <div className="wa39-campaign-progress"><i><span style={{ width: `${progress}%` }} /></i><small>{campaign.sentCount} enviadas · {campaign.skippedCount} ignoradas · {campaign.failedCount} não confirmadas · {campaign.totalRecipients} total</small></div>
                 {campaign.lastError ? <p>{campaign.lastError}</p> : null}
                 {active ? <button type="button" onClick={() => void cancelCampaign(campaign.id)} disabled={campaignBusy}>Cancelar campanha</button> : null}
               </article>
-            })}</div> : <div className="nr-whatsapp-campaign-empty">Nenhuma campanha criada ainda.</div>}
+            })}</div> : <div className="wa39-campaign-empty">Nenhuma campanha criada ainda.</div>}
           </section>
         </section>
       ) : null}
 
-      {view === 'connection' ? (
-        <section className="nr-whatsapp-connection-grid">
-          <article className="nr-whatsapp-connection-status">
-            <div className={`nr-whatsapp-connection-mark is-${status}`}><Smartphone size={22} /></div>
-            <div><span>Conexão</span><h3>{status === 'connected' ? 'WhatsApp conectado' : status === 'qr_scan' ? 'Leia o QR Code' : 'Conecte seu WhatsApp'}</h3><p>{status === 'connected' ? 'A central está pronta para enviar e receber mensagens.' : 'Faça a conexão para ativar conversas e automações.'}</p></div>
+      {!statusPending && (!connected || view === 'connection') ? (
+        <section className="wa39-connection-grid">
+          <article className="wa39-connection-status">
+            <div className={`wa39-connection-mark is-${status}`}><Smartphone size={22} /></div>
+            <div><span>Conexão</span><h3>{connectionState === null ? 'Verifique a conexão' : status === 'connected' ? 'WhatsApp conectado' : status === 'qr_scan' ? 'Leia o QR Code' : 'Conecte seu WhatsApp'}</h3><p>{status === 'connected' ? 'A central está pronta para enviar e receber mensagens.' : 'Use o WhatsApp do espaço, compartilhado pela equipe autorizada. Conecte pelo QR Code para começar.'}</p></div>
             <button type="button" onClick={() => void refreshConnection()} disabled={connectionBusy}><RefreshCw size={16} /> {connectionBusy ? 'Verificando…' : 'Verificar'}</button>
           </article>
 
-          <article className="nr-whatsapp-connection-card">
+          {connected ? <article className="wa39-connection-card">
             <header><div><span>Recebimento de mensagens</span><strong>{diagnostics?.providerWebhookConfigured === true ? 'Recebimento preparado' : diagnostics?.providerWebhookConfigured === false ? 'Precisa de atenção' : 'Verificando configuração'}</strong></div><MessageSquare size={20} /></header>
-            <p>{diagnostics?.providerWebhookConfigured === false ? 'A conexão existe, mas o recebimento precisa ser configurado novamente.' : 'As respostas das clientes são encaminhadas para a inbox do NaRégua.'}</p>
+            <p>{diagnostics?.providerWebhookConfigured === false ? 'A conexão existe, mas o recebimento precisa ser configurado novamente.' : 'As respostas dos clientes são encaminhadas para a inbox do NaRégua.'}</p>
             <dl><div><dt>Última recebida</dt><dd>{relativeTime(diagnostics?.lastInboundAt ?? null) || 'Nenhuma ainda'}</dd></div><div><dt>Último envio</dt><dd>{relativeTime(diagnostics?.lastOutboundAt ?? null) || 'Nenhum ainda'}</dd></div></dl>
+          </article> : null}
+
+          <article className="wa39-connection-card">
+            <header><div><span>WhatsApp do espaço</span><strong>{instance?.platformManaged ? 'Conexão preparada pela plataforma' : 'Conectar o número do espaço'}</strong></div><QrCode size={20} /></header>
+            <p>{instance?.platformManaged ? 'Você só precisa ler o QR Code em WhatsApp → Aparelhos conectados → Conectar aparelho.' : 'Leia o QR Code em WhatsApp → Aparelhos conectados → Conectar aparelho.'}</p>
+            {status !== 'connected' ? <button type="button" className="is-primary" onClick={() => void handleConnect()} disabled={connectionBusy || connectionState === null || !(instance?.baseUrl && instance?.instanceName && instance?.hasApiKey)}>{connectionBusy ? 'Preparando…' : 'Conectar via QR Code'}</button> : <span className="wa39-connected-note"><CheckCircle2 size={15} /> Nenhuma ação necessária agora</span>}
           </article>
 
-          <article className="nr-whatsapp-connection-card">
-            <header><div><span>Infraestrutura</span><strong>{instance?.platformManaged ? 'Gerenciada pelo NaRégua' : 'Conexão configurada'}</strong></div><QrCode size={20} /></header>
-            <p>{instance?.platformManaged ? 'Os dados técnicos da instância ficam ocultos e são gerenciados pela plataforma.' : 'A integração Evolution deste espaço está configurada para operar com a central.'}</p>
-            {status !== 'connected' ? <button type="button" className="is-primary" onClick={() => void handleConnect()} disabled={connectionBusy || !(instance?.baseUrl && instance?.instanceName && instance?.hasApiKey)}>{connectionBusy ? 'Preparando…' : 'Conectar via QR Code'}</button> : <span className="nr-whatsapp-connected-note"><i aria-hidden="true" /> Nenhuma ação necessária agora</span>}
-          </article>
-
-          {qrCode && status !== 'connected' ? <article className="nr-whatsapp-qr-card"><span>Leia no WhatsApp</span><div><img src={qrCode} alt="QR Code para conectar o WhatsApp" /></div><p>Abra <b>Aparelhos conectados</b> no WhatsApp e leia este código.</p></article> : null}
+          {!connected && !connectionBusy && instance && !(instance.baseUrl && instance.instanceName && instance.hasApiKey) ? <p role="status">A conexão ainda precisa ser preparada. Abra um chamado em Suporte para solicitar a ativação.</p> : null}
+          {qrCode && status !== 'connected' ? <article className="wa39-qr-card"><span>Leia no WhatsApp</span><div><img src={qrCode} alt="QR Code para conectar o WhatsApp" /></div><p>Abra <b>Aparelhos conectados</b> no WhatsApp e leia este código.</p></article> : null}
         </section>
       ) : null}
 
       {newConversationOpen ? (
-        <ModalRoot onMouseDown={(e) => { if (e.currentTarget === e.target) setNewConversationOpen(false) }}>
-          <form className="nr-dialog nr-whatsapp-new-dialog" role="dialog" aria-modal="true" aria-labelledby="new-whatsapp-conversation-title" onSubmit={startConversation} onMouseDown={(event) => event.stopPropagation()}>
-            <header className="modal-header"><div><span>Nova conversa</span><h3 id="new-whatsapp-conversation-title">Adicionar contato e conversar</h3><p>O nome fica salvo na sua caixa de entrada para você reconhecer cada cliente sem depender do número.</p></div><button type="button" className="icon-btn modal-close" data-modal-close onClick={() => setNewConversationOpen(false)} aria-label="Fechar"><X size={18} /></button></header>
-            <div className="modal-body nr-whatsapp-new-body"><div className="nr-whatsapp-new-fields"><label><span>Nome</span><input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex.: João Souza" autoComplete="name" autoFocus /></label><label><span>WhatsApp com DDD</span><input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="(11) 99999-9999" inputMode="tel" autoComplete="tel" /></label></div><label><span>Primeira mensagem</span><textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Oi, João! Como posso ajudar?" /></label></div>
-            <footer className="modal-footer"><button type="button" data-modal-close onClick={() => setNewConversationOpen(false)}>Cancelar</button><button type="submit" className="is-primary" disabled={sending || newName.trim().length < 2 || newPhone.trim().length < 8 || !newMessage.trim()}>{sending ? 'Enviando…' : 'Salvar e enviar'}</button></footer>
+        <div className="wa39-new-backdrop" role="presentation" onMouseDown={(e) => { if (e.currentTarget === e.target) setNewConversationOpen(false) }}>
+          <form className="wa39-new-dialog" onSubmit={startConversation}>
+            <header><div><span>Nova conversa</span><h3>Adicionar contato e conversar</h3><p>O nome fica salvo na sua inbox para você não precisar reconhecer clientes pelo número.</p></div><button type="button" onClick={() => setNewConversationOpen(false)} aria-label="Fechar"><X size={18} /></button></header>
+            <div className="wa39-new-fields"><label><span>Nome</span><input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Ex.: Maria Souza" autoFocus /></label><label><span>WhatsApp com DDD</span><input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="(11) 99999-9999" /></label></div>
+            <label><span>Primeira mensagem</span><textarea value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Oi, Maria! Como posso te ajudar?" /></label>
+            <footer><button type="button" onClick={() => setNewConversationOpen(false)}>Cancelar</button><button type="submit" className="is-primary" disabled={sending || newName.trim().length < 2 || newPhone.trim().length < 8 || !newMessage.trim()}>{sending ? 'Enviando…' : 'Salvar e enviar'}</button></footer>
           </form>
-        </ModalRoot>
+        </div>
       ) : null}
     </div>
   )

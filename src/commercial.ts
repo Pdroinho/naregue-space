@@ -1,20 +1,7 @@
-export type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'SEMIANNUAL' | 'ANNUAL'
+const OFFICIAL_ANNUAL_PRICE_CENTS = 59880
 
-export type BillingPlan = {
-  cycle: BillingCycle
-  months: number
-  label: string
-  amountCents: number
-  monthlyEquivalentCents: number
-  savingsPercent: number
-  featured: boolean
-}
-
-export type PublicBillingCatalog = {
-  plans: BillingPlan[]
-  firstMonthPromoCents: number
-  checkoutProvider: 'INFINITEPAY'
-  methods: Array<'PIX' | 'CARD'>
+export function subscriptionPriceCents() {
+  return OFFICIAL_ANNUAL_PRICE_CENTS
 }
 
 export function currencyBRLFromCents(cents: number, options?: Intl.NumberFormatOptions) {
