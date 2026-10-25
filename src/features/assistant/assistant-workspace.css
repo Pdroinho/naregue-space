@@ -1,12 +1,15 @@
 /* Reuse product cards, tabs, controls and dialogs. This layer arranges the work area. */
-.assistant-workspace {
+.nr-assistant-workspace-layout {
   max-width: 1200px;
   margin-inline: auto;
-  display: grid;
-  gap: var(--ld-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: calc(100dvh - 150px);
+  min-height: 360px;
   min-width: 0;
 }
-.assistant-workspace > .ld-agenda-tabs {
+.nr-assistant-workspace-layout > .ld-agenda-tabs {
   max-width: 100%;
 }
 .assistant-work-heading {
@@ -190,16 +193,16 @@
   }
 }
 @media (max-width: 650px) {
-  .assistant-workspace {
+  .nr-assistant-workspace-layout {
     gap: var(--ld-space-5);
   }
-  .assistant-workspace > .ld-agenda-tabs {
+  .nr-assistant-workspace-layout > .ld-agenda-tabs {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
     gap: var(--ld-space-2);
   }
-  .assistant-workspace > .ld-agenda-tabs > .ld-agenda-tab {
+  .nr-assistant-workspace-layout > .ld-agenda-tabs > .ld-agenda-tab {
     min-height: var(--ld-touch-target);
     font-size: var(--ld-type-small-size);
   }
@@ -280,7 +283,7 @@
 .assistant34>.assistant34-header,.assistant34>.assistant34-disabled {flex:none;}
 .assistant34>.assistant34-workspace {flex:1;min-height:0;height:auto;grid-row:auto;}
 .assistant-credit-area>.btn {margin-left:auto;font-size:12px;min-height:36px;}
-@media(max-width:768px){.ld-shell.has-mobile-tabbar .assistant-workspace .assistant34--page{height:calc(100dvh - 224px);min-height:340px;}.assistant34-empty{align-content:center;}.assistant34-empty-main{align-self:center;}}
+@media(max-width:768px){.assistant34-empty{align-content:center;}.assistant34-empty-main{align-self:center;}}
 
 /* Confirmation is a neutral receipt: text and icon carry success, not competing fills. */
 .assistant34 .assistant35-action.is-done {background:var(--ld-color-raised);border-color:var(--l34-line-strong);}

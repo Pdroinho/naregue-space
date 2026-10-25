@@ -8,17 +8,21 @@ import sharp from 'sharp'
 import { prepareLogoImage } from '../dist/server/logoImageProcessing.js'
 import path from 'node:path'
 import express from 'express'
-const { chromium } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
+import { runInteractionChecks } from './qa-interactions.mjs'
+const { chromium, firefox } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
 let completed=false
 process.on('exit',()=>{if(!completed){console.error('Incomplete browser check run');process.exitCode=1}})
 const app=express();app.use(express.static(path.resolve('dist/client'),{index:false}));app.get(/.*/,(_req,res)=>res.type('html').send(readFileSync('dist/client/index.html','utf8')))
-const server=app.listen(0,'127.0.0.1');await once(server,'listening');const origin=`http://studio.localhost:${server.address().port}`
+const server=app.listen(0,'127.0.0.1');await once(server,'listening');const origin=`http://${process.argv.includes('--firefox')?'127.0.0.1':'studio.localhost'}:${server.address().port}`
 const tenant={id:'studio',slug:'studio',name:'Studio QA',primaryColor:'#b85a30'}
 const plans=[{code:'TEAM_3',seats:3,minProfessionals:1,label:'1 a 3 profissionais',amountCents:7490},{code:'TEAM_6',seats:6,minProfessionals:4,label:'4 a 6 profissionais',amountCents:9990},{code:'TEAM_15',seats:15,minProfessionals:7,label:'7 a 15 profissionais',amountCents:14900}]
 const snapshot={ym:'2026-10',entriesCents:20000,expensesCents:10000,balanceCents:10000,serviceEntriesCents:20000,manualIncomeCents:0,confirmedAppointments:2}
 const qaLogoDirectory=mkdtempSync(path.join(tmpdir(),'lash-logo-ui-'));const qaLogoPath=path.join(qaLogoDirectory,'logo.png');const ink=await sharp({create:{width:60,height:30,channels:4,background:'#972d57'}}).png().toBuffer();const whiteLogo=await sharp({create:{width:240,height:160,channels:4,background:'#fff'}}).composite([{input:ink,left:90,top:65}]).png().toBuffer();writeFileSync(qaLogoPath,whiteLogo)
 const logoPreparations=[];let tenantHold=null
 const requestedPaths=[]
+const assistantRequests=[]
+const serviceWrites=[],cashWrites=[]
+let assistantMode='ok',releaseAssistant=null,usageMode='ok',referralsEnabled=false,referralLink=null
 const omitted = new Set()
 const setupAnalyses=[],setupCompletions=[]
 const settingsAnalyses=[],settingsWrites=[]
@@ -58,7 +62,7 @@ async function assertReadable(selectors){
 async function shot(name){if(await page.locator('.ld-sidebar').count() && await page.evaluate(()=>window.innerWidth<768))await page.waitForFunction(()=>document.querySelector('.ld-sidebar').getBoundingClientRect().right<=1);if(process.env.NAREGUA_QA_SCREENSHOT_DIR && (!process.env.NAREGUA_QA_SCREENSHOT_FILTER || new RegExp(process.env.NAREGUA_QA_SCREENSHOT_FILTER).test(name)))await page.screenshot({path:path.join(process.env.NAREGUA_QA_SCREENSHOT_DIR,name+'.png'),fullPage:true})}
 
 try{
- browser=await chromium.launch({headless:true,...(process.env.NAREGUA_QA_CHROMIUM_PATH?{executablePath:process.env.NAREGUA_QA_CHROMIUM_PATH}:{}),args:['--host-resolver-rules=MAP *.localhost 127.0.0.1']})
+ browser=process.argv.includes('--firefox')?await firefox.launch({headless:true}):await chromium.launch({headless:true,...(process.env.NAREGUA_QA_CHROMIUM_PATH?{executablePath:process.env.NAREGUA_QA_CHROMIUM_PATH}:{}),args:['--host-resolver-rules=MAP *.localhost 127.0.0.1']})
  const context=await browser.newContext({timezoneId:'America/Bahia',...(process.argv.includes('--booking-mobile')?{isMobile:true,hasTouch:true,deviceScaleFactor:2}:{})});page=await context.newPage();page.setDefaultTimeout(10000)
  await page.addInitScript(()=>{for(const tab of ['dashboard','settings','evolution','referrals','finance','assistant','billing','calendar','services','clients','team'])window.localStorage.setItem(`naregua:tour:admin-${tab}:v3`,'qa');window.localStorage.setItem('naregua:tour:client-appointments:v3','qa')})
  const errors=[];page.on('pageerror',error=>{errors.push(error.message);console.error('BROWSER ERROR',error.stack)})
@@ -82,7 +86,14 @@ try{
   if(p==='/api/admin/onboarding/brand-suggestions'){const body=route.request().postDataJSON();setupAnalyses.push(body);return json(route,{palettes:[{name:'Marca da cliente',primary:'#972D57',secondary:'#33272D',background:'#FCF7F9',rationale:'Cores preservadas com contraste.'}, {name:'Neutro',primary:'#66566E',secondary:'#29252C',background:'#F8F6FA',rationale:'Serena.'},{name:'Terra',primary:'#82605B',secondary:'#312927',background:'#FAF7F3',rationale:'Acolhedora.'}],...(aiSetupMode==='vision'?{logoPresentation:{layout:'FULL',size:'L',rationale:'Nome integrado na logo, com proporção preservada.'}}:{}),source:aiSetupMode==='vision'?'VISION':'CURATED'})}
   if(p==='/api/admin/onboarding/complete'){setupMode=false;const body=route.request().postDataJSON();setupCompletions.push(body);Object.assign(tenant,body);return json(route,{tenant})}
   if(p==='/api/admin/services' && route.request().method()==='GET')return serviceMode==='error'?json(route,{message:'Serviços indisponíveis para teste'},503):json(route,{services:serviceMode==='empty'?[]:serviceRows})
-  if(p.startsWith('/api/admin/services') && route.request().method()!=='GET')return mutationMode==='error'?json(route,{message:'Não foi possível salvar o serviço de teste.'},503):json(route,{ok:true,service:serviceRows[0]})
+  if(p.startsWith('/api/admin/services') && route.request().method()!=='GET'){
+   if(mutationMode==='error')return json(route,{message:'Não foi possível salvar o serviço de teste.'},503)
+   const body=route.request().postDataJSON();serviceWrites.push(body)
+   const service={id:'55555555-5555-4555-8555-555555555555',...body};serviceRows.push(service)
+   return json(route,{ok:true,service})
+  }
+  if(p==='/api/admin/finance/transactions' && route.request().method()==='POST' && process.argv.includes('--interactions')){cashWrites.push(route.request().postDataJSON());return json(route,{ok:true})}
+  if(p==='/api/support/tickets' && process.argv.includes('--interactions'))return json(route,{tickets:[],total:0,page:1,stats:{active:0,waiting:0,overdue:0}})
   if(p==='/api/admin/clients')return clientMode==='error'?json(route,{message:'Clientes indisponíveis para teste'},503):json(route,{clients:clientMode==='empty'?[]:clientRows})
   if(p==='/api/admin/professionals')return json(route,{professionals:professionalRows,seatLimit:3,businessHours:[],timezone:'America/Bahia'})
   if(p==='/api/admin/appointments')return json(route,{appointments})
@@ -104,14 +115,26 @@ try{
   if(p==='/api/admin/domains')return domainMode==='error'?json(route,{message:'Domínios indisponíveis'},503):json(route,{domains:domainMode==='active'?[{id:'domain',domain:'agenda.example.com',status:'ACTIVE',verifiedAt:new Date().toISOString(),isPrimary:true}]:[]})
   if(p==='/api/admin/billing/overview')return json(route,{subscription:null,orders:[]})
   if(p==='/api/admin/subscription/team-plans')return json(route,{plans,activeProfessionals:1,checkoutAvailable:false,currentSubscription:null,orders:[]})
-  if(p==='/api/admin/referrals/overview')return refError?json(route,{message:'Indicações indisponíveis'},503):json(route,{teamDiscountsAvailable:false,link:null,metrics:{total:2,paid:1,customerSavingsCents:749},credits:[],rules:{inviteeDiscountPercent:10,referrerRewardPercent:10,renewalCapPercent:30}})
-  if(p==='/api/admin/assistant/usage')return json(route,{enabled:true,used:2,limit:40,extraCreditBalance:0})
+  if(p==='/api/admin/referrals/overview')return refError?json(route,{message:'Indicações indisponíveis'},503):json(route,{teamDiscountsAvailable:referralsEnabled,link:referralLink,metrics:{total:2,paid:1,customerSavingsCents:749},credits:[],rules:{inviteeDiscountPercent:10,referrerRewardPercent:10,renewalCapPercent:30}})
+  if(p==='/api/admin/referrals/link' && process.argv.includes('--interactions')){referralLink={id:'qa-link',active:true,url:'https://naregua.space/?ref=controlled-browser-test',inviteeDiscountPercent:10,referrerRewardPercent:10,redemptionsCount:0};return json(route,{url:referralLink.url})}
+  if(p==='/api/admin/assistant/message' && process.argv.includes('--interactions')){
+   const body=route.request().postDataJSON();assistantRequests.push(body)
+   if(assistantMode==='hold')await new Promise(resolve=>{releaseAssistant=resolve})
+   if(assistantMode==='error')return json(route,{message:'Falha de resposta para teste',code:'ASSISTANT_UPSTREAM_FAILED'},503)
+   return json(route,{answer:'Resposta conferida para '+body.message,usage:{used:3,limit:40,extraCreditBalance:0}}).catch(()=>{})
+  }
+  if(p==='/api/admin/assistant/usage')return usageMode==='error'?json(route,{message:'Não foi possível consultar a disponibilidade'},503):json(route,{enabled:true,used:2,limit:40,extraCreditBalance:0,...(process.argv.includes('--interactions')?{storageScope:'qa:studio:interactions'}:{})})
   if(p==='/api/admin/finance')return json(route,{timeZone:'America/Bahia',todayYmd:'2026-10-13',currentMonthYm:'2026-10',currentMonth:snapshot,previousMonth:{...snapshot,ym:'2026-09',entriesCents:0},totals:{entriesCents:20000,expensesCents:10000,profitCents:10000},goals:{revenueCents:0,newClients:0,currentRevenueCents:20000,currentNewClients:1},expenseCategories:[],lastEntries:[],lastCashTransactions:[],monthly:[snapshot]})
   if(!omitted.has(p)){omitted.add(p);console.log('AUXILIARY FIXTURE '+p)}
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--booking-mobile')){
+ if(process.argv.includes('--interactions')){
+  await runInteractionChecks({page,origin,pass,shot,cleanLayout,assertReadable,
+   setRole:value=>{role=value},setAssistantMode:value=>{assistantMode=value},assistantRequests,
+   releaseAssistant:()=>{releaseAssistant?.();releaseAssistant=null},setUsageMode:value=>{usageMode=value},
+   setReferrals:value=>{referralsEnabled=value},setMutationMode:value=>{mutationMode=value},serviceWrites,cashWrites})
+ }else if(process.argv.includes('--booking-mobile')){
  role=null;
  for(const [width,height] of [[320,640],[360,740],[390,844],[430,932],[768,900],[820,900],[1440,900]]){
   await page.setViewportSize({width,height});await page.goto(origin+'/agendar');await page.locator('.booking30-service').first().waitFor();await page.evaluate(()=>document.fonts.ready);await cleanLayout();await assertReadable(['.booking30-heading p','.booking30-service-copy span','.booking30-steps button strong']);await shot(`booking-mobile-services-${width}`);

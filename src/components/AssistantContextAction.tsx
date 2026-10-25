@@ -5,7 +5,7 @@ export function AssistantContextAction({ screen }: { screen: string }) {
       type="button"
       className="btn btn-ghost assistant-context-action"
       data-tour="assistant-context"
-      aria-label="Pedir ajuda à Assistant nesta tela"
+      aria-label="Pedir ajuda ao Mestre AI nesta tela"
       onClick={() =>
         window.dispatchEvent(
           new CustomEvent('naregua:assistant-open', {

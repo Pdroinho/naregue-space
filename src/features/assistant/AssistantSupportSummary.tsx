@@ -96,7 +96,7 @@ export function AssistantSupportSummary({
                     )
                   }
                 >
-                  Assistant, me atualize
+                  Mestre AI, me atualize
                 </button>
                 <a
                   className="btn btn-ghost"

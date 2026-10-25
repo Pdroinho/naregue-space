@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { SupportNotification } from '../features/support/types'
 import { api } from '../api'
@@ -19,10 +19,12 @@ export function NotificationsModal({
   isOpen,
   onClose,
   role,
+  triggerRef,
 }: {
   isOpen: boolean
   onClose: () => void
   role?: SessionUser['role']
+  triggerRef?: RefObject<HTMLButtonElement | null>
 }) {
   const navigate = useNavigate()
   const [support, setSupport] = useState<SupportNotification[]>([])
@@ -138,11 +140,12 @@ export function NotificationsModal({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (triggerRef?.current?.contains(event.target as Node)) return
       if (ref.current && !ref.current.contains(event.target as Node)) onClose()
     }
     if (isOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, triggerRef])
 
   async function markSupport(items: SupportNotification[], all = false) {
     if (!items.length && !all) return true

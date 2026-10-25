@@ -60,22 +60,24 @@ export function ReferralCenter() {
     <section className="referral-page" aria-labelledby="referral-title">
       {loadError ? <p role="alert">{loadError}</p> : null}
       <header className="referral-hero">
-        <div><span className="eyebrow">Indicações da plataforma</span><h1 id="referral-title">Indique o NaRégua a outro espaço.</h1><p>{data.teamDiscountsAvailable ? `Ele recebe ${data.rules.inviteeDiscountPercent}% na primeira assinatura paga. Após a confirmação, você ganha ${data.rules.referrerRewardPercent}% para renovar sua assinatura.` : 'Benefícios em atualização. Descontos e créditos de indicação ainda não são aplicados aos planos por equipe.'}</p></div>
-        <div className="referral-reward"><strong>{nextDiscount}%</strong><span>{data.teamDiscountsAvailable ? 'de desconto na próxima renovação da assinatura' : 'em créditos anteriores · uso indisponível'}</span></div>
+        <div className="referral-intro"><h1 id="referral-title">Indique o NaRégua a outra barbearia.</h1><p>{data.teamDiscountsAvailable ? `Ela recebe ${data.rules.inviteeDiscountPercent}% na primeira assinatura paga. Após a confirmação, você ganha ${data.rules.referrerRewardPercent}% para renovar sua assinatura.` : 'O programa de indicações depende da ativação dos pagamentos pela administração da plataforma.'}</p>
+          {data.teamDiscountsAvailable ? <p className="referral-current-reward"><strong>{nextDiscount}%</strong> disponível para a próxima renovação</p> : null}
+        </div>
+        <figure className="referral-visual"><img src="/naregua/craft.webp" alt="" /></figure>
       </header>
 
       <div className="referral-metrics">
         <article><span>Espaços com pagamento confirmado</span><strong>{data.metrics.paid}</strong><small>{data.metrics.total} assinaturas iniciadas pelo seu link</small></article>
         <article><span>Economia dos espaços indicados</span><strong>{money(data.metrics.customerSavingsCents)}</strong><small>somente pagamentos confirmados</small></article>
-        <article><span>{data.teamDiscountsAvailable ? 'Limite por renovação' : 'Teto do programa anterior'}</span><strong>{data.rules.renewalCapPercent}%</strong><small>{data.teamDiscountsAvailable ? 'Créditos excedentes ficam para as próximas renovações' : 'não representa desconto disponível no checkout atual'}</small></article>
+        {data.teamDiscountsAvailable ? <article><span>Limite por renovação</span><strong>{data.rules.renewalCapPercent}%</strong><small>Créditos excedentes ficam para as próximas renovações</small></article> : null}
       </div>
 
       {data.debtRecoveryPercent ? <p role="status">{data.debtRecoveryPercent}% dos créditos serão usados para compensar benefícios de indicações estornadas antes de liberar novo desconto. Não há cobrança automática.</p> : null}
-      <div className="referral-link-card">
-        <div className="referral-link-copy"><Link2 size={22} /><div><h2>Seu link de indicação da plataforma</h2><p>Para convidar espaços. O link de agendamento das seus clientes fica no Início.</p></div></div>
+      {data.teamDiscountsAvailable ? <div className="referral-link-card">
+        <div className="referral-link-copy"><Link2 size={22} /><div><h2>Seu link de indicação da plataforma</h2><p>Para convidar outras barbearias. O link de agendamento dos seus clientes fica no Início.</p></div></div>
         {data.link?.active ? <div className="referral-link-field"><input value={data.link.url} readOnly onFocus={(event) => event.currentTarget.select()} aria-label="Link de indicação" /><button type="button" className="btn btnPrimary" onClick={copyLink}><Copy size={17} />Copiar link</button></div> : <button type="button" className="btn btnPrimary" onClick={createLink} disabled={busy || !data.teamDiscountsAvailable}>{busy ? 'Criando…' : data.teamDiscountsAvailable ? 'Criar meu link' : 'Programa em atualização'}</button>}
         <p className="referral-rules">{!data.teamDiscountsAvailable ? 'Links antigos não dão desconto no checkout atual. O histórico foi preservado.' : `O benefício é desconto na assinatura, não saldo em dinheiro. Não vale para autoindicação e só é liberado após o primeiro pagamento confirmado. Limite de ${data.rules.renewalCapPercent}% por renovação.`}</p>
-      </div>
+      </div> : <section className="referral-unavailable" role="status"><h2>Indicações indisponíveis no momento</h2><p>O checkout da plataforma ainda não está ativo. Assim que os pagamentos forem habilitados, você poderá criar e compartilhar seu link com os benefícios do programa.</p><p>Seus registros anteriores continuam preservados.</p></section>}
     </section>
   )
 }

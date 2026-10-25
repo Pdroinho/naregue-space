@@ -253,6 +253,9 @@ export function AssistantConversation({
   initialPrompt?: string
 }) {
   const [usage, setUsage] = useState<Usage | null>(null)
+  const [usageLoading, setUsageLoading] = useState(true)
+  const [usageError, setUsageError] = useState<string | null>(null)
+  const [usageRevision, setUsageRevision] = useState(0)
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -260,6 +263,7 @@ export function AssistantConversation({
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(
     null,
   )
+  const [lastFailedAttachment, setLastFailedAttachment] = useState<ImageAttachment | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [conversations, setConversations] = useState<SavedConversation[]>([])
   const [view, setView] = useState<'chat' | 'history'>('chat')
@@ -277,7 +281,12 @@ export function AssistantConversation({
 
   useEffect(() => {
     mountedRef.current = true
+    setUsageLoading(true)
     api<Usage>('/api/admin/assistant/usage').then((result) => {
+      if (!mountedRef.current) return
+      setUsageLoading(false)
+      if (!result.ok) { setUsageError(result.error.message); return }
+      setUsageError(null)
       if (mountedRef.current && result.ok) {
         setUsage(result.data)
         if (result.data.storageScope) {
@@ -292,7 +301,7 @@ export function AssistantConversation({
       mountedRef.current = false
       abortRef.current?.abort()
     }
-  }, [])
+  }, [usageRevision])
 
   useEffect(() => {
     const refresh = () => {
@@ -366,7 +375,7 @@ export function AssistantConversation({
     if (busy) return
     conversationIdRef.current = conversation.id
     setMessages(conversation.messages.filter(item => item && (item.role === 'user' || item.role === 'assistant') && typeof item.text === 'string'))
-    setInput(''); setAttachment(null); setError(null); setErrorCode(null); setLastFailedMessage(null); setView('chat')
+    setInput(''); setAttachment(null); setError(null); setErrorCode(null); setLastFailedMessage(null); setLastFailedAttachment(null); setView('chat')
   }
 
   function clearHistory() {
@@ -382,6 +391,7 @@ export function AssistantConversation({
     setError(null)
     setErrorCode(null)
     setLastFailedMessage(null)
+    setLastFailedAttachment(null)
     setMessages([])
     setInput('')
     setView('chat')
@@ -479,6 +489,7 @@ export function AssistantConversation({
     } catch (requestError) {
       if (!mountedRef.current || controller.signal.aborted) return
       setLastFailedMessage(clean)
+      setLastFailedAttachment(image)
       setErrorCode(
         requestError instanceof Error &&
           'code' in requestError &&
@@ -503,7 +514,7 @@ export function AssistantConversation({
     event.preventDefault()
     const message = input.trim()
     const image = attachment
-    if (!message && !image) return
+    if (busy || disabled || (message.length < 2 && !image)) return
     setInput('')
     setAttachment(null)
     void sendMessage(message, true, image)
@@ -632,7 +643,7 @@ export function AssistantConversation({
             disabled={disabled}
             placeholder={
               disabled
-                ? 'Assistant não está habilitada neste ambiente'
+                ? usageLoading ? 'Carregando Mestre AI…' : 'Mestre AI indisponível neste ambiente'
                 : variant === 'page'
                   ? 'Pergunte algo sobre seu negócio...'
                   : 'Faça uma pergunta...'
@@ -941,7 +952,7 @@ export function AssistantConversation({
               className="assistant34-close"
               data-modal-close
               onClick={onClose}
-              aria-label="Fechar Assistant"
+              aria-label="Fechar Mestre AI"
             >
               <X size={17} />
             </button>
@@ -951,15 +962,13 @@ export function AssistantConversation({
 
       {disabled ? (
         <div className="assistant34-disabled" role="status">
-          <strong>Assistant indisponível neste ambiente.</strong>
-          <span>
-            O restante da plataforma continua funcionando normalmente.
-          </span>
+          <strong>{usageLoading ? 'Carregando Mestre AI…' : usageError ? 'Não foi possível carregar o Mestre AI.' : 'O Mestre AI está desativado neste ambiente.'}</strong>
+          {usageError ? <><span>{usageError}</span><button type="button" className="btn" onClick={() => setUsageRevision(value => value + 1)}>Tentar novamente</button></> : null}
         </div>
       ) : null}
 
       <details className="assistant-chat-capabilities" data-tour="assistant-capabilities">
-        <summary>O que posso pedir à Assistant?<span aria-hidden="true">+</span></summary>
+        <summary>O que posso pedir ao Mestre AI?<span aria-hidden="true">+</span></summary>
         <div className="assistant-chat-capabilities-body">
           <p>Escolha um exemplo ou escreva o que precisa. Tudo acontece nesta conversa.</p>
           <div className="assistant-chat-examples">
@@ -1152,7 +1161,7 @@ export function AssistantConversation({
                         <button
                           type="button"
                           onClick={() =>
-                            void sendMessage(lastFailedMessage, false)
+                            void sendMessage(lastFailedMessage, false, lastFailedAttachment)
                           }
                         >
                           Tentar novamente

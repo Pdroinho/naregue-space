@@ -927,7 +927,7 @@ export function Dev() {
                       <article><span>Espaços ativos</span><strong>{platformOverview?.totals.active ?? tenants.filter((tenant) => tenant.status === 'ACTIVE').length}</strong><small>de {platformOverview?.totals.total ?? tenants.length} cadastrados</small></article>
                       <article><span>Assinaturas ativas</span><strong>{platformOverview?.activeSubscriptions ?? 0}</strong><small>acesso vigente</small></article>
                       <article><span>Pagamentos pendentes</span><strong>{platformOverview?.pendingOrders ?? 0}</strong><small>aguardando confirmação</small></article>
-                      <article><span>Assistant · 30 dias</span><strong>{platformOverview?.ai30d.requests ?? 0}</strong><small>{platformOverview?.ai30d.tokens?.toLocaleString('pt-BR') ?? 0} tokens</small></article>
+                      <article><span>Mestre AI · 30 dias</span><strong>{platformOverview?.ai30d.requests ?? 0}</strong><small>{platformOverview?.ai30d.tokens?.toLocaleString('pt-BR') ?? 0} tokens</small></article>
                     </div>
 
                     <div className="card tenant-directory">

@@ -135,7 +135,7 @@ export function AssistantReminders({
       {loading ? (
         <p role="status">Carregando…</p>
       ) : !visibleRows.length ? (
-        <p className="form-help">Nenhum lembrete nesta lista. Você pode pedir à Assistant ou criar um aqui.</p>
+        <p className="form-help">Nenhum lembrete nesta lista. Você pode pedir ao Mestre AI ou criar um aqui.</p>
       ) : (
         <div className="assistant-reminder-list">
           {visibleRows.map((r) => (

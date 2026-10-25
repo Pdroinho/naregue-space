@@ -211,9 +211,9 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
           sidebar={
             <div className="ld-nav-group">
               <div className="ld-nav-section">Principal</div>
-              <SidebarItem active icon={<LayoutDashboard size={18}/>} label="Início" onClick={() => {}} />
-              <SidebarItem icon={<Calendar size={18}/>} label="Agenda" onClick={() => {}} />
-              <SidebarItem icon={<Users size={18}/>} label="Clientes" onClick={() => {}} />
+              <SidebarItem disabled active icon={<LayoutDashboard size={18}/>} label="Início" />
+              <SidebarItem disabled icon={<Calendar size={18}/>} label="Agenda" />
+              <SidebarItem disabled icon={<Users size={18}/>} label="Clientes" />
             </div>
           }
         >
@@ -358,10 +358,10 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
                   }
                   loadStats()
                 }} /> : null}
-                {tab !== 'assistant' ? <AssistantChatLauncher floating={false} /> : null}
               </>
           )}
         </Suspense>
+        {!subscriptionInactive && tab !== 'assistant' ? <AssistantChatLauncher floating={false} /> : null}
     </Shell>
   )
 }

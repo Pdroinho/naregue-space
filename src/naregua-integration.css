@@ -41,3 +41,85 @@ body { font-family: var(--font-ui); }
 
 /* Secondary dashboard copy remains readable on the fixed cream surface. */
 .ld-mobile-dashboard-intro p,.ld-mobile-dashboard-intro>div>span { color:var(--ink-body); }
+
+/* One neutral/semantic contract for both generations of product components. */
+:root {
+  --ld-color-canvas:var(--surface-canvas);
+  --ld-color-canvas-warm:var(--surface-canvas);
+  --ld-color-panel:var(--surface-panel);
+  --ld-color-paper:var(--surface-panel);
+  --ld-color-raised:var(--surface-raised);
+  --ld-color-soft:var(--surface-soft);
+  --ld-color-soft-warm:var(--surface-soft);
+  --ld-color-muted:var(--surface-muted);
+  --ld-color-line-soft:var(--line-soft);
+  --ld-color-line-strong:var(--line-strong);
+  --ld-color-ink-strong:var(--ink-strong);
+  --ld-color-ink-body:var(--ink-body);
+  --ld-color-ink-soft:var(--ink-soft);
+  --ld-color-ink-faint:var(--ink-body);
+  --ld-color-muted-foreground:var(--ink-body);
+  --ld-color-border:var(--line-soft);
+  --ld-color-accent:var(--brand-action);
+  --ld-color-accent-hover:var(--brand-action-hover);
+  --ld-color-accent-deep:var(--brand-accent-strong);
+  --ld-color-accent-soft:var(--brand-soft);
+  --ld-color-accent-soft-strong:var(--brand-soft-strong);
+  --ld-color-on-accent:var(--primary-fg);
+  --ld-color-success:var(--success-strong);
+  --ld-color-success-soft:var(--success-soft);
+  --ld-color-danger:var(--danger-strong);
+  --ld-color-danger-soft:var(--danger-soft);
+  --ld-color-warning:var(--warning-strong);
+  --ld-color-warning-soft:var(--warning-soft);
+  --ld-color-info:var(--status-info-ink);
+  --ld-color-info-soft:var(--status-info-bg);
+}
+.authRefTitle { color:var(--ink-strong); }
+.authRefSubtitle,.authRefLabel,.authRefCheckbox span,.authRefLegal,.authRefFooter { color:var(--ink-body); }
+.authRefInput { background:var(--surface-raised);color:var(--ink-strong);border-color:var(--line-strong);caret-color:var(--ink-strong); }
+.authRefInput::placeholder { color:var(--ink-body);opacity:1; }
+.authRefInput:is(:autofill,:-webkit-autofill) {
+  -webkit-text-fill-color:var(--ink-strong);
+  box-shadow:0 0 0 1000px var(--surface-raised) inset;
+  caret-color:var(--ink-strong);
+}
+.authRefPrimary { background:var(--brand-action);color:var(--primary-fg);box-shadow:none; }
+.authRefPrimary:hover:not(:disabled) { background:var(--brand-action-hover-bg);box-shadow:none; }
+.authRefPasswordToggle,.authRefForgot,.auth-recovery-link,.authRefSecondaryAction,.authRefLegal a,.authRefSupport a { color:var(--brand-accent-on-light); }
+:root[data-theme='dark'] .authRef :is(a,.authRefForgot,.auth-recovery-link,.authRefSecondaryAction,.authRefPasswordToggle),
+:root[data-mode='dev'][data-dev-theme='dark'] .authRef :is(a,.authRefForgot,.auth-recovery-link,.authRefSecondaryAction,.authRefPasswordToggle) { color:var(--brand-accent-on-dark); }
+.authRefCheckbox input { background:var(--surface-raised);border-color:var(--line-strong); }
+.authRefError { color:var(--danger-strong);background:var(--danger-soft);border-color:var(--danger-border); }
+
+/* Keep the chat composer inside the viewport, including credit history. */
+.nr-assistant-workspace-layout {
+  display:flex;flex-direction:column;gap:12px;height:calc(100dvh - 150px);
+  min-height:360px;max-width:1200px;margin-inline:auto;min-width:0;
+}
+.nr-assistant-workspace-layout>.assistant-credit-area { flex:0 0 auto;max-height:180px;overflow:auto; }
+.nr-assistant-workspace-layout>.assistant34-page { flex:1;min-height:0;width:100%;margin:0; }
+.nr-assistant-workspace-layout .assistant34--page { height:100%;min-height:0;grid-template-rows:auto auto minmax(0,1fr); }
+.nr-assistant-workspace-layout .assistant34--page:has(>.assistant34-disabled) { grid-template-rows:auto auto auto minmax(0,1fr); }
+.assistant34-send { background:var(--brand-action);color:var(--primary-fg); }
+.assistant34-send:hover:not(:disabled) { background:var(--brand-action-hover-bg); }
+.assistant34-send:disabled { opacity:.55; }
+.assistant34-composer textarea::placeholder { color:var(--ink-body); }
+.referral-page .referral-hero { grid-template-columns:minmax(0,1.3fr) minmax(240px,1fr);padding:0;gap:0;background:var(--surface-raised); }
+.referral-intro { padding:clamp(24px,3vw,40px); }
+.referral-page .referral-hero h1 { font-size:clamp(1.8rem,3.2vw,2.8rem);letter-spacing:-.035em; }
+.referral-page .referral-hero p { color:var(--ink-body); }
+.referral-visual { height:100%;min-height:240px;margin:0;overflow:hidden; }
+.referral-visual img { width:100%;height:100%;object-fit:cover;display:block; }
+.referral-current-reward strong { color:var(--brand-accent-strong);font-size:1.4rem; }
+.referral-page .referral-metrics { grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+.referral-unavailable { padding:24px;border:1px solid var(--line-soft);border-radius:16px;background:var(--surface-raised); }
+.referral-unavailable h2 { margin:0 0 10px;font-size:1.1rem;color:var(--ink-strong); }
+.referral-unavailable p { margin:8px 0;color:var(--ink-body);line-height:1.6;max-width:75ch; }
+@media(max-width:650px) { .referral-page .referral-hero { grid-template-columns:1fr; }.referral-visual { min-height:0;height:180px; } }
+@media(min-width:901px) { .ld-topbar .ld-mobile-menu-button { display:inline-grid; } }
+@media(max-width:768px) {
+  .ld-shell.has-mobile-tabbar .nr-assistant-workspace-layout { height:calc(100dvh - 190px); }
+  .ld-shell.has-mobile-tabbar .nr-assistant-workspace-layout .assistant34--page { height:100%;min-height:0;grid-template-rows:auto auto minmax(0,1fr); }
+  .ld-shell.has-mobile-tabbar .nr-assistant-workspace-layout .assistant34-page { width:100%;margin:0; }
+}

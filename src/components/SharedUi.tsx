@@ -62,7 +62,8 @@ export function SidebarItem(props: {
   active?: boolean
   icon: ReactNode
   label: string
-  onClick: () => void
+  onClick?: () => void
+  disabled?: boolean
 }) {
   const icon = isValidElement(props.icon)
     ? cloneElement(
@@ -75,6 +76,7 @@ export function SidebarItem(props: {
       type="button"
       className={`ld-nav-item ${props.active ? 'is-active' : ''}`}
       onClick={props.onClick}
+      disabled={props.disabled}
       aria-current={props.active ? 'page' : undefined}
       aria-label={props.label}
       title={props.label}

@@ -129,7 +129,7 @@ export function AdminFinance() {
                         <Download size={16} /> Extrato
                     </button>
                     <button type="button" className="finance36-btn is-assistant" onClick={() => askAssistant('Analise meu financeiro deste mês. Compare com o mês anterior, destaque o que merece atenção e me dê no máximo 3 próximos passos práticos.')}>
-                        <Sparkles size={16} /> Analisar com Assistant
+                        <Sparkles size={16} /> Analisar com Mestre AI
                     </button>
                 </div>
             </section>
@@ -193,7 +193,7 @@ export function AdminFinance() {
                         <div><span>Agendamentos confirmados</span><strong>{current.confirmedAppointments}</strong></div>
                     </div>
                     <button type="button" className="finance36-assistant-card" onClick={() => askAssistant('Explique de forma simples a composição do meu financeiro deste mês: serviços confirmados, entradas manuais, despesas e saldo. Aponte qualquer sinal fora do normal.') }>
-                        <span><Sparkles size={16} /> Perguntar à Assistant sobre estes números</span>
+                        <span><Sparkles size={16} /> Perguntar ao Mestre AI sobre estes números</span>
                         <ArrowRight size={15} />
                     </button>
                     <p className="finance36-definition">Saldo não é lucro contábil: ele representa as entradas e saídas que estão registradas no NaRégua.</p>

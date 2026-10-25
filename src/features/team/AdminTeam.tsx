@@ -126,7 +126,7 @@ export function AdminTeam({
         <div>
           <span className="team-eyebrow">EQUIPE DO ESTÚDIO</span>
           <h2 className="ld-ds-page-title" id="team-title">
-            Cado profissional, uma agenda organizada.
+            Cada profissional, uma agenda organizada.
           </h2>
           <p>
             Escolha quem atende, quais serviços realiza e quando está

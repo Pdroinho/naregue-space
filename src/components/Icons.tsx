@@ -37,9 +37,12 @@ function createIcon(file: string) {
   ) {
     const dimension = typeof size === 'number' ? `${size}px` : size
     const iconStyle: CSSProperties = {
+      display: 'inline-block',
+      flexShrink: 0,
+      verticalAlign: 'middle',
       width: dimension,
       height: dimension,
-      color: color ?? undefined,
+      color: color ?? 'inherit',
       backgroundColor: 'currentColor',
       WebkitMaskImage: `url(${ICON_ROOT}${file})`,
       maskImage: `url(${ICON_ROOT}${file})`,

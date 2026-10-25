@@ -32,7 +32,9 @@ export function Shell(props: {
   const sidebarRef = useRef<HTMLElement>(null)
   const mobileToggleRef = useRef<HTMLButtonElement>(null)
   const [showNotifications, setShowNotifications] = useState(false)
+  const notificationsToggleRef = useRef<HTMLButtonElement>(null)
   const [showTour, setShowTour] = useState(false)
+  const [compactNavigation, setCompactNavigation] = useState(() => window.matchMedia('(max-width: 900px)').matches)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.localStorage.getItem('naregua:sidebar-collapsed') === 'true'
@@ -97,6 +99,13 @@ export function Shell(props: {
     window.localStorage.setItem('naregua:sidebar-collapsed', String(sidebarCollapsed))
   }, [sidebarCollapsed])
 
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 900px)')
+    const sync = () => { setCompactNavigation(media.matches); if (!media.matches) setMobileOpen(false) }
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
   return (
     <div className={`ld-shell ${sidebarCollapsed ? 'is-sidebar-collapsed' : ''} ${props.mobileNav?.length ? 'has-mobile-tabbar' : ''}`}>
       <aside ref={sidebarRef} className={`ld-sidebar ${mobileOpen ? 'is-open' : ''}`} data-tour="sidebar" aria-label="Navegação principal" onClick={(event) => { if ((event.target as HTMLElement).closest('.ld-nav-item')) setMobileOpen(false) }}>
@@ -152,9 +161,9 @@ export function Shell(props: {
               type="button"
               ref={mobileToggleRef}
               className="icon-btn ld-mobile-menu-button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Abrir menu lateral"
-              aria-expanded={mobileOpen}
+              onClick={() => compactNavigation ? setMobileOpen(true) : setSidebarCollapsed(value => !value)}
+              aria-label={compactNavigation ? 'Abrir menu lateral' : sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+              aria-expanded={compactNavigation ? mobileOpen : !sidebarCollapsed}
             >
               <Menu size={20} />
             </button>
@@ -208,12 +217,12 @@ export function Shell(props: {
               </div>
             ) : null}
 
-            <button type="button" className="icon-btn" data-tour="notifications" style={{position: 'relative', border: 'none', background: 'transparent'}} onClick={() => setShowNotifications(!showNotifications)} aria-label={supportUnread ? `Abrir notificações, ${supportUnread} de suporte não lidas` : 'Abrir notificações'} aria-expanded={showNotifications}>
+            <button ref={notificationsToggleRef} type="button" className="icon-btn" data-tour="notifications" style={{position: 'relative', border: 'none', background: 'transparent'}} onClick={() => setShowNotifications(value => !value)} aria-label={supportUnread ? `Abrir notificações, ${supportUnread} de suporte não lidas` : 'Abrir notificações'} aria-expanded={showNotifications}>
               <Bell size={20} />
               {supportUnread > 0 ? <span className="support-notification-count" aria-hidden="true">{supportUnread > 99 ? '99+' : supportUnread}</span> : null}
             </button>
 
-            <NotificationsModal isOpen={showNotifications} onClose={() => setShowNotifications(false)} role={props.user?.role} />
+            <NotificationsModal isOpen={showNotifications} onClose={() => setShowNotifications(false)} triggerRef={notificationsToggleRef} role={props.user?.role} />
 
             <div className="ld-topbar-divider" aria-hidden="true" />
 

@@ -144,7 +144,7 @@ export function ClientPortal(props: { tenant?: TenantPublic; tenantSlug?: string
             sidebar={
                 <div className="ld-nav-group">
                     <SidebarItem icon={<Calendar size={18}/>} label="Agendar Novo" onClick={() => nav(withBasePath(basePath, '/agendar'))} />
-                    <SidebarItem active icon={<ClipboardList size={18}/>} label="Meus Agendamentos" onClick={() => {}} />
+                    <SidebarItem active icon={<ClipboardList size={18}/>} label="Meus Agendamentos" onClick={() => document.getElementById('client-appointments-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
                     <div className="navDivider" />
                     <SidebarItem icon={<LogOut size={18}/>} label="Sair" onClick={async () => {
                         await api('/api/auth/logout', {method: 'POST'})
@@ -155,7 +155,7 @@ export function ClientPortal(props: { tenant?: TenantPublic; tenantSlug?: string
         >
             <div className="column" style={{gap: '1.5rem'}}>
             <div className="card">
-                <div className="cardHeader"><h2 className="cardTitle">Meus Agendamentos</h2></div>
+                <div className="cardHeader"><h2 id="client-appointments-heading" className="cardTitle">Meus Agendamentos</h2></div>
 
                 {appointmentsLoading ? <div className="cardBody" role="status">Carregando seus agendamentos…</div> : appointmentsError ? <div className="cardBody"><p role="alert">{appointmentsError}</p><button type="button" className="btn btnPrimary" onClick={() => setAppointmentsReload(value => value+1)}>Tentar novamente</button></div> : <>
                 {/* Desktop Table View */}

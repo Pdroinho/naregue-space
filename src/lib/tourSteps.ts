@@ -72,7 +72,7 @@ export const shellTourSteps = (area: 'admin' | 'dev' | 'client', screen: string)
       description: 'Use as abas para personalizar seu espaço, cuidar da segurança, configurar seu endereço e consultar planos e pagamentos. As alterações digitadas ficam preservadas enquanto você troca de aba.',
     })
   }
-  if(area === 'admin') filtered.push({selector:'[data-tour="assistant-context"]',title:'Assistant junto da sua rotina',description:'Peça ajuda sobre a tela em que você está. Alterações em agenda, financeiro e suporte ficam prontas para você revisar e confirmar.'})
+  if(area === 'admin') filtered.push({selector:'[data-tour="assistant-context"]',title:'Mestre AI junto da sua rotina',description:'Peça ajuda sobre a tela em que você está. Alterações em agenda, financeiro e suporte ficam prontas para você revisar e confirmar.'})
   if(area==='admin' && screen==='assistant') filtered.push({selector:'[data-tour="assistant-capabilities"]',title:'Tudo em uma conversa',description:'Peça para consultar a agenda, registrar quem veio, organizar o financeiro, acompanhar chamados, agendar lembretes ou personalizar o Mestre AI. Os exemplos ajudam você a começar; as alterações precisam da sua confirmação.'})
   if(area==='admin' && screen==='billing') filtered.push({selector:'[data-tour="billing-summary"]',title:'Confira antes de contratar',description:'Veja o valor final, a validade e os descontos aplicados. Se sua assinatura já estiver ativa, a tela mostra a próxima ação disponível.'})
   return filtered
