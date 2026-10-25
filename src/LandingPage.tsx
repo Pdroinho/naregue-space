@@ -11,6 +11,7 @@ import {
 import { LandingCheckout } from './components/LandingCheckout'
 import { currencyBRLFromCents } from './commercial'
 import './landing.css'
+import './naregua-landing.css'
 
 const productViews = [
   {
@@ -167,7 +168,7 @@ export function LandingPage() {
         <div className="nr-sales-hero-noise" aria-hidden="true" />
         <div className="nr-sales-container nr-sales-hero-copy nr-sales-reveal is-visible">
           <span className="nr-sales-kicker">Da cadeira ao caixa, tudo conversa</span>
-          <h1>Mais cadeira ocupada.<br /><em>Menos rotina no improviso.</em></h1>
+          <h1>Mais cadeira ocupada.<br />{' '}<em>Menos rotina no improviso.</em></h1>
           <p>Agenda online, clientes, WhatsApp e caixa trabalham no mesmo ritmo — para você atender bem sem carregar a barbearia inteira na cabeça.</p>
           <div className="nr-sales-hero-actions">
             <Cta className="nr-sales-button nr-sales-button-primary nr-sales-button-xl" location="hero" onClick={() => buy('TEAM_3')}>Começar com minha barbearia <ArrowRight size={18} /></Cta>
@@ -294,8 +295,8 @@ export function LandingPage() {
         <div className="nr-sales-container nr-sales-pricing-layout">
           <div className="nr-sales-pricing-copy nr-sales-reveal">
             <span className="nr-sales-kicker">Planos</span>
-            <h2>O NaRégua completo.<br /><em>Você escolhe o fôlego.</em></h2>
-            <p>O produto não muda de um ciclo para outro. Você escolhe a frequência da cobrança e quanto quer economizar.</p>
+            <h2>O NaRégua completo.<br /><em>Para o tamanho da sua equipe.</em></h2>
+            <p>Escolha a faixa de profissionais da sua barbearia. Todos os planos têm os mesmos recursos, com renovação mensal.</p>
             <div className="nr-sales-pricing-includes"><span><i aria-hidden="true" /> Agenda + link online</span><span><i aria-hidden="true" /> WhatsApp Center</span><span><i aria-hidden="true" /> Caixa</span><span><i aria-hidden="true" /> Mestre AI</span></div>
           </div>
           <div className="nr-sales-plan-grid nr-sales-reveal">
