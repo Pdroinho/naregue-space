@@ -36,3 +36,7 @@ Depois da publicação, health/readiness e estado saudável do container foram c
 ### Contraste do botão Mestre AI
 
 Após nova captura do usuário, o botão do cabeçalho ganhou estilo próprio: fundo creme, texto petróleo, borda cobre e marca de 24px. As classes genéricas de botão transparente foram removidas desse controle, pois suas regras com `!important` anulavam o fundo necessário para a marca. O contraste de texto medido foi 17,97:1 nos dois temas, com o fundo claro confirmado e as 24 verificações de interação novamente aprovadas. Hover e foco usam a mesma paleta; a revisão visual restrita ao controle foi aprovada. Imagem atual publicada: `naregua:3.0-ui-c360689`, diretório `/opt/lashdesigner/releases/3.0-ui-c360689`.
+
+### Estados de autenticação
+
+A captura posterior mostrou o título de sucesso do login com uma cor fixa escura. O commit `ebbcebd` substitui as cores fixas de título, redirecionamento e indicador pelos tokens de texto e sucesso do tema. Também ajusta o aviso de recuperação e remove o título auxiliar redundante da verificação. A validação cobre recuperação, erro de entrega, verificação e sucesso em claro/escuro nas larguras 320, 390 e 1440; nove cenários passaram. No sucesso escuro, os contrastes medidos foram 13,24:1 no título e 10,21:1 no texto de redirecionamento. Revisão visual restrita ao estado de sucesso aprovada. Imagem publicada e saudável: `naregua:3.0-ui-ebbcebd`.
