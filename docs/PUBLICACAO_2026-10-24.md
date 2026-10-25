@@ -1,6 +1,6 @@
 # Publicação NaRégua 3.0 — 24/10/2026
 
-Publicação autorizada pelo usuário e concluída em `oracle_tunado`, servidor `servidor-a1-free`. Código da aplicação: commit `fbe91f8`, versão `3.0.0`, imagem `naregua:3.0-fbe91f8` construída na própria VPS ARM64.
+Publicação autorizada pelo usuário e concluída em `oracle_tunado`, servidor `servidor-a1-free`. Código inicial: commit `fbe91f8`, versão `3.0.0`. A imagem atual é `naregua:3.0-5f4c03e`, construída na própria VPS ARM64 com a correção da landing descrita abaixo.
 
 ## Estado publicado
 
@@ -35,3 +35,11 @@ Chromium abriu a aplicação publicada por HTTPS e validou a landing, acesso por
 O painel recusou acesso anônimo com HTTP 401, como esperado, e seu botão abriu o login correto. O conteúdo autenticado do painel não foi inspecionado sem as credenciais do usuário. Capturas locais: `.validation/production-home-desktop.png`, `.validation/production-booking-mobile.png` e `.validation/production-login-mobile.png`.
 
 Ainda pendentes: homologação financeira live do AbacatePay, integrações externas autenticadas e backup remoto recorrente. Esses pontos não foram tratados como aprovados pelo deploy ou pelo teste público de navegador.
+
+## Correção da landing publicada em 25/10/2026
+
+A conferência visual encontrou o componente original `nr-sales-*` sem sua folha de estilos correspondente. O CSS original foi restaurado em `src/naregua-landing.css`, mantendo o CSS do checkout novo. A descrição de planos foi ajustada às faixas de equipe com renovação mensal e o título ganhou separação correta entre frases no mobile.
+
+O commit `5f4c03e` está em produção, com container saudável e banco pronto. A revisão independente deu **ship para essa correção restrita**, inclusive a separação do título mobile. A verificação adicional passou em quatro larguras (320, 390, 768 e 1440 pixels), cobrindo dimensões do logo, cabeçalho, ausência de overflow, três planos e checkout desativado. As capturas públicas atualizadas são `.validation/production-home-desktop-fixed.png` e `.validation/production-home-mobile-fixed.png`.
+
+A imagem anterior desta versão 3.0 foi mantida como `naregua:3.0-before-landing-fix`; a correção não alterou o banco. O rollback completo para 2.2.2 continua exigindo o snapshot anterior à migração.
