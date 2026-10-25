@@ -43,3 +43,11 @@ A conferência visual encontrou o componente original `nr-sales-*` sem sua folha
 O commit `5f4c03e` está em produção, com container saudável e banco pronto. A revisão independente deu **ship para essa correção restrita**, inclusive a separação do título mobile. A verificação adicional passou em quatro larguras (320, 390, 768 e 1440 pixels), cobrindo dimensões do logo, cabeçalho, ausência de overflow, três planos e checkout desativado. As capturas públicas atualizadas são `.validation/production-home-desktop-fixed.png` e `.validation/production-home-mobile-fixed.png`.
 
 A imagem anterior desta versão 3.0 foi mantida como `naregua:3.0-before-landing-fix`; a correção não alterou o banco. O rollback completo para 2.2.2 continua exigindo o snapshot anterior à migração.
+
+## Recuperação do operador publicada em 25/10/2026
+
+O login foi bloqueado pelo WhatsApp global desconectado, embora a URL e a chave da Evolution estivessem corretas. O commit `2f1d557`, imagem `naregua:3.0-auth-recovery`, mantém a senha e o MFA, preserva a tela do desafio quando o envio falha e oferece recuperação DEV somente pelo console da VPS. O procedimento está em [RECUPERACAO_OPERADOR.md](RECUPERACAO_OPERADOR.md).
+
+O comando administrativo gera um código de uso único por cinco minutos, vinculado ao desafio recente de senha e ao navegador. Não existe endpoint público emissor nem liberação automática por indisponibilidade do provedor. A emissão deixa trilha de segurança sem armazenar o código em texto aberto.
+
+Validação: 265 testes principais aprovados, incluindo sessão ausente após falha de entrega, recuperação ligada ao cookie, proteção do host DEV, consumo único, expiração, telefone alterado e restrição de papel. Lint, tipos e build passaram. O fluxo de recuperação também passou em 320, 390 e 1440 pixels; a revisão visual foi aprovada nesse escopo. Container publicado saudável e readiness confirmada. O pareamento físico do WhatsApp ainda exige que o operador escaneie o QR.
