@@ -56,6 +56,16 @@
   outline-offset: 2px;
 }
 
+/* Authentication outcomes use the same theme contract as the form. */
+.authRefSuccessTitle { color:var(--ink-strong); }
+.authRefSuccessSub { color:var(--ink-body); }
+.authRef .form-help { color:var(--ink-body) !important; }
+.authRefSuccessIcon {
+  background:var(--success-soft);
+  color:var(--success-strong);
+  box-shadow:none;
+}
+
 .authSecurityPanel{display:grid;gap:1rem;width:min(100%,28rem)}
 .authEnrollmentKey{display:grid;gap:.45rem;padding:.9rem 1rem;border:1px solid var(--border);border-radius:28px;background:var(--bg-subtle)}
 .authEnrollmentKey span{font-size:.78rem;font-weight:700;color:var(--text-muted)}

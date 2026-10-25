@@ -224,7 +224,6 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
               </div>
             ) : authStep !== 'PASSWORD' ? (
               <div className="authSecurityPanel">
-                <span className="eyebrow">Verificação em duas etapas</span>
                 <h1 className="authRefTitle">{authStep === 'PHONE_SETUP' ? 'Cadastre seu WhatsApp' : 'Digite o código recebido'}</h1>
                 <p className="authRefSubtitle">
                   {authStep === 'PHONE_SETUP'
