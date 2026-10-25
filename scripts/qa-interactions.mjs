@@ -21,6 +21,8 @@ export async function runInteractionChecks(q){
   await page.getByRole('button',{name:/Abrir notificações/}).click();await page.getByRole('dialog',{name:'Notificações',exact:true}).waitFor()
   await page.getByRole('button',{name:/Abrir notificações/}).click();assert.equal(await page.getByRole('dialog',{name:'Notificações',exact:true}).count(),0)
   pass(`${theme} desktop menu changes sidebar width; notifications open and close`)
+  await assertReadable(['.assistant-context-action'])
+  await shot(`fixed-mestre-button-${theme}-1440`)
   await page.getByRole('button',{name:'Pedir ajuda ao Mestre AI nesta tela'}).click()
   const drawer=page.getByRole('dialog',{name:'Conversa com o Mestre AI'});await drawer.waitFor()
   await iconVisible(drawer.getByRole('button',{name:'Anexar imagem'}));await iconVisible(drawer.getByRole('button',{name:'Enviar mensagem'}))
