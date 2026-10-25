@@ -257,10 +257,14 @@ export function createAuthRouter(options: AuthRouterOptions) {
       const delivered = await sendPlatformWhatsappText(
         row.phone,
         `Seu código de verificação NaRégua: ${challenge.code}. Ele expira em 5 minutos. Não compartilhe este código.`,
-      )
+      ).catch(() => false)
       if (!delivered) {
         logSecurityEvent(db, { eventType: 'WHATSAPP_MFA_DELIVERY_FAILED', userId: row.id, tenantId: row.tenantId, ...requestSecurityMetadata(req) })
-        throw badRequest('Não foi possível enviar o código pelo WhatsApp. Verifique a Evolution API Global.', 'WHATSAPP_MFA_DELIVERY_FAILED')
+        // Keep the password-verified challenge available for a server-console recovery.
+        // A delivery failure never creates a session or a trusted device.
+        res.status(202).json({ whatsappOtpRequired: true, deliveryFailed: true,
+          operatorRecoveryAvailable: row.role === 'DEV', phoneMasked: maskE164Phone(row.phone) })
+        return
       }
 
       logSecurityEvent(db, { eventType: 'WHATSAPP_MFA_OTP_SENT', userId: row.id, tenantId: row.tenantId, ...requestSecurityMetadata(req) })
@@ -294,10 +298,10 @@ export function createAuthRouter(options: AuthRouterOptions) {
       const delivered = await sendPlatformWhatsappText(
         phone,
         `Seu código de verificação NaRégua: ${refreshed.code}. Ele expira em 5 minutos. Não compartilhe este código.`,
-      )
+      ).catch(() => false)
       if (!delivered) {
         logSecurityEvent(db, { eventType: 'WHATSAPP_MFA_DELIVERY_FAILED', userId: challenge.userId, tenantId: challenge.tenantId, ...requestSecurityMetadata(req) })
-        throw badRequest('Não foi possível enviar o código pelo WhatsApp. Verifique a Evolution API Global.', 'WHATSAPP_MFA_DELIVERY_FAILED')
+        throw badRequest('O WhatsApp da plataforma está indisponível. Tente novamente após reconectar a instância global ou use a recuperação do operador pela VPS.', 'WHATSAPP_MFA_DELIVERY_FAILED')
       }
 
       logSecurityEvent(db, { eventType: 'WHATSAPP_MFA_OTP_SENT', userId: challenge.userId, tenantId: challenge.tenantId, ...requestSecurityMetadata(req), details: { resend: true } })
@@ -313,6 +317,9 @@ export function createAuthRouter(options: AuthRouterOptions) {
       if (typeof token !== 'string') throw unauthorized('Desafio de autenticação expirado.', 'AUTH_CHALLENGE_REQUIRED')
       const challenge = resolveAuthChallenge(db, token)
       if (!challenge || !challenge.phone) throw unauthorized('Desafio de autenticação expirado.', 'AUTH_CHALLENGE_INVALID')
+      if (challenge.role === 'DEV' && !isDevHost(req.hostname)) {
+        throw unauthorized('Acesso DEV somente no subdomínio dev.', 'DEV_SUBDOMAIN_ONLY')
+      }
       const body = z.object({ code: z.string().regex(/^\d{6}$/), trustDevice: z.boolean().optional().default(false) }).parse(req.body)
 
       const currentUser = db.prepare(`SELECT phone FROM users WHERE id = ? LIMIT 1`).get(challenge.userId) as { phone: string | null } | undefined

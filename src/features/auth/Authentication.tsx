@@ -26,6 +26,8 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
   const [mfaPhone, setMfaPhone] = useState('')
   const [phoneMasked, setPhoneMasked] = useState('')
   const [trustDevice, setTrustDevice] = useState(true)
+  const [otpDeliveryFailed, setOtpDeliveryFailed] = useState(false)
+  const [operatorRecoveryAvailable, setOperatorRecoveryAvailable] = useState(false)
 
   const [allowDevBootstrap, setAllowDevBootstrap] = useState(false)
   const [bootstrapEmail, setBootstrapEmail] = useState('')
@@ -97,6 +99,8 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
       whatsappOtpRequired?: boolean
       phoneEnrollmentRequired?: boolean
       phoneMasked?: string
+      deliveryFailed?: boolean
+      operatorRecoveryAvailable?: boolean
     }>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password, keepSigned }),
@@ -117,6 +121,9 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
     if (res.data.whatsappOtpRequired) {
       setOtpCode('')
       setPhoneMasked(res.data.phoneMasked ?? '')
+      setOtpDeliveryFailed(Boolean(res.data.deliveryFailed))
+      setOperatorRecoveryAvailable(Boolean(res.data.operatorRecoveryAvailable))
+      if (res.data.deliveryFailed) setError('O código não foi enviado: o WhatsApp da plataforma está indisponível.')
       setAuthStep('WHATSAPP_OTP')
       return
     }
@@ -143,6 +150,7 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
     }
     setOtpCode('')
     setPhoneMasked(res.data.phoneMasked)
+    setOtpDeliveryFailed(false)
     setAuthStep('WHATSAPP_OTP')
   }
 
@@ -221,7 +229,11 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
                 <p className="authRefSubtitle">
                   {authStep === 'PHONE_SETUP'
                     ? 'Este número será usado para confirmar novos dispositivos antes de liberar o acesso.'
-                    : `Enviamos um código de 6 dígitos pelo WhatsApp${phoneMasked ? ` para ${phoneMasked}` : ''}.`}
+                    : otpDeliveryFailed
+                      ? operatorRecoveryAvailable
+                        ? 'Reconecte o WhatsApp da plataforma ou use um código de recuperação gerado pelo acesso à VPS.'
+                        : 'O envio não foi concluído. Tente novamente após a administração reconectar o WhatsApp da plataforma.'
+                      : `Enviamos um código de 6 dígitos pelo WhatsApp${phoneMasked ? ` para ${phoneMasked}` : ''}.`}
                 </p>
 
                 <div className="authRefForm">
@@ -245,6 +257,13 @@ export function UnifiedLogin(props: { hostTenant?: TenantPublic | null; isDevHos
                   ) : null}
 
                   {error ? <div className="authRefError"><XCircle size={16} /><span>{error}</span></div> : null}
+
+                  {otpDeliveryFailed && operatorRecoveryAvailable ? <details className="authRefRecoveryHelp">
+                    <summary>Recuperar pelo acesso à VPS</summary>
+                    <p>Após validar sua senha nesta tela, execute no servidor:</p>
+                    <code style={{ display: 'block', overflowWrap: 'anywhere', fontSize: '.75rem' }}>docker exec -it naregua-app node dist/server/operatorRecoveryCli.js --dev</code>
+                    <p>Digite o código gerado no campo acima. Ele é de uso único e expira em 5 minutos. Não clique em Reenviar após gerar a recuperação.</p>
+                  </details> : null}
 
                   <button
                     type="button"
