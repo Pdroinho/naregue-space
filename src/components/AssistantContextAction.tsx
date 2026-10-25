@@ -3,7 +3,7 @@ export function AssistantContextAction({ screen }: { screen: string }) {
   return (
     <button
       type="button"
-      className="btn btn-ghost assistant-context-action"
+      className="assistant-context-action"
       data-tour="assistant-context"
       aria-label="Pedir ajuda ao Mestre AI nesta tela"
       onClick={() =>

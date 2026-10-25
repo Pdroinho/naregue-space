@@ -22,6 +22,8 @@ export async function runInteractionChecks(q){
   await page.getByRole('button',{name:/Abrir notificações/}).click();assert.equal(await page.getByRole('dialog',{name:'Notificações',exact:true}).count(),0)
   pass(`${theme} desktop menu changes sidebar width; notifications open and close`)
   await assertReadable(['.assistant-context-action'])
+  const buttonBackground=await page.locator('.assistant-context-action').evaluate(el=>window.getComputedStyle(el).backgroundColor)
+  assert.equal(buttonBackground,'rgb(255, 253, 248)','Mestre AI keeps the light background required by its full-color mark')
   await shot(`fixed-mestre-button-${theme}-1440`)
   await page.getByRole('button',{name:'Pedir ajuda ao Mestre AI nesta tela'}).click()
   const drawer=page.getByRole('dialog',{name:'Conversa com o Mestre AI'});await drawer.waitFor()

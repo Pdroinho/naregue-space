@@ -6,6 +6,8 @@ body { font-family: var(--font-ui); }
 .assistant-brand-mark img { object-fit: contain; }
 /* The full-color Mestre AI mark needs a light ground in both themes. */
 .ld-topbar .assistant-context-action {
+  display:inline-flex;align-items:center;justify-content:center;
+  font:750 .86rem/1.2 var(--font-ui);cursor:pointer;
   min-height:44px;padding:9px 14px;gap:9px;border-radius:12px;
   background:var(--cream-50);color:var(--petrol-900);
   border:1px solid var(--copper-600);box-shadow:none;
