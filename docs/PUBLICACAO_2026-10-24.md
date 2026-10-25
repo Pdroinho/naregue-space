@@ -51,3 +51,7 @@ O login foi bloqueado pelo WhatsApp global desconectado, embora a URL e a chave 
 O comando administrativo gera um código de uso único por cinco minutos, vinculado ao desafio recente de senha e ao navegador. Não existe endpoint público emissor nem liberação automática por indisponibilidade do provedor. A emissão deixa trilha de segurança sem armazenar o código em texto aberto.
 
 Validação: 265 testes principais aprovados, incluindo sessão ausente após falha de entrega, recuperação ligada ao cookie, proteção do host DEV, consumo único, expiração, telefone alterado e restrição de papel. Lint, tipos e build passaram. O fluxo de recuperação também passou em 320, 390 e 1440 pixels; a revisão visual foi aprovada nesse escopo. Container publicado saudável e readiness confirmada. O pareamento físico do WhatsApp ainda exige que o operador escaneie o QR.
+
+## Correção das falhas de interface apontadas pelo usuário
+
+A imagem atual passou a ser `naregua:3.0-ui-54788c9`, com fonte em `/opt/lashdesigner/releases/3.0-ui-54788c9`. O relatório [CORRECOES_UI_2026-10-25.md](CORRECOES_UI_2026-10-25.md) descreve os problemas, correções, 338 testes de código e 137 verificações de interface desta rodada. As correções de recuperação DEV e da landing permanecem incluídas.
