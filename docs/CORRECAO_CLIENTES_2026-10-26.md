@@ -19,7 +19,7 @@ Comparados PRODUCT.md, DESIGN.md, diff corrente, captura original e capturas loc
 
 Os logs `.validation/clients-check.log` e `.validation/clients-firefox.log` registram 14/14 verificacoes aprovadas em cada navegador, com fixtures locais e sem chamadas a provedores externos. Cobrem busca sem resultados, limpeza, erro de API e recuperacao por nova tentativa; nao foram observados erros de navegador nas execucoes registradas. `.validation/clients-build.log` registra build aprovado.
 
-Revisor independente: disposition ship para os defeitos apontados e alteracoes desta tela, com capturas estabilizadas apos fontes e animacoes. Regressao de interacoes: 24/24 aprovada. Tipos e lint aprovados. Publicacao em producao pendente no commit funcional.
+Revisor independente: disposition ship para os defeitos apontados e alteracoes desta tela, com capturas estabilizadas apos fontes e animacoes. Regressao de interacoes: 24/24 aprovada. Tipos e lint aprovados. Publicado na imagem naregua:3.0-ui-e55ee53 apos backup criptografado. Container healthy, zero reinicios, /api/ready publico com database ready. Login publico abriu no navegador apos a troca. O painel autenticado foi validado localmente com fixtures; nao houve alteracao de clientes reais.
 
 ## Sistema de design e limites
 
