@@ -37,7 +37,7 @@
 .ld-agenda-tab:hover { color: var(--ink-strong); }
 .ld-agenda-tab.is-active {
   background: var(--surface-raised);
-  color: var(--brand-action);
+  color: var(--brand-accent-strong);
   box-shadow: 0 2px 8px rgba(42,28,36,.06);
 }
 .ld-agenda-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }

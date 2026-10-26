@@ -68,8 +68,8 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
       <div style={{width: '100%', height: 0}} />
       <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
         <div style={{display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap'}}>
-          <div style={{position: 'relative'}}>
-            <button type="button" className="btn" style={{paddingLeft: 8, paddingRight: 12, gap: 8, background: 'var(--bg-card)'}}>
+          <div className="color-picker-native" style={{position: 'relative'}}>
+            <span className="btn" aria-hidden="true" style={{paddingLeft: 8, paddingRight: 12, gap: 8, background: 'var(--bg-card)'}}>
               <div style={{
                 width: 24,
                 height: 24,
@@ -79,7 +79,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
                 boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.2)'
               }} />
               <span style={{color: 'var(--text-main)'}}>Outra cor</span>
-            </button>
+            </span>
             <input
               aria-label="Escolher cor"
               type="color"
@@ -97,6 +97,8 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
           <div style={{width: 100}}>
             <input
               className="input"
+              aria-label="Cor principal em hexadecimal"
+              aria-invalid={Boolean(error)}
               value={text}
               style={{height: 40, padding: '0 12px', fontSize: '0.9rem', width: '100%'}}
               onChange={(e) => {

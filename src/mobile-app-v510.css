@@ -122,10 +122,10 @@
     transition: background-color .16s ease, color .16s ease, transform .16s ease;
   }
 
-  .ld-mobile-tabbar-item.is-active { color: var(--brand-action); }
+  .ld-mobile-tabbar-item.is-active { color: var(--brand-accent-strong); }
   .ld-mobile-tabbar-item.is-active .ld-mobile-tabbar-icon {
     background: var(--brand-soft);
-    color: var(--brand-action);
+    color: var(--brand-accent-strong);
   }
   .ld-mobile-tabbar-item:active .ld-mobile-tabbar-icon { transform: scale(.94); }
   .ld-mobile-tabbar-item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
@@ -229,7 +229,7 @@
     min-width: 34px;
     border-radius: 11px;
     background: var(--brand-soft);
-    color: var(--brand-action);
+    color: var(--brand-accent-strong);
   }
   .ld-dashboard-page .stat-icon svg { width: 18px; height: 18px; }
   .ld-dashboard-page .stat-info { min-width: 0; }
@@ -327,7 +327,7 @@
     font-size: .72rem;
   }
   .ld-agenda-tab.is-active {
-    color: var(--brand-action);
+    color: var(--brand-accent-strong);
     box-shadow: 0 3px 10px rgba(39,29,34,.055);
   }
 
@@ -547,7 +547,7 @@
   padding-inline: 9px;
   border-radius: 999px;
   background: var(--brand-soft);
-  color: var(--brand-action);
+  color: var(--brand-accent-strong);
   font: 800 .68rem/1 var(--font-ui);
 }
 
@@ -679,7 +679,7 @@
     font: 750 .57rem/1 var(--font-ui);
   }
   .service-mobile-meta span { background: var(--surface-soft); color: var(--ink-soft); }
-  .service-mobile-meta b { background: var(--brand-soft); color: var(--brand-action); }
+  .service-mobile-meta b { background: var(--brand-soft); color: var(--brand-accent-strong); }
   .service-mobile-edit { border-radius: 13px !important; }
   .service-editor-dialog {
     position: fixed;

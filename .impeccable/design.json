@@ -135,7 +135,7 @@
       "refersTo": "navigation",
       "description": "Active Navigation extracted from the incumbent shared system.",
       "html": "<nav aria-label=\"Principal\"><button class=\"ds-nav\" aria-current=\"page\">Agenda</button></nav>",
-      "css": ".ds-nav{min-height:44px;padding:9px 11px;border:1px solid color-mix(in srgb,var(--brand-action) 20%,var(--line-soft));border-radius:12px;background:var(--brand-soft);color:var(--brand-action);box-shadow:inset 3px 0 0 color-mix(in srgb,var(--brand-action) 86%,transparent);font:610 .88rem var(--font-ui);cursor:pointer}.ds-nav:hover{background:color-mix(in srgb,var(--surface-soft) 80%,transparent);color:var(--ink-strong)}.ds-nav:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
+      "css": ".ds-nav{min-height:44px;padding:9px 11px;border:1px solid color-mix(in srgb,var(--brand-action) 20%,var(--line-soft));border-radius:12px;background:var(--brand-soft);color:var(--brand-accent-strong);box-shadow:inset 3px 0 0 color-mix(in srgb,var(--brand-action) 86%,transparent);font:610 .88rem var(--font-ui);cursor:pointer}.ds-nav:hover{background:color-mix(in srgb,var(--surface-soft) 80%,transparent);color:var(--ink-strong)}.ds-nav:focus-visible{outline:none;box-shadow:var(--focus-ring)}"
     }
   ],
   "narrative": {

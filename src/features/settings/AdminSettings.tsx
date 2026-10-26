@@ -489,7 +489,7 @@ export function AdminSettings({ tenant, onUpdate }: { tenant: TenantPublic | nul
                                         {logoAdvice && <p className="form-help" role="status">Sugestão do Mestre AI: {logoAdvice} Confira a prévia antes de salvar.</p>}
                                         {logoError && <p className="form-error" role="alert">{logoError}</p>}
                                     </div>
-                                    <input type="file" ref={logoInputRef} disabled={logoBusy || saving} className="visually-hidden" accept="image/png,image/jpeg,image/webp" onChange={e => { const f = e.target.files?.[0]; if(f) void handleLogoFile(f); e.currentTarget.value = '' }} />
+                                    <input type="file" aria-label="Enviar logo do espaço" ref={logoInputRef} disabled={logoBusy || saving} className="visually-hidden" accept="image/png,image/jpeg,image/webp" onChange={e => { const f = e.target.files?.[0]; if(f) void handleLogoFile(f); e.currentTarget.value = '' }} />
                                 </div>
                             </div>
 

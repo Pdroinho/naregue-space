@@ -313,7 +313,7 @@ export function AdminTeam({
           )}
           <p className="team-footnote">
             O WhatsApp é compartilhado pelo espaço e administrado pela
-            responsável. Cado profissional com acesso vê somente a própria
+            responsável. Cada profissional com acesso vê somente a própria
             agenda.
           </p>
         </>

@@ -79,7 +79,7 @@
 .ld-sidebar-collapse:focus-visible {
   background: var(--brand-soft);
   border-color: color-mix(in srgb, var(--brand-action) 24%, var(--line-soft));
-  color: var(--brand-action);
+  color: var(--brand-accent-strong);
 }
 
 .ld-sidebar-nav {
@@ -144,7 +144,7 @@
 .ld-nav-item.is-active {
   border-color: color-mix(in srgb, var(--brand-action) 20%, var(--line-soft));
   background: var(--brand-soft);
-  color: var(--brand-action);
+  color: var(--brand-accent-strong);
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand-action) 86%, transparent);
 }
 
@@ -294,7 +294,7 @@
   letter-spacing: .035em;
   text-transform: uppercase;
 }
-.ld-breadcrumb-current { color: var(--brand-action); }
+.ld-breadcrumb-current { color: var(--brand-accent-strong); }
 .ld-page-title {
   max-width: 100%;
   margin: 0;

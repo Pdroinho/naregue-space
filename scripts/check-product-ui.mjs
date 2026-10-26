@@ -9,6 +9,7 @@ import { prepareLogoImage } from '../dist/server/logoImageProcessing.js'
 import path from 'node:path'
 import express from 'express'
 import { runInteractionChecks } from './qa-interactions.mjs'
+import { runVisualAudit } from './qa-visual-audit.mjs'
 const { chromium, firefox } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
 let completed=false
 process.on('exit',()=>{if(!completed){console.error('Incomplete browser check run');process.exitCode=1}})
@@ -93,7 +94,7 @@ try{
    return json(route,{ok:true,service})
   }
   if(p==='/api/admin/finance/transactions' && route.request().method()==='POST' && process.argv.includes('--interactions')){cashWrites.push(route.request().postDataJSON());return json(route,{ok:true})}
-  if(p==='/api/support/tickets' && process.argv.includes('--interactions'))return json(route,{tickets:[],total:0,page:1,stats:{active:0,waiting:0,overdue:0}})
+  if(p==='/api/support/tickets' && (process.argv.includes('--interactions')||process.argv.includes('--audit')))return json(route,{tickets:[],total:0,page:1,stats:{active:0,waiting:0,overdue:0}})
   if(p==='/api/admin/clients')return clientMode==='error'?json(route,{message:'Clientes indisponíveis para teste'},503):json(route,{clients:clientMode==='empty'?[]:clientRows})
   if(p==='/api/admin/professionals')return json(route,{professionals:professionalRows,seatLimit:3,businessHours:[],timezone:'America/Bahia'})
   if(p==='/api/admin/appointments')return json(route,{appointments})
@@ -129,7 +130,9 @@ try{
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--interactions')){
+ if(process.argv.includes('--audit')){
+  await runVisualAudit({page,origin,setRole:value=>{role=value}})
+ }else if(process.argv.includes('--interactions')){
   await runInteractionChecks({page,origin,pass,shot,cleanLayout,assertReadable,
    setRole:value=>{role=value},setAssistantMode:value=>{assistantMode=value},assistantRequests,
    releaseAssistant:()=>{releaseAssistant?.();releaseAssistant=null},setUsageMode:value=>{usageMode=value},
@@ -221,6 +224,13 @@ try{
  }
  const before=settingsAnalyses.length;await page.locator('.settings-logo-field input[type=file]').setInputFiles({name:'fake.png',mimeType:'image/png',buffer:Buffer.from('not an image')});await page.getByRole('alert').filter({hasText:'Não foi possível preparar a imagem'}).waitFor();assert.equal(settingsAnalyses.length,before);pass('invalid file is rejected before consuming an AI request');
  }else if(process.argv.includes('--settings')){
+ await page.goto(origin+'/admin?view=settings');await page.getByLabel('Cor principal em hexadecimal',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Usar a cor #111827',exact:true}).focus();await page.keyboard.press('Tab');
+ assert.equal(await page.getByLabel('Escolher cor',{exact:true}).evaluate(el=>el===document.activeElement),true);
+ assert.equal(await page.locator('.color-picker-native').evaluate(el=>window.getComputedStyle(el).outlineStyle),'solid');
+ await shot('color-picker-focus');
+ await page.getByLabel('Escolher cor',{exact:true}).fill('#123456');assert.equal(await page.getByLabel('Cor principal em hexadecimal',{exact:true}).inputValue(),'#123456');
+ pass('native color picker has visible keyboard focus and updates the named hex field');
  for(const width of [1440,768,390,320]) {
   requestedPaths.length=0;await page.setViewportSize({width,height:900});await page.goto(origin+'/admin?view=settings');const nav=page.getByRole('tablist',{name:'Áreas das configurações',exact:true});await nav.waitFor();assert.equal(await nav.getByRole('tab').count(),4);assert.equal(await page.getByRole('tabpanel').count(),1);assert.equal(await nav.getByRole('tab',{name:'Seu espaço',exact:true}).getAttribute('aria-selected'),'true');assert.equal(requestedPaths.includes('/api/auth/security'),false);assert.equal(requestedPaths.includes('/api/admin/domains'),false);assert.equal(requestedPaths.includes('/api/admin/subscription/team-plans'),false);await cleanLayout();await shot(`settings-brand-${width}`);pass(`settings ${width}px opens one subject without loading hidden sections`);
   await page.getByLabel('Nome do Espaço',{exact:true}).fill('Meu espaço editado');await nav.getByRole('tab',{name:'Segurança',exact:true}).click();await page.getByRole('heading',{name:'Segurança da conta',exact:true}).waitFor();await page.locator('#security-current-password').fill('draft-not-submitted');await cleanLayout();await shot(`settings-security-${width}`);

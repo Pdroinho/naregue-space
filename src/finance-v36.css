@@ -63,7 +63,7 @@
 .finance36-eyebrow,
 .finance36-panel-kicker {
   display: block;
-  color: var(--f36-accent);
+  color: var(--brand-accent-strong);
   font: 780 .67rem/1.2 var(--font-ui);
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -119,7 +119,7 @@
 }
 
 .finance36-btn.is-assistant {
-  color: var(--f36-accent);
+  color: var(--brand-accent-strong);
   background: var(--f36-accent-soft);
 }
 
@@ -230,7 +230,7 @@
   letter-spacing: -.02em;
 }
 
-.finance36-panel-head > svg { color: var(--f36-accent); }
+.finance36-panel-head > svg { color: var(--brand-accent-strong); }
 
 .finance36-legend {
   display: flex;
@@ -365,7 +365,7 @@
   border: 1px solid color-mix(in srgb, var(--f36-accent) 16%, var(--f36-line));
   border-radius: 14px;
   background: var(--f36-accent-soft);
-  color: var(--f36-accent);
+  color: var(--brand-accent-strong);
   cursor: pointer;
 }
 
@@ -512,7 +512,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--f36-accent);
+  color: var(--brand-accent-strong);
   font: 750 .68rem/1 var(--font-ui);
   cursor: pointer;
 }
@@ -543,7 +543,7 @@
 .finance36-goal + .finance36-goal { padding-top: 12px; }
 .finance36-goal > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .finance36-goal span { color: var(--f36-body); font: 660 .7rem/1.2 var(--font-ui); }
-.finance36-goal strong { color: var(--f36-accent); font: 800 .72rem/1 var(--font-ui); }
+.finance36-goal strong { color: var(--brand-accent-strong); font: 800 .72rem/1 var(--font-ui); }
 .finance36-goal small { color: var(--f36-muted); font: 580 .62rem/1.3 var(--font-ui); }
 .finance36-goal.is-client .finance36-progress i { background: var(--status-info-ink); }
 .finance36-goal.is-client strong { color: var(--status-info-ink); }
@@ -637,7 +637,7 @@
 .finance40-dialog-kicker {
   display: block;
   margin-bottom: 4px;
-  color: var(--f36-accent, var(--brand-action));
+  color: var(--brand-accent-strong);
   font: 760 .62rem/1.2 var(--font-ui);
   letter-spacing: .07em;
   text-transform: uppercase;

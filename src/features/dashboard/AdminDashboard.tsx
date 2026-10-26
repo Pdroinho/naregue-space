@@ -378,7 +378,7 @@ export function AdminDashboard({ me, stats, onRefresh, onOpenAgenda, dataError }
                     fontSize: '0.85rem',
                     marginBottom: 16,
                     border: '1px solid var(--gray-200)',
-                    color: 'var(--primary-600)',
+                    color: 'var(--brand-accent-strong)',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',

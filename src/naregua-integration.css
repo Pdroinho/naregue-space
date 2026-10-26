@@ -1,6 +1,7 @@
 /* Layout parity inherits NaRegua identity; no alternate brand palette. */
 :root { --font-display: var(--font-ui); --brand-wine: var(--primary-700); --brand-soft: var(--primary-50); --brand-soft-strong: var(--primary-100); }
 body { font-family: var(--font-ui); }
+.color-picker-native:has(input:focus-visible) { outline:3px solid var(--brand-accent-strong);outline-offset:3px;border-radius:var(--nr-radius-control); }
 .tenant-brand-name { font-family: var(--font-ui); font-weight: 750; letter-spacing: -.025em; }
 .assistant-brand-wordmark { font-family: var(--font-ui); font-weight: 750; }
 .assistant-brand-mark img { object-fit: contain; }
