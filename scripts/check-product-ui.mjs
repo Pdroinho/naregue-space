@@ -10,6 +10,7 @@ import path from 'node:path'
 import express from 'express'
 import { runInteractionChecks } from './qa-interactions.mjs'
 import { runVisualAudit } from './qa-visual-audit.mjs'
+import { runClientsRefinement } from './qa-clients-refinement.mjs'
 const { chromium, firefox } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
 let completed=false
 process.on('exit',()=>{if(!completed){console.error('Incomplete browser check run');process.exitCode=1}})
@@ -130,7 +131,9 @@ try{
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--audit')){
+ if(process.argv.includes('--clients-refinement')){
+  await runClientsRefinement({page,origin,pass,shot,setClientMode:value=>{clientMode=value}})
+ }else if(process.argv.includes('--audit')){
   await runVisualAudit({page,origin,setRole:value=>{role=value}})
  }else if(process.argv.includes('--interactions')){
   await runInteractionChecks({page,origin,pass,shot,cleanLayout,assertReadable,
@@ -275,7 +278,7 @@ try{
  serviceMode='error';await page.goto(origin+'/admin?view=services');await page.getByRole('alert').filter({hasText:'Não foi possível carregar os serviços'}).waitFor();assert.equal(await page.getByText('Nenhum serviço cadastrado',{exact:true}).count(),0);serviceMode='data';await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();await page.locator('.service-mobile-card').getByText(serviceRows[0].name,{exact:true}).waitFor();pass('service fetch error is explicit and retry restores data')
  await page.getByRole('button',{name:'Novo serviço',exact:true}).click();const dialog=page.getByRole('dialog');await dialog.waitFor();await dialog.locator('input[autofocus],input[placeholder="Ex.: Corte degradê"]').first().fill('Serviço revisado');await dialog.getByRole('button',{name:/Adicionar serviço|Salvar/}).click();await dialog.getByRole('alert').filter({hasText:'Não foi possível salvar'}).waitFor();assert.equal(await dialog.isVisible(),true);assert.equal(await dialog.locator('input[placeholder="Ex.: Corte degradê"]').inputValue(),'Serviço revisado');await shot('review-service-error-390');pass('service save failure preserves the modal and user input')
  await dialog.getByRole('button',{name:/Fechar|Cancelar/}).first().click();clientMode='error';await page.goto(origin+'/admin?view=clients');await page.getByRole('alert').filter({hasText:'Não foi possível carregar os clientes'}).waitFor();assert.equal(await page.getByText('Nenhum cliente ainda',{exact:true}).count(),0);clientMode='data';await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();await page.getByText('Amanda Oliveira',{exact:true}).first().waitFor();await page.getByRole('textbox',{name:'Buscar clientes'}).fill('Bianca');assert.equal(await page.locator('.client-mobile-card').count(),1);await shot('review-clients-filter-390');pass('client failure is not mistaken for empty data and search recovers')
- clientMode='empty';await page.goto(origin+'/admin?view=clients');await page.locator('.client-mobile-list').getByText('Nenhum cliente ainda',{exact:true}).waitFor();await shot('review-clients-empty-390');pass('client empty state is truthful and readable')
+ clientMode='empty';await page.goto(origin+'/admin?view=clients');await page.locator('.client-empty').getByText('Nenhum cliente ainda',{exact:true}).waitFor();await shot('review-clients-empty-390');pass('client empty state is truthful and readable')
  setupMode=true;await page.goto(origin+'/admin');await page.getByRole('heading',{name:'Como quer começar?',exact:true}).waitFor();await shot('review-setup-390');await page.getByRole('button',{name:/Quero escolher sozinha/}).click();await page.getByRole('button',{name:'Continuar',exact:true}).click();await shot('review-setup-brand-390');pass('setup choices and next step render on mobile')
  await page.getByRole('button',{name:'Continuar',exact:true}).click();await page.getByRole('heading',{name:'Quando você costuma atender?',exact:true}).waitFor();assert.equal(await page.locator('.workspace-time-grid input[type=time]').count(),0);await page.getByRole('button',{name:'Horário de início',exact:true}).click();await page.getByRole('option',{name:'08:00',exact:true}).click();await shot('review-setup-hours-390');await page.getByRole('button',{name:'Continuar',exact:true}).click();await page.getByRole('heading',{name:'Quais serviços já podem entrar na agenda?',exact:true}).waitFor();await shot('review-setup-services-390');pass('setup uses shared time controls and all four steps fit mobile')
  setupMode=false;role=null;for(const width of [1440,390,320]){await page.setViewportSize({width,height:900});await page.goto(origin+'/login');await page.getByRole('button',{name:/Entrar/}).first().waitFor();await cleanLayout();await shot(`review-login-${width}`);await page.goto(origin+'/agendar');await page.locator('.booking30-service').first().waitFor();await cleanLayout();await shot(`review-booking-${width}`);await page.locator('.booking30-service').first().click();await page.locator('.dateScrollerWrapper').waitFor();await cleanLayout();await shot(`review-booking-dates-${width}`);

@@ -6,20 +6,21 @@ import {
 } from 'react'
 
 export function EmptyState(props: {
-  image: string
+  image?: string
+  icon?: ReactNode
   title: string
   description?: string
   compact?: boolean
 }) {
   return (
     <div className={`empty-state ${props.compact ? 'compact' : ''}`}>
-      <img
+      {props.icon ? <div className="empty-state-icon" aria-hidden="true">{props.icon}</div> : props.image ? <img
         decoding="async"
         src={props.image}
         alt=""
         aria-hidden="true"
         loading="lazy"
-      />
+      /> : null}
       <strong>{props.title}</strong>
       {props.description ? <span>{props.description}</span> : null}
     </div>

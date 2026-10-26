@@ -4,7 +4,7 @@ import { api } from '../../api'
 import type { AdminClientRow } from '../shared/types'
 import { formatBRL } from '../../lib/runtime'
 import { EmptyState } from '../../components/SharedUi'
-import { Search, X } from '../../components/Icons'
+import { Search, Users, X } from '../../components/Icons'
 
 export function AdminClients() {
     const [clients, setClients] = useState<AdminClientRow[]>([])
@@ -47,13 +47,13 @@ export function AdminClients() {
     if(error)return <section className="card product-load-state" role="alert"><h2 className="cardTitle">Não foi possível carregar os clientes.</h2><p>{error}</p><button type="button" className="btn" onClick={()=>setRevision(r=>r+1)} disabled={loading}>{loading?'Carregando…':'Tentar novamente'}</button></section>
     return (
         <div className="card client-admin-page">
-            <section className="client-mobile-overview" aria-label="Resumo da base de clientes">
+            {clients.length > 0 ? <section className="client-mobile-overview" aria-label="Resumo da base de clientes">
                 <div className="client-mobile-overview-copy"><span>Sua comunidade</span><strong>{clients.length}</strong><p>{visitedClients} {visitedClients === 1 ? 'cliente tem visita registrada' : 'clientes têm visita registrada'}.</p></div>
                 {topClient ? (() => { const col = colorFor(topClient.name); return <div className="client-mobile-highlight" style={{ '--client-accent': col.bg || 'var(--brand-soft)' } as CSSProperties}>
                     <div className="user-avatar-mini" style={{ background: col.bg, color: col.fg }}>{initials(topClient.name)}</div>
                     <span><small>Maior valor acumulado</small><strong>{topClient.name}</strong><em>{formatBRL(topClient.totalSpentCents / 100)}</em></span>
                 </div> })() : <div className="client-mobile-highlight is-empty"><span><small>Primeiros vínculos</small><strong>Sua base começa aqui.</strong></span></div>}
-            </section>
+            </section> : null}
             <div className="cardHeader client-admin-header">
                 <div>
                     <h2 className="cardTitle">Clientes</h2>
@@ -61,16 +61,16 @@ export function AdminClients() {
                 </div>
                 <span className="client-count-badge">{clients.length}</span>
             </div>
-            <label className="client-search" aria-label="Buscar clientes">
+            <div className="client-toolbar"><div className="client-search">
                 <Search size={18} />
                 <input aria-label="Buscar clientes" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por nome, telefone ou e-mail" />
                 {query ? <button type="button" onClick={() => setQuery('')} aria-label="Limpar busca"><X size={15} /></button> : null}
-            </label>
+            </div></div>
             {loading ? (
                 <div style={{display: 'flex', justifyContent: 'center', padding: 40}}>
                     <div className="spinner" />
                 </div>
-            ) : (
+            ) : filteredClients.length > 0 ? (
                 <div className="table-scroll client-desktop-table">
                     <table className="data-table">
                         <thead>
@@ -117,18 +117,11 @@ export function AdminClients() {
                                     </tr>
                                 )
                             })}
-                            {filteredClients.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5}>
-                                        <EmptyState compact image="/icons/hugeicons/user-group.svg" title="Nenhum cliente ainda" description="Os novos contatos aparecerão aqui após o primeiro agendamento." />
-                                    </td>
-                                </tr>
-                            ) : null}
                         </tbody>
                     </table>
                 </div>
-            )}
-            {!loading ? <div className="client-mobile-list" aria-label="Clientes cadastradas">
+            ) : null}
+            {!loading && filteredClients.length > 0 ? <div className="client-mobile-list" aria-label="Clientes cadastrados">
                 {filteredClients.map((client) => {
                     const col = colorFor(client.name)
                     return <article className="client-mobile-card" key={`mobile-${client.id}`} style={{ '--client-accent': col.bg || 'var(--brand-soft)' } as CSSProperties}>
@@ -144,7 +137,11 @@ export function AdminClients() {
                         <div className="client-mobile-value"><small>Total</small><strong>{formatBRL(client.totalSpentCents / 100)}</strong></div>
                     </article>
                 })}
-                {filteredClients.length === 0 ? <EmptyState compact image="/icons/hugeicons/user-group.svg" title={query ? 'Nenhum cliente encontrada' : 'Nenhum cliente ainda'} description={query ? 'Tente outro nome, telefone ou e-mail.' : 'Os novos contatos aparecerão aqui após o primeiro agendamento.'} /> : null}
+
+            </div> : null}
+            {!loading && filteredClients.length === 0 ? <div className="client-empty" role="status">
+                <EmptyState icon={<Users size={48} />} title={normalizedQuery ? 'Nenhum cliente encontrado' : 'Nenhum cliente ainda'} description={normalizedQuery ? 'Tente outro nome, telefone ou e-mail.' : 'Os novos contatos aparecerão aqui após o primeiro agendamento.'} />
+                {normalizedQuery ? <button type="button" className="btn" onClick={() => setQuery('')}>Limpar busca</button> : null}
             </div> : null}
         </div>
     )

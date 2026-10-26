@@ -1,6 +1,17 @@
 /* Layout parity inherits NaRegua identity; no alternate brand palette. */
 :root { --font-display: var(--font-ui); --brand-wine: var(--primary-700); --brand-soft: var(--primary-50); --brand-soft-strong: var(--primary-100); }
 body { font-family: var(--font-ui); }
+/* One navigation control per viewport; desktop owns the sidebar control. */
+@media(min-width:901px) { .ld-topbar .ld-mobile-menu-button { display:none; } }
+.client-admin-page .client-toolbar { padding:20px; }
+.client-admin-page .client-toolbar .client-search { margin:0; }
+.client-admin-page .client-search:focus-within { outline:2px solid var(--brand-accent-strong);outline-offset:2px; }
+.client-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;padding:28px 20px;gap:16px; }
+.client-empty .empty-state { min-height:0;padding:0;gap:12px; }
+.empty-state-icon { display:grid;place-items:center;width:72px;height:72px;margin-bottom:8px;border-radius:18px;background:var(--surface-soft);color:var(--ink-body); }
+.client-empty .empty-state strong { color:var(--ink-strong); }
+.client-empty .empty-state span { color:var(--ink-body); }
+@media(max-width:640px) { .client-admin-page .client-toolbar { padding:4px 2px 16px; }.client-empty { min-height:300px;padding:28px 16px; } }
 .color-picker-native:has(input:focus-visible) { outline:3px solid var(--brand-accent-strong);outline-offset:3px;border-radius:var(--nr-radius-control); }
 .tenant-brand-name { font-family: var(--font-ui); font-weight: 750; letter-spacing: -.025em; }
 .assistant-brand-wordmark { font-family: var(--font-ui); font-weight: 750; }
@@ -133,7 +144,6 @@ body { font-family: var(--font-ui); }
 .referral-unavailable h2 { margin:0 0 10px;font-size:1.1rem;color:var(--ink-strong); }
 .referral-unavailable p { margin:8px 0;color:var(--ink-body);line-height:1.6;max-width:75ch; }
 @media(max-width:650px) { .referral-page .referral-hero { grid-template-columns:1fr; }.referral-visual { min-height:0;height:180px; } }
-@media(min-width:901px) { .ld-topbar .ld-mobile-menu-button { display:inline-grid; } }
 @media(max-width:768px) {
   .ld-shell.has-mobile-tabbar .nr-assistant-workspace-layout { height:calc(100dvh - 190px); }
   .ld-shell.has-mobile-tabbar .nr-assistant-workspace-layout .assistant34--page { height:100%;min-height:0;grid-template-rows:auto auto minmax(0,1fr); }
