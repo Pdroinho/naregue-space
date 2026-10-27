@@ -11,6 +11,7 @@ import express from 'express'
 import { runInteractionChecks } from './qa-interactions.mjs'
 import { runVisualAudit } from './qa-visual-audit.mjs'
 import { runClientsRefinement } from './qa-clients-refinement.mjs'
+import { runPanelStates,runPanelDialogs } from './qa-panel-states.mjs'
 const { chromium, firefox } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
 let completed=false
 process.on('exit',()=>{if(!completed){console.error('Incomplete browser check run');process.exitCode=1}})
@@ -22,6 +23,7 @@ const snapshot={ym:'2026-10',entriesCents:20000,expensesCents:10000,balanceCents
 const qaLogoDirectory=mkdtempSync(path.join(tmpdir(),'lash-logo-ui-'));const qaLogoPath=path.join(qaLogoDirectory,'logo.png');const ink=await sharp({create:{width:60,height:30,channels:4,background:'#972d57'}}).png().toBuffer();const whiteLogo=await sharp({create:{width:240,height:160,channels:4,background:'#fff'}}).composite([{input:ink,left:90,top:65}]).png().toBuffer();writeFileSync(qaLogoPath,whiteLogo)
 const logoPreparations=[];let tenantHold=null
 const requestedPaths=[]
+const failedGetRoutes=new Set()
 const assistantRequests=[]
 const serviceWrites=[],cashWrites=[]
 let assistantMode='ok',releaseAssistant=null,usageMode='ok',referralsEnabled=false,referralLink=null
@@ -71,6 +73,7 @@ try{
  await page.route('**/api/**',async route=>{
   const url=new URL(route.request().url()), p=url.pathname.replace('/api/public/tenant/studio/','/api/public/').replace(/^\/api\/public\/tenant\/studio$/,'/api/public/tenant')
   requestedPaths.push(p)
+  if(route.request().method()==='GET'&&failedGetRoutes.has(p))return json(route,{message:'Falha de carregamento simulada para verificação'},503)
   if(p==='/api/public/tenant'){if(tenantHold)await tenantHold;return json(route,{tenant})}
   if(p==='/api/auth/security')return json(route,{phone:null,whatsappMfaReady:false,devices:[],sessions:[]})
   if(p==='/api/admin/brand/prepare-image'){const body=route.request().postDataJSON();logoPreparations.push(body);try{return json(route,await prepareLogoImage(body.imageDataUrl,body.mode))}catch(error){return json(route,{message:error.message,code:'LOGO_PREPARATION_FAILED'},400)}}
@@ -131,7 +134,11 @@ try{
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--clients-refinement')){
+ if(process.argv.includes('--panel-dialogs')){
+  await runPanelDialogs({page,origin,pass})
+ }else if(process.argv.includes('--panel-states')){
+  await runPanelStates({page,origin,pass,shot,failedGetRoutes,requestedPaths,professionalRows,setClientMode:value=>{clientMode=value},setServiceMode:value=>{serviceMode=value}})
+ }else if(process.argv.includes('--clients-refinement')){
   await runClientsRefinement({page,origin,pass,shot,setClientMode:value=>{clientMode=value}})
  }else if(process.argv.includes('--audit')){
   await runVisualAudit({page,origin,setRole:value=>{role=value}})

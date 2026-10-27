@@ -14,7 +14,7 @@ export function EmptyState(props: {
 }) {
   return (
     <div className={`empty-state ${props.compact ? 'compact' : ''}`}>
-      {props.icon ? <div className="empty-state-icon" aria-hidden="true">{props.icon}</div> : props.image ? <img
+      {props.icon ? <div className="empty-state-icon" aria-hidden="true">{props.icon}</div> : props.image?.startsWith('/icons/hugeicons/') ? <div className="empty-state-icon" aria-hidden="true"><span className="nr-icon" style={{display:'inline-block',width:48,height:48,backgroundColor:'currentColor',mask:`url("${props.image}") center / contain no-repeat`,WebkitMask:`url("${props.image}") center / contain no-repeat`}} /></div> : props.image ? <img
         decoding="async"
         src={props.image}
         alt=""

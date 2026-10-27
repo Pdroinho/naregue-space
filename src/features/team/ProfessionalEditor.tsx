@@ -121,7 +121,7 @@ export function ProfessionalEditor({
               {person ? 'CONFIGURAR PROFISSIONAL' : 'ADICIONAR À EQUIPE'}
             </span>
             <h2 className="cardTitle" id="team-editor-title">
-              {person ? person.name : 'Uma novo profissional'}
+              {person ? person.name : 'Novo profissional'}
             </h2>
           </div>
           <button
@@ -152,7 +152,7 @@ export function ProfessionalEditor({
           <div className="cardBody team-dialog-body">
             {step === 0 ? (
               <>
-                <h3>Como ela se chama?</h3>
+                <h3>Como se chama?</h3>
                 <p className="team-help">
                   Este nome aparece para os clientes na página de agendamento. O
                   acesso ao painel pode ser criado depois.

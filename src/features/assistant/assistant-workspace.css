@@ -83,7 +83,7 @@
 }
 .assistant-appointment time {
   font-size: var(--ld-type-small-size);
-  color: var(--ld-color-accent);
+  color: var(--brand-accent-strong);
   font-weight: 700;
 }
 .assistant-appointment h3,

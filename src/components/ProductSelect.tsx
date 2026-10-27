@@ -165,6 +165,9 @@ export function ProductSelect({
       event.preventDefault(); close({ restoreFocus: true }); return
     }
     if (event.key === 'Tab') {
+      // The portal is at the end of body. Continue Tab from the trigger's
+      // position in the form, rather than from a menu that is being removed.
+      triggerRef.current?.focus({ preventScroll: true })
       close(); return
     }
     if (event.key.length === 1) handleTypeahead(event.key)

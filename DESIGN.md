@@ -114,7 +114,7 @@ Warm cream supports reading; petroleum provides structure; copper marks actions 
 
 **The Product Neutrals Rule.** Tenant branding changes the accent family and logo, never product surfaces or semantic colors.
 
-Green, amber and coral belong to success, warning and danger. Dark mode replaces surface, ink, line, semantic and shadow values under the explicit admin/tenant/dev theme selectors in naregua-identity.css. In dark mode the later integration root aliases do not outrank the more specific dark selectors. Use live CSS variables rather than hardcoding light values in new components.
+Green, amber and coral belong to success, warning and danger. Dark mode replaces surface, ink, line, semantic and shadow values under the explicit admin/tenant/dev theme selectors in naregua-identity.css. The integration aliases intentionally match the dark theme selectors' specificity so both component generations resolve to the canonical product neutrals and semantic colors. Use live CSS variables rather than hardcoding light values in new components.
 
 ## Typography
 
@@ -128,7 +128,7 @@ Space Mono remains declared for numeric/code roles, but fonts.css currently self
 
 The workspace uses a collapsible sidebar and flexible content column. Its declared content ceiling is 1680px, page gutter clamp(16px, 2.1vw, 34px), and compact gutter 12px. Shared surfaces use 20px internal padding, reduced to 16px below 640px. The spacing vocabulary follows four-pixel increments, with contextual gaps rather than nested cards for every grouping.
 
-Below 767px the admin header wraps readable page context, retains a compact monogram and places team scope in its own content toolbar. Mobile operational navigation is a bottom dock. Booking uses a bounded shell (1220px) on desktop; below 820px it becomes a vertical journey with short progress labels, two-column photo-led service choices and a centered workspace up to 620px. Its field inputs use 16px on mobile. These breakpoint-specific arrangements are contextual, not one universal mobile breakpoint.
+Below 767px the admin header wraps readable page context, retains a compact monogram above 360px and places team scope in its own content toolbar; at 360px and below the redundant header brand is omitted to preserve the full page title. Mobile operational navigation is a bottom dock. Booking uses a bounded shell (1220px) on desktop; below 820px it becomes a vertical journey with short progress labels, two-column photo-led service choices and a centered workspace up to 620px. Its field inputs use 16px on mobile. These breakpoint-specific arrangements are contextual, not one universal mobile breakpoint.
 
 ## Elevation & Depth
 

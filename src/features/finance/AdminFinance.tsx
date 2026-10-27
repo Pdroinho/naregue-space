@@ -400,16 +400,16 @@ function NewTransactionModal({ isOpen, onClose, onSuccess, todayYmd }: { isOpen:
                     </div>
                 </div>
                 <div className="input-group">
-                    <label className="label">Valor (R$)</label>
-                    <input className="input finance40-control" inputMode="decimal" autoComplete="off" value={amount} onChange={handleAmountChange} placeholder="0,00" required />
+                    <label className="label" htmlFor="transaction-amount">Valor (R$)</label>
+                    <input id="transaction-amount" className="input finance40-control" inputMode="decimal" autoComplete="off" value={amount} onChange={handleAmountChange} placeholder="0,00" required />
                 </div>
                 <div className="input-group">
-                    <label className="label">{type==='EXPENSE'?'Categoria da despesa':'Forma de pagamento'}</label>
-                    <input className="input finance40-control" value={method} onChange={e => setMethod(e.target.value)} placeholder={type==='EXPENSE'?'Ex.: materiais, aluguel':'Ex.: Pix, dinheiro, cartão'} />
+                    <label className="label" htmlFor="transaction-method">{type==='EXPENSE'?'Categoria da despesa':'Forma de pagamento'}</label>
+                    <input id="transaction-method" className="input finance40-control" value={method} onChange={e => setMethod(e.target.value)} placeholder={type==='EXPENSE'?'Ex.: materiais, aluguel':'Ex.: Pix, dinheiro, cartão'} />
                 </div>
                 <div className="input-group">
-                    <label className="label">Descrição <span className="text-muted">(opcional)</span></label>
-                    <textarea className="input finance40-control finance40-textarea" value={note} onChange={e => setNote(e.target.value)} placeholder="Detalhes da movimentação" rows={3} />
+                    <label className="label" htmlFor="transaction-note">Descrição <span className="text-muted">(opcional)</span></label>
+                    <textarea id="transaction-note" className="input finance40-control finance40-textarea" value={note} onChange={e => setNote(e.target.value)} placeholder="Detalhes da movimentação" rows={3} />
                 </div>
             </div>
             <div className="modal-footer finance40-dialog-footer">
@@ -610,12 +610,12 @@ function GoalsModal({ isOpen, onClose, onSuccess, initialRevenue, initialNewClie
                 <form onSubmit={handleSubmit} className="modal-body">
                     <div className="form-stack">
                         <div className="input-group">
-                            <label className="label">Meta de Faturamento (R$)</label>
-                            <input className="input" value={revenue} onChange={e => setRevenue(e.target.value)} required />
+                            <label className="label" htmlFor="goal-revenue">Meta de Faturamento (R$)</label>
+                            <input id="goal-revenue" className="input" value={revenue} onChange={e => setRevenue(e.target.value)} required />
                         </div>
                         <div className="input-group">
-                            <label className="label">Meta de Novos Clientes</label>
-                            <input className="input" type="number" value={newClients} onChange={e => setNewClients(e.target.value)} required />
+                            <label className="label" htmlFor="goal-clients">Meta de Novos Clientes</label>
+                            <input id="goal-clients" className="input" type="number" value={newClients} onChange={e => setNewClients(e.target.value)} required />
                         </div>
                     </div>
                     <div className="modal-footer" style={{marginTop: 24, display: 'flex', justifyContent: 'flex-end', gap: 12}}>

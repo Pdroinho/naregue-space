@@ -14,11 +14,12 @@ export function AdminDashboard({ me, stats, onRefresh, onOpenAgenda, dataError }
   async function handleStatusChange(id: string, status: string) {
     if (updating) return
     setUpdating(true)
-    await api(`/api/admin/appointments/${id}`, {
+    const res = await api(`/api/admin/appointments/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ status })
     })
     setUpdating(false)
+    if (!res.ok) { notify(res.error.message, 'error'); return }
     if (onRefresh) onRefresh()
   }
 
@@ -193,7 +194,7 @@ export function AdminDashboard({ me, stats, onRefresh, onOpenAgenda, dataError }
           <div className="stat-icon"><Wallet size={24} /></div>
           <div className="stat-info">
             <h4>Faturamento Estimado</h4>
-            <div className="value">R$ {(((stats?.today?.expectedRevenueCents ?? 0) / 100).toFixed(2) ?? '0,00')}</div>
+            <div className="value">{formatBRL((stats?.today?.expectedRevenueCents ?? 0) / 100)}</div>
           </div>
         </div>
         <div className="stat-card">

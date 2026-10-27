@@ -38,7 +38,7 @@
   margin-bottom: 0;
 }
 .support-eyebrow {
-  color: var(--ld-color-accent);
+  color: var(--brand-accent-strong);
   font-size: var(--ld-type-caption-size);
   line-height: var(--ld-type-caption-line);
   font-weight: 750;
@@ -150,7 +150,7 @@
 }
 .support-unread {
   font-weight: 750;
-  color: var(--ld-color-accent);
+  color: var(--brand-accent-strong);
 }
 .support-pagination {
   display: flex;
@@ -207,7 +207,7 @@
   display: block;
   margin-top: var(--ld-space-3);
   font-size: var(--ld-type-small-size);
-  color: var(--ld-color-accent);
+  color: var(--brand-accent-strong);
   line-height: var(--ld-type-small-line);
 }
 .support-message.internal {

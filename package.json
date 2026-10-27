@@ -21,6 +21,7 @@
     "test:whatsapp": "node --experimental-strip-types --test server/whatsappIntent.test.mjs server/whatsappWebhook.test.mjs server/whatsappMedia.test.mjs server/marketingCampaign.test.mjs",
     "test:release": "node scripts/stable-release-audit.mjs",
     "test:ui": "node scripts/check-product-ui.mjs",
+    "test:panel-ui": "npm run build && node scripts/check-product-ui.mjs --audit && node scripts/check-product-ui.mjs --panel-states && node scripts/check-product-ui.mjs --panel-dialogs && node scripts/check-product-ui.mjs --interactions",
     "test:booking-ui": "node scripts/check-product-ui.mjs --booking-mobile",
     "test:settings-ui": "node scripts/check-product-ui.mjs --settings"
   },

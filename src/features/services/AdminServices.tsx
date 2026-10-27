@@ -141,7 +141,7 @@ export function AdminServices() {
                     <div style={{padding: 20}}>
                         <div className="skeleton skeleton-card" style={{height: 160}} />
                     </div>
-                ) : (
+                ) : services.length ? (
                     <div className="table-scroll service-desktop-table">
                         <table className="data-table">
                             <thead>
@@ -173,20 +173,17 @@ export function AdminServices() {
                                         </td>
                                     </tr>
                                 ))}
-                                {services.length === 0 && (
-                                    <tr><td colSpan={5}><EmptyState compact image="/icons/hugeicons/calendar-03.svg" title="Nenhum serviço cadastrado" description="Crie o primeiro serviço e escolha uma das capas incluídas no kit visual." /></td></tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
-                )}
-                {!loading && !loadError ? <div className="service-mobile-list" aria-label="Serviços cadastrados">
+                ) : <EmptyState compact image="/icons/hugeicons/calendar-03.svg" title="Nenhum serviço cadastrado" description="Crie o primeiro serviço para começar a receber horários." />}
+                {!loading && !loadError && services.length > 0 ? <div className="service-mobile-list" aria-label="Serviços cadastrados">
                     {services.map((service) => <article className="service-mobile-card" key={`mobile-${service.id}`}>
                         <img decoding="async" src={service.coverUrl || bundledServiceCover(service.name)} alt="" loading="lazy" onError={(event) => { event.currentTarget.src = '/naregua/services/fade.webp' }} />
                         <div className="service-mobile-copy"><strong>{service.name}</strong><div className="service-mobile-meta"><span>{service.durationMinutes} min</span><b>{formatBRL(service.priceCents/100)}</b></div></div>
                         <button type="button" className="icon-btn service-mobile-edit" onClick={() => openEditModal(service)} aria-label={`Editar serviço ${service.name}`}><Edit2 size={17}/></button>
                     </article>)}
-                    {services.length === 0 ? <EmptyState compact image="/icons/hugeicons/calendar-03.svg" title="Nenhum serviço cadastrado" description="Crie o primeiro serviço para começar a receber horários." /> : null}
+
                 </div> : null}
             </div>
 
@@ -376,11 +373,12 @@ export function AdminServices() {
                                         </div>
                                     </div>
                                     <div className="input-group">
-                                        <label className="label">Preço (R$)</label>
+                                        <label className="label" htmlFor="service-price">Preço (R$)</label>
                                         <div className="input-wrapper">
                                             <input
                                                 className="input"
                                                 type="text"
+                                                id="service-price"
                                                 inputMode="decimal"
                                                 autoComplete="off"
                                                 placeholder="R$0,00"

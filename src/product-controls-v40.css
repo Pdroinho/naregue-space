@@ -206,7 +206,7 @@
 
 .ld-select-check {
   flex: 0 0 auto;
-  color: var(--ld-color-accent);
+  color: var(--brand-accent-strong);
 }
 
 .ld-select-empty {

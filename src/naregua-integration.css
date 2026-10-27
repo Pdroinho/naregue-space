@@ -46,7 +46,14 @@ body { font-family: var(--font-ui); }
 /* Review: scope is a content toolbar so page context fits at 320px. */
 .nr-team-scope-toolbar { display:flex; justify-content:flex-end; margin-bottom:16px; }
 .nr-team-scope-toolbar:empty { display:none; }
-.nr-team-scope-toolbar .product-select { min-width:190px; }
+.nr-team-scope-error { display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--danger-strong); }
+.table-scroll .data-table { min-width:720px; }
+.data-table th,.data-table .pill,.data-table .status-badge { white-space:nowrap;overflow-wrap:normal;word-break:normal; }
+.client-desktop-table td:nth-child(n+2) { white-space:nowrap;overflow-wrap:normal;word-break:normal; }
+.ld-dialog>.cardHeader { flex-wrap:nowrap;align-items:flex-start; }
+.ld-dialog>.cardHeader>div { flex:1;min-width:0;width:auto; }
+.ld-dialog>.cardHeader>.icon-btn { flex:0 0 44px;width:44px; }
+.nr-team-scope-toolbar>.ld-select-trigger { flex:0 1 260px;width:260px;max-width:100%; }
 .booking30 { --b30-muted:var(--ink-body); }
 .booking30-steps button:disabled { opacity:1; color:var(--ink-body); }
 .booking30-fields input::placeholder { color:var(--ink-body);opacity:1; }
@@ -63,14 +70,17 @@ body { font-family: var(--font-ui); }
   :root[data-mode='admin'] .ld-topbar-actions { flex:0 0 auto;gap:4px; }
   :root[data-mode='admin'] .ld-topbar-actions .icon-btn,:root[data-mode='admin'] .ld-topbar-actions>.btn { width:40px;min-width:40px;height:40px; }
   .nr-team-scope-toolbar { justify-content:stretch; }
-  .nr-team-scope-toolbar>div { width:100%; }
+  .nr-team-scope-toolbar>.ld-select-trigger { flex:1;width:100%; }
 }
+@media(max-width:360px) { :root[data-mode='admin'] .ld-topbar .tenant-brand-mobile { display:none; } }
 
 /* Secondary dashboard copy remains readable on the fixed cream surface. */
 .ld-mobile-dashboard-intro p,.ld-mobile-dashboard-intro>div>span { color:var(--ink-body); }
 
 /* One neutral/semantic contract for both generations of product components. */
-:root {
+:root,
+:root[data-theme='dark']:not([data-mode='dev']),
+:root[data-mode='dev'][data-dev-theme='dark'] {
   --ld-color-canvas:var(--surface-canvas);
   --ld-color-canvas-warm:var(--surface-canvas);
   --ld-color-panel:var(--surface-panel);
@@ -130,6 +140,7 @@ body { font-family: var(--font-ui); }
 .nr-assistant-workspace-layout .assistant34--page:has(>.assistant34-disabled) { grid-template-rows:auto auto auto minmax(0,1fr); }
 .assistant34-send { background:var(--brand-action);color:var(--primary-fg); }
 .assistant34-send:hover:not(:disabled) { background:var(--brand-action-hover-bg); }
+.assistant34-send.is-stop { background:var(--ink-strong);color:var(--surface-canvas); }
 .assistant34-send:disabled { opacity:.55; }
 .assistant34-composer textarea::placeholder { color:var(--ink-body); }
 .referral-page .referral-hero { grid-template-columns:minmax(0,1.3fr) minmax(240px,1fr);padding:0;gap:0;background:var(--surface-raised); }
