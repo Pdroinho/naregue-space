@@ -82,8 +82,7 @@ export function createAdminWhatsappConnectionRouter({
       if (!tenantId) return next(badRequest('Tenant inválido', 'INVALID_TENANT'))
       const row = ensurePlatformWhatsappConfig(tenantId)
       if (!row?.baseUrl || !row.apiKey || !row.instanceName) {
-        res.json({ qrCode: null, state: 'NOT_CONFIGURED' })
-        return
+        return next(badRequest('A conexão da plataforma com a Evolution está indisponível. Tente novamente ou entre em contato com o suporte.', 'WHATSAPP_PLATFORM_NOT_CONFIGURED'))
       }
 
       const headers = { apikey: row.apiKey, 'Content-Type': 'application/json' }
@@ -96,6 +95,13 @@ export function createAdminWhatsappConnectionRouter({
       })
       let raw = await response.json().catch(() => null)
       let qrCode = extractQrCode(raw)
+      const providerState = raw?.instance?.state ?? raw?.state
+      if (response.ok && normalizeEvolutionConnectionState(providerState) === 'CONNECTED') {
+        updateEvolutionConnectionFromWebhook(tenantId, row.instanceName, 'CONNECTED')
+        await configureEvolutionWebhookForTenant(tenantId).catch(() => false)
+        res.json({ qrCode: null, state: 'open' })
+        return
+      }
 
       if (!response.ok || !qrCode) {
         const createResponse = await fetchImpl(`${baseUrl}/instance/create`, {

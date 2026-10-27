@@ -12,6 +12,7 @@ import { runInteractionChecks } from './qa-interactions.mjs'
 import { runVisualAudit } from './qa-visual-audit.mjs'
 import { runClientsRefinement } from './qa-clients-refinement.mjs'
 import { runPanelStates,runPanelDialogs } from './qa-panel-states.mjs'
+import { runWorkspaceReview } from './qa-workspace-review.mjs'
 const { chromium, firefox } = await import(process.env.NAREGUA_QA_PLAYWRIGHT_MODULE || 'playwright')
 let completed=false
 process.on('exit',()=>{if(!completed){console.error('Incomplete browser check run');process.exitCode=1}})
@@ -36,6 +37,8 @@ let bookingPeopleMode='normal'
 let bookingSubmissionMode='success';const bookingSubmissions=[]
 let bookingMode='data',staffZone='America/Bahia'
 let serviceMode='data',clientMode='data',mutationMode='error',setupMode=false
+let billingActive=false,waUnconfigured=false,extractFailed=false
+const domainWrites=[],domainRows=[]
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bahia'}).format(new Date())
 const serviceRows=[{id:'11111111-1111-4111-8111-111111111111',name:'Corte clássico',durationMinutes:60,priceCents:12000},{id:'22222222-2222-4222-8222-222222222222',name:'Corte e barba',durationMinutes:90,priceCents:18000}]
 const professionalRows=[{id:'33333333-3333-4333-8333-333333333333',name:'Mariana Souza',instagram:'mariana.lashes',tiktok:'mariana_lashes',active:true,bookable:true,userId:null,accessRole:null,accessDisabledAt:null,serviceIds:serviceRows.map(s=>s.id),hours:[],pendingInvitation:null}]
@@ -110,16 +113,18 @@ try{
   if(p==='/api/admin/dashboard')return json(route,{timeZone:'America/Bahia',upcoming:appointments,recentActivity:[],today:{appointmentsCount:2,expectedRevenueCents:30000},newClients30d:3,pendingAppointments:1,confirmationSummary:{confirmed:1,awaiting:1,noResponse:0,deliveryFailed:0,declined:0,notRequested:0},confirmationAttention:[]})
   if(p==='/api/admin/onboarding')return json(route,{onboarding:{status:setupMode?'PENDING':'DONE'}})
   if(p==='/api/support/notifications')return json(route,{unreadCount:0,notifications:[]})
-  if(p==='/api/admin/whatsapp')return json(route,{instance:{id:'wa',status:waState,baseUrl:'https://example.com',instanceName:'studio',hasApiKey:true,platformManaged:true}})
-  if(p==='/api/admin/whatsapp/status')return waError?json(route,{message:'Status indisponível'},503):json(route,{state:waState})
+  if(p==='/api/admin/whatsapp')return json(route,{instance:waUnconfigured?null:{id:'wa',status:waState,baseUrl:'https://example.com',instanceName:'studio',hasApiKey:true,platformManaged:true}})
+  if(p==='/api/admin/whatsapp/status')return waError?json(route,{message:'Status indisponível'},503):json(route,{state:waUnconfigured?'NOT_CONFIGURED':waState})
   if(p==='/api/admin/whatsapp/diagnostics')return json(route,{providerWebhookConfigured:false,lastInboundAt:null,lastOutboundAt:null,optedInClients:0,totalClients:0})
   if(p==='/api/admin/whatsapp/settings')return json(route,{settings:{}})
-  if(p==='/api/admin/whatsapp/qrcode')return json(route,{qrCode:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD1cAAAAASUVORK5CYII=',state:'connecting'})
+  if(p==='/api/admin/whatsapp/qrcode'){waUnconfigured=false;return json(route,{qrCode:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jD1cAAAAASUVORK5CYII=',state:'connecting'})}
   if(p==='/api/admin/whatsapp/conversations'){return json(route,{conversations:[]})}
   if(p==='/api/admin/whatsapp/campaigns')return json(route,{campaigns:[],enabled:false,maxRecipients:50,sendIntervalSeconds:15})
-  if(p==='/api/admin/domains')return domainMode==='error'?json(route,{message:'Domínios indisponíveis'},503):json(route,{domains:domainMode==='active'?[{id:'domain',domain:'agenda.example.com',status:'ACTIVE',verifiedAt:new Date().toISOString(),isPrimary:true}]:[]})
+  if(p==='/api/admin/domains'&&route.request().method()==='POST'){const body=route.request().postDataJSON();domainWrites.push(body);const domain={id:'qa-domain',domain:body.domain,status:'PENDING',createdAt:new Date().toISOString(),isPrimary:false,dns:{verification:{type:'TXT',name:'_naregua',value:'naregua=qa'},routing:{type:'CNAME',name:'agenda',value:'naregua.space'}}};domainRows.push(domain);return json(route,{domain})}
+  if(p==='/api/admin/domains')return domainMode==='error'?json(route,{message:'Domínios indisponíveis'},503):json(route,{domains:domainMode==='active'?[{id:'domain',domain:'agenda.example.com',status:'ACTIVE',verifiedAt:new Date().toISOString(),isPrimary:true}]:domainRows})
   if(p==='/api/admin/billing/overview')return json(route,{subscription:null,orders:[]})
-  if(p==='/api/admin/subscription/team-plans')return json(route,{plans,activeProfessionals:1,checkoutAvailable:false,currentSubscription:null,orders:[]})
+  if(p==='/api/admin/subscription/team-plans')return json(route,{plans,activeProfessionals:1,checkoutAvailable:false,currentSubscription:billingActive?{planCode:'TEAM_6',currentPeriodEnd:'2027-08-15T12:00:00Z'}:null,orders:[]})
+  if(p==='/api/admin/finance/extract')return extractFailed?json(route,{message:'Falha ao carregar extrato de teste'},503):json(route,{transactions:[]})
   if(p==='/api/admin/referrals/overview')return refError?json(route,{message:'Indicações indisponíveis'},503):json(route,{teamDiscountsAvailable:referralsEnabled,link:referralLink,metrics:{total:2,paid:1,customerSavingsCents:749},credits:[],rules:{inviteeDiscountPercent:10,referrerRewardPercent:10,renewalCapPercent:30}})
   if(p==='/api/admin/referrals/link' && process.argv.includes('--interactions')){referralLink={id:'qa-link',active:true,url:'https://naregua.space/?ref=controlled-browser-test',inviteeDiscountPercent:10,referrerRewardPercent:10,redemptionsCount:0};return json(route,{url:referralLink.url})}
   if(p==='/api/admin/assistant/message' && process.argv.includes('--interactions')){
@@ -134,7 +139,9 @@ try{
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--panel-dialogs')){
+ if(process.argv.includes('--workspace-review')||process.argv.includes('--referrals-narrow')){
+  await runWorkspaceReview({page,origin,pass,shot,requestedPaths,domainWrites,onlyReferrals:process.argv.includes('--referrals-narrow'),setBillingActive:value=>{billingActive=value},setWaUnconfigured:value=>{waUnconfigured=value},setExtractFailed:value=>{extractFailed=value},professionalRows,snapshot})
+ }else if(process.argv.includes('--panel-dialogs')){
   await runPanelDialogs({page,origin,pass})
  }else if(process.argv.includes('--panel-states')){
   await runPanelStates({page,origin,pass,shot,failedGetRoutes,requestedPaths,professionalRows,setClientMode:value=>{clientMode=value},setServiceMode:value=>{serviceMode=value}})
@@ -235,12 +242,12 @@ try{
  const before=settingsAnalyses.length;await page.locator('.settings-logo-field input[type=file]').setInputFiles({name:'fake.png',mimeType:'image/png',buffer:Buffer.from('not an image')});await page.getByRole('alert').filter({hasText:'Não foi possível preparar a imagem'}).waitFor();assert.equal(settingsAnalyses.length,before);pass('invalid file is rejected before consuming an AI request');
  }else if(process.argv.includes('--settings')){
  await page.goto(origin+'/admin?view=settings');await page.getByLabel('Cor principal em hexadecimal',{exact:true}).waitFor();
- await page.getByRole('button',{name:'Usar a cor #111827',exact:true}).focus();await page.keyboard.press('Tab');
- assert.equal(await page.getByLabel('Escolher cor',{exact:true}).evaluate(el=>el===document.activeElement),true);
- assert.equal(await page.locator('.color-picker-native').evaluate(el=>window.getComputedStyle(el).outlineStyle),'solid');
+ await page.getByRole('button',{name:'Outra cor',exact:true}).focus();await page.keyboard.press('Enter');
+ assert.equal(await page.getByRole('group',{name:'Personalizar cor',exact:true}).isVisible(),true);
+ assert.equal(await page.locator('input[type=color]').count(),0);
  await shot('color-picker-focus');
- await page.getByLabel('Escolher cor',{exact:true}).fill('#123456');assert.equal(await page.getByLabel('Cor principal em hexadecimal',{exact:true}).inputValue(),'#123456');
- pass('native color picker has visible keyboard focus and updates the named hex field');
+ await page.getByLabel('Cor principal em hexadecimal',{exact:true}).fill('#123456');await page.getByLabel('Cor principal em hexadecimal',{exact:true}).press('Enter');assert.equal(await page.getByLabel('Cor principal em hexadecimal',{exact:true}).inputValue(),'#123456');
+ pass('custom color picker opens by keyboard and updates the named hex field');
  for(const width of [1440,768,390,320]) {
   requestedPaths.length=0;await page.setViewportSize({width,height:900});await page.goto(origin+'/admin?view=settings');const nav=page.getByRole('tablist',{name:'Áreas das configurações',exact:true});await nav.waitFor();assert.equal(await nav.getByRole('tab').count(),4);assert.equal(await page.getByRole('tabpanel').count(),1);assert.equal(await nav.getByRole('tab',{name:'Seu espaço',exact:true}).getAttribute('aria-selected'),'true');assert.equal(requestedPaths.includes('/api/auth/security'),false);assert.equal(requestedPaths.includes('/api/admin/domains'),false);assert.equal(requestedPaths.includes('/api/admin/subscription/team-plans'),false);await cleanLayout();await shot(`settings-brand-${width}`);pass(`settings ${width}px opens one subject without loading hidden sections`);
   await page.getByLabel('Nome do Espaço',{exact:true}).fill('Meu espaço editado');await nav.getByRole('tab',{name:'Segurança',exact:true}).click();await page.getByRole('heading',{name:'Segurança da conta',exact:true}).waitFor();await page.locator('#security-current-password').fill('draft-not-submitted');await cleanLayout();await shot(`settings-security-${width}`);

@@ -55,6 +55,7 @@ test('conexão WhatsApp preserva estado, QR, diagnóstico e isolamento por tenan
   }
 
   let scenario: 'status' | 'qr-direct' | 'qr-provision' | 'qr-failure' = 'status'
+  let platformUnavailable = false
   const providerRequests: Array<{ url: string; method: string; apiKey: string | null; body: string | null }> = []
   const fetchImpl: typeof fetch = async (input, init) => {
     const url = String(input)
@@ -102,7 +103,7 @@ test('conexão WhatsApp preserva estado, QR, diagnóstico e isolamento por tenan
   app.use('/api/admin', createAdminWhatsappConnectionRouter({
     db,
     requireWhatsappConfig: readConfig,
-    ensurePlatformWhatsappConfig: readConfig,
+    ensurePlatformWhatsappConfig: tenantId => platformUnavailable ? undefined : readConfig(tenantId),
     resolveExternalHttpsBaseUrl: async raw => raw.replace(/\/$/, ''),
     configureEvolutionWebhookForTenant: async tenantId => {
       webhookConfiguredFor.push(tenantId)
@@ -130,10 +131,9 @@ test('conexão WhatsApp preserva estado, QR, diagnóstico e isolamento por tenan
     assert.deepEqual(await fetch(`${baseUrl}/api/admin/whatsapp/status`, { headers }).then(response => response.json()), {
       state: 'NOT_CONFIGURED',
     })
-    assert.deepEqual(await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers }).then(response => response.json()), {
-      qrCode: null,
-      state: 'NOT_CONFIGURED',
-    })
+    const missingQr = await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers })
+    assert.equal(missingQr.status,400)
+    assert.equal((await missingQr.json()).code,'WHATSAPP_PLATFORM_NOT_CONFIGURED')
 
     db.exec(`
       INSERT INTO whatsapp_instances VALUES (
@@ -163,12 +163,20 @@ test('conexão WhatsApp preserva estado, QR, diagnóstico e isolamento por tenan
       method: 'GET', apiKey: 'tenant-key', body: null,
     })
 
+    providerRequests.length = 0
+    const alreadyConnected = await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers })
+    assert.deepEqual(await alreadyConnected.json(), { qrCode:null,state:'open' })
+    assert.equal(providerRequests.some(request=>request.url.endsWith('/instance/create')),false)
+    platformUnavailable = true
+    const unavailable = await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers })
+    assert.equal(unavailable.status,400)
+    platformUnavailable = false
     scenario = 'qr-direct'
     const directQr = await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers }).then(response => response.json()) as {
       qrCode: string; state: string
     }
     assert.deepEqual(directQr, { qrCode, state: 'QR_SCAN' })
-    assert.deepEqual(webhookConfiguredFor, [tenantOne, tenantOne])
+    assert.deepEqual(webhookConfiguredFor, [tenantOne, tenantOne, tenantOne])
 
     scenario = 'qr-provision'
     const provisionedQr = await fetch(`${baseUrl}/api/admin/whatsapp/qrcode`, { headers }).then(response => response.json()) as {

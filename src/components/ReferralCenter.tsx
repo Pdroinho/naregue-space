@@ -59,11 +59,10 @@ export function ReferralCenter() {
   return (
     <section className="referral-page" aria-labelledby="referral-title">
       {loadError ? <p role="alert">{loadError}</p> : null}
-      <header className="referral-hero">
-        <div className="referral-intro"><h1 id="referral-title">Indique o NaRégua a outra barbearia.</h1><p>{data.teamDiscountsAvailable ? `Ela recebe ${data.rules.inviteeDiscountPercent}% na primeira assinatura paga. Após a confirmação, você ganha ${data.rules.referrerRewardPercent}% para renovar sua assinatura.` : 'O programa de indicações depende da ativação dos pagamentos pela administração da plataforma.'}</p>
+      <header className="nr-referral-heading">
+        <div><h2 id="referral-title">Indicações de barbearias</h2><p>{data.teamDiscountsAvailable ? `A barbearia indicada recebe ${data.rules.inviteeDiscountPercent}% na primeira assinatura paga. Você ganha ${data.rules.referrerRewardPercent}% para renovar após o pagamento confirmado.` : 'Acompanhe suas indicações e os benefícios recebidos.'}</p>
           {data.teamDiscountsAvailable ? <p className="referral-current-reward"><strong>{nextDiscount}%</strong> disponível para a próxima renovação</p> : null}
         </div>
-        <figure className="referral-visual"><img src="/naregua/craft.webp" alt="" /></figure>
       </header>
 
       <div className="referral-metrics">

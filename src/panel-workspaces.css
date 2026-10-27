@@ -1,0 +1,68 @@
+/* Operational screens share NaRégua's surfaces; no promotional banners. */
+.referral-page .nr-referral-heading{padding:0 0 8px;display:block}
+.nr-referral-heading h2{margin:0 0 8px;font-size:1.25rem;line-height:1.35;color:var(--ink-strong)}
+.nr-referral-heading p{max-width:72ch;margin:0;color:var(--ink-body);font-size:.875rem;line-height:1.6}
+.referral-page .referral-metrics article{padding:20px;border-radius:var(--nr-radius-card)}
+.referral-page .referral-unavailable{padding:24px;max-width:none}
+@media(max-width:640px){.ld-shell .referral-page .referral-metrics{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible}.ld-shell .referral-page .referral-metrics>article{width:auto;min-width:0;max-width:none;flex:auto}}
+.billing-shell.staff52-billing .billing-intro{display:block;min-height:0;padding:0 0 8px;background:none;border:0;border-radius:0;box-shadow:none;color:var(--ink-strong)}
+.billing-shell.staff52-billing .billing-intro::before{display:none}
+.billing-shell.staff52-billing .billing-intro h2{margin:0 0 8px;font-size:1.25rem;line-height:1.4}
+.billing-shell.staff52-billing .billing-intro p{color:var(--ink-body);max-width:72ch;font-size:.875rem;line-height:1.6}
+.billing-shell.staff52-billing .billing-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.billing-shell.staff52-billing .billing-plan-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.billing-shell.staff52-billing .billing-plan{min-height:156px;padding:20px;border-radius:var(--nr-radius-card);text-align:left;box-shadow:none}
+.billing-shell.staff52-billing .billing-summary{position:static;display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,1fr);gap:12px 28px;align-items:start;padding:24px;border-radius:var(--nr-radius-card);box-shadow:none}
+.billing-shell.staff52-billing .billing-summary h3{margin:0;font-size:1.1rem;color:var(--ink-strong)}
+.billing-shell.staff52-billing .billing-summary>p{margin:0;line-height:1.6;font-size:.875rem;grid-column:1/-1}
+.billing-shell.staff52-billing .billing-summary__price{grid-column:2;grid-row:1/3;margin:0;padding:0;justify-content:flex-end;gap:12px;border:0}
+.billing-shell.staff52-billing .billing-summary__price strong{font-size:1.8rem}
+.billing-shell.staff52-billing .billing-summary>.btn{width:auto;min-width:200px;justify-self:start;margin:4px 0 0}
+.billing-shell.staff52-billing .billing-summary>p[role=status]{background:var(--surface-soft);padding:14px;border-radius:10px}
+.billing-shell.staff52-billing{padding-bottom:20px}
+.custom-domains-card .domain-input-wrap{border:1px solid var(--line-strong);border-radius:10px;background:var(--surface-raised)}
+.custom-domains-card .custom-domains-header{background:var(--surface-raised);color:var(--ink-strong)}
+.custom-domains-card .custom-domains-header .cardDesc{color:var(--ink-body)}
+.custom-domains-card .custom-domains-header::before,.custom-domains-card .custom-domains-header::after{display:none}
+.billing-plan__current{display:inline-block;margin-top:10px;color:var(--success-strong);font-size:.75rem;font-weight:750}
+.custom-domains-card .domain-input-wrap .input{border:0 !important;background:transparent;box-shadow:none !important;border-radius:0;margin:0;outline:none}
+.custom-domains-card .domain-input-wrap:focus-within{outline:2px solid var(--brand-accent-strong);outline-offset:2px;box-shadow:none}
+.custom-domains-card .empty-state{min-height:180px;padding:24px;gap:10px}
+.custom-domains-card .empty-state-icon{width:60px;height:60px;margin-bottom:4px}
+.team-page .team-heading h2{font-size:1.35rem;line-height:1.35}
+.team-page .team-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),360px));justify-content:start;align-items:start}
+.team-page .team-person{padding:20px;border-radius:var(--nr-radius-card)}
+.team-page .team-person-info{gap:10px}
+.finance36.nr-finance{gap:20px}
+.nr-finance .finance36-hero{order:1;padding:0;background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;align-items:center;gap:18px}
+.nr-finance .finance36-hero::after{display:none}
+.nr-finance .finance36-hero h2{font-size:1.3rem;line-height:1.4;margin:0 0 6px}
+.nr-finance .finance36-hero p{display:block;font-size:.875rem;line-height:1.6}
+.nr-finance .finance36-actions{gap:8px;flex:0 0 auto;max-width:520px}
+.nr-finance .finance36-btn{min-height:44px;font-size:.8rem;padding:10px 14px}
+.nr-finance .finance36-kpis{order:2;gap:14px}
+.nr-finance .finance36-kpi{padding:20px;min-height:136px;border-radius:var(--nr-radius-card);box-shadow:none}
+.nr-finance .finance36-kpi::before{display:none}
+.nr-finance .finance36-kpi>span{font-size:.8rem;line-height:1.4}
+.nr-finance .finance36-kpi>strong{font-size:clamp(1.3rem,2.2vw,1.85rem);line-height:1.3;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.nr-finance .finance36-kpi small{font-size:.75rem;line-height:1.5;color:var(--ink-body)}
+.nr-finance .finance36-secondary-grid{order:3;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);align-items:start}
+.nr-finance .finance36-primary-grid{order:4;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);align-items:start}
+.nr-finance .finance36-panel{border-radius:var(--nr-radius-card);box-shadow:none;min-width:0}
+.nr-finance .finance36-panel-head{padding:18px 20px;gap:12px;align-items:center}
+.nr-finance .finance36-panel-head h3{font-size:1rem;line-height:1.4}
+.nr-panel-description{margin:4px 0 0;color:var(--ink-body);font-size:.8rem}
+.nr-finance .finance36-reading-list{padding-inline:20px}
+.nr-finance .finance36-reading-list>div{font-size:.85rem;line-height:1.5;gap:16px}
+.nr-finance .finance36-assistant-card{display:none}
+.nr-finance .finance36-goals>.finance36-inline-action{display:none}
+.nr-finance .finance36-definition{font-size:.8rem;line-height:1.6;color:var(--ink-body)}
+.nr-finance .finance36-transaction{padding:16px 20px;gap:12px}
+.nr-finance .finance36-transaction-copy strong{font-size:.875rem;line-height:1.4}
+.nr-finance .finance36-transaction-copy span,.nr-finance .finance36-transaction time{font-size:.75rem;line-height:1.5}
+.nr-finance .finance36-transaction-value{white-space:nowrap;font-size:.9rem}
+.nr-finance .finance36-filter-group button{min-height:36px;padding:8px 12px;font-size:.8rem}
+.nr-finance .finance36-inline-action{font-size:.8rem;min-height:44px}
+@media(max-width:1100px){.nr-finance .finance36-hero{flex-direction:column;align-items:stretch}.nr-finance .finance36-actions{max-width:none;justify-content:flex-start}.nr-finance .finance36-primary-grid,.nr-finance .finance36-secondary-grid{grid-template-columns:1fr}.nr-finance .finance36-side-stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.billing-shell.staff52-billing .billing-plan-grid{grid-template-columns:1fr}.billing-shell.staff52-billing .billing-plan{min-height:0;padding:18px}.billing-shell.staff52-billing .billing-summary{grid-template-columns:1fr;padding:20px}.billing-shell.staff52-billing .billing-summary__price{grid-row:auto;grid-column:1;justify-content:flex-start}.billing-shell.staff52-billing .billing-summary>.btn{width:100%}.nr-finance .finance36-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.nr-finance .finance36-kpi{padding:16px;min-height:128px}.nr-finance .finance36-actions{display:flex;flex-wrap:wrap}.nr-finance .finance36-actions>.finance36-btn{flex:1 1 150px}.nr-finance .finance36-hero p{display:block}.nr-finance .finance36-panel-head{padding:16px;flex-wrap:wrap}.nr-finance .finance36-transaction{padding:14px 16px}.nr-finance .finance36-side-stack{grid-template-columns:1fr}.nr-finance .finance36-kpi>strong{font-size:1.3rem}.nr-finance .finance36-panel-head .finance36-filter-group{width:100%}.team-page .team-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),360px))}}
+@media(prefers-reduced-motion:reduce){.nr-color-picker *{scroll-behavior:auto}}

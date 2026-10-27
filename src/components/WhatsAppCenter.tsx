@@ -293,6 +293,7 @@ export function WhatsAppCenter() {
   async function loadInstance() {
     const res = await api<{ instance: WhatsAppInstance | null }>('/api/admin/whatsapp')
     if (res.ok) setInstance(res.data.instance)
+    else setError(res.error.message)
   }
 
   async function loadDiagnostics() {
@@ -551,6 +552,7 @@ export function WhatsAppCenter() {
     if (!res.ok) setError(res.error.message)
     else {
       setQrCode(res.data.qrCode)
+      await loadInstance()
       if (res.data.state) setConnectionState(res.data.state)
       if (!res.data.qrCode && statusToUi(res.data.state ?? null) !== 'connected') setError('Não foi possível gerar o QR Code agora. Verifique a conexão e tente novamente; se persistir, abra um chamado em Suporte.')
     }
@@ -850,10 +852,10 @@ export function WhatsAppCenter() {
           <article className="wa39-connection-card">
             <header><div><span>WhatsApp do espaço</span><strong>{instance?.platformManaged ? 'Conexão preparada pela plataforma' : 'Conectar o número do espaço'}</strong></div><QrCode size={20} /></header>
             <p>{instance?.platformManaged ? 'Você só precisa ler o QR Code em WhatsApp → Aparelhos conectados → Conectar aparelho.' : 'Leia o QR Code em WhatsApp → Aparelhos conectados → Conectar aparelho.'}</p>
-            {status !== 'connected' ? <button type="button" className="is-primary" onClick={() => void handleConnect()} disabled={connectionBusy || connectionState === null || !(instance?.baseUrl && instance?.instanceName && instance?.hasApiKey)}>{connectionBusy ? 'Preparando…' : 'Conectar via QR Code'}</button> : <span className="wa39-connected-note"><CheckCircle2 size={15} /> Nenhuma ação necessária agora</span>}
+            {status !== 'connected' ? <button type="button" className="is-primary" onClick={() => void handleConnect()} disabled={connectionBusy || statusPending}>{connectionBusy ? 'Preparando…' : 'Conectar via QR Code'}</button> : <span className="wa39-connected-note"><CheckCircle2 size={15} /> Nenhuma ação necessária agora</span>}
           </article>
 
-          {!connected && !connectionBusy && instance && !(instance.baseUrl && instance.instanceName && instance.hasApiKey) ? <p role="status">A conexão ainda precisa ser preparada. Abra um chamado em Suporte para solicitar a ativação.</p> : null}
+          {!connected && !connectionBusy && !instance ? <p role="status">Ao conectar, preparamos uma conexão exclusiva para o WhatsApp da sua barbearia.</p> : null}
           {qrCode && status !== 'connected' ? <article className="wa39-qr-card"><span>Leia no WhatsApp</span><div><img src={qrCode} alt="QR Code para conectar o WhatsApp" /></div><p>Abra <b>Aparelhos conectados</b> no WhatsApp e leia este código.</p></article> : null}
         </section>
       ) : null}

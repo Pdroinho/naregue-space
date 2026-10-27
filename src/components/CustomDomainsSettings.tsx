@@ -1,6 +1,7 @@
 import './report-review.css'
 import { useCallback, useEffect, useState } from 'react'
-import { AlertCircle, Check, CheckCircle2, Copy, ExternalLink, RefreshCw, ShieldCheck, Star, Trash2 } from './Icons'
+import { AlertCircle, Check, CheckCircle2, Copy, ExternalLink, Globe, RefreshCw, ShieldCheck, Star, Trash2 } from './Icons'
+import { EmptyState } from './SharedUi'
 import { api } from '../api'
 import { confirmAction } from '../lib/feedback'
 
@@ -149,7 +150,6 @@ export function CustomDomainsSettings() {
         <div>
           <div className="domain-title-row">
             <div>
-              <span className="section-kicker">Presença digital</span>
               <h2 className="cardTitle">Domínio personalizado</h2>
               <p className="cardDesc">Use até 5 endereços próprios, com verificação de propriedade e HTTPS automático.</p>
             </div>
@@ -169,7 +169,7 @@ export function CustomDomainsSettings() {
               onKeyDown={(event) => {
                 if (event.key === 'Enter') void createDomain()
               }}
-              placeholder="agenda.seusalao.com.br"
+              placeholder="agenda.suabarbearia.com.br"
               inputMode="url"
               aria-label="Domínio personalizado"
               autoCapitalize="none"
@@ -187,11 +187,7 @@ export function CustomDomainsSettings() {
         {loading ? (
           <div className="domain-loading skeleton" />
         ) : loadFailed ? (<div className="domain-empty"><strong>Não foi possível carregar seus domínios</strong><button type="button" className="btn btnPrimary" onClick={() => void load()}>Tentar novamente</button></div>) : domains.length === 0 ? (
-          <div className="domain-empty">
-            <img decoding="async" src="/icons/hugeicons/globe-02.svg" alt="" aria-hidden="true" loading="lazy" />
-            <strong>Nenhum domínio conectado</strong>
-            <span>Você continuará usando o subdomínio padrão até adicionar um endereço próprio.</span>
-          </div>
+          <EmptyState compact icon={<Globe size={36} />} title="Nenhum domínio conectado" description="Seu endereço atual continua funcionando. Adicione um domínio próprio quando quiser." />
         ) : (
           <div className="domain-list">
             {domains.map((item) => (

@@ -12,7 +12,6 @@ body { font-family: var(--font-ui); }
 .client-empty .empty-state strong { color:var(--ink-strong); }
 .client-empty .empty-state span { color:var(--ink-body); }
 @media(max-width:640px) { .client-admin-page .client-toolbar { padding:4px 2px 16px; }.client-empty { min-height:300px;padding:28px 16px; } }
-.color-picker-native:has(input:focus-visible) { outline:3px solid var(--brand-accent-strong);outline-offset:3px;border-radius:var(--nr-radius-control); }
 .tenant-brand-name { font-family: var(--font-ui); font-weight: 750; letter-spacing: -.025em; }
 .assistant-brand-wordmark { font-family: var(--font-ui); font-weight: 750; }
 .assistant-brand-mark img { object-fit: contain; }

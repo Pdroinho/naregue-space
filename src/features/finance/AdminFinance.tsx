@@ -57,6 +57,7 @@ export function AdminFinance() {
     const revenueGoalPercent = finance.goals.revenueCents > 0 ? Math.min(100, (finance.goals.currentRevenueCents / finance.goals.revenueCents) * 100) : 0
     const clientGoalPercent = finance.goals.newClients > 0 ? Math.min(100, (finance.goals.currentNewClients / finance.goals.newClients) * 100) : 0
     const activeMonthLabel = financeMonthLabel(finance.currentMonthYm)
+    const fullMonthLabel = new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${finance.currentMonthYm}-01T12:00:00Z`))
     const monthlyFlow = finance.monthly.map((month) => ({
         ...month,
         label: financeMonthLabel(month.ym),
@@ -113,13 +114,12 @@ export function AdminFinance() {
     }
 
     return (
-        <div className="finance36">
+        <div className="finance36 nr-finance">
             {loadError ? <div className="card product-load-state" role="alert"><strong>Os dados abaixo podem estar desatualizados.</strong><p>{loadError}</p><button type="button" className="btn" onClick={loadData}>Tentar novamente</button></div> : null}
             <section className="finance36-hero">
                 <div className="finance36-hero-copy">
-                    <span className="finance36-eyebrow">Controle financeiro · {activeMonthLabel}</span>
-                    <h2>Entenda o mês sem fazer conta na cabeça.</h2>
-                    <p>Entradas confirmadas, movimentações manuais, despesas e metas reunidas na mesma leitura.</p>
+                    <h2>Resumo de {fullMonthLabel}</h2>
+                    <p>Atendimentos confirmados e movimentações da barbearia.</p>
                 </div>
                 <div className="finance36-actions">
                     <button type="button" className="finance36-btn is-primary" onClick={() => setShowTransactionModal(true)}>
@@ -136,14 +136,14 @@ export function AdminFinance() {
 
             <section className="finance36-kpis" aria-label="Resumo financeiro do mês">
                 <article className="finance36-kpi is-income">
-                    <span>Entradas do mês</span>
+                    <span>Receita registrada</span>
                     <strong data-money-size={formatBRL(current.entriesCents / 100).length>14?'long':formatBRL(current.entriesCents / 100).length>11?'medium':'normal'}>{formatBRL(current.entriesCents / 100)}</strong>
                     <small className={growth === null || growth >= 0 ? 'is-positive' : 'is-negative'}>{growth === null ? 'Mês anterior sem entradas para comparar' : `${growth >= 0 ? '+' : ''}${growth}% vs. ${financeMonthLabel(previous.ym)}`}</small>
                 </article>
                 <article className="finance36-kpi is-expense">
-                    <span>Saídas do mês</span>
+                    <span>Despesas registradas</span>
                     <strong data-money-size={formatBRL(current.expensesCents / 100).length>14?'long':formatBRL(current.expensesCents / 100).length>11?'medium':'normal'}>{formatBRL(current.expensesCents / 100)}</strong>
-                    <small>{expenseRatio.toFixed(1).replace('.', ',')}% das entradas registradas</small>
+                    <small>{current.entriesCents>0 ? `${expenseRatio.toFixed(1).replace('.', ',')}% da receita registrada` : 'Sem receita registrada para comparar'}</small>
                 </article>
                 <article className="finance36-kpi is-balance">
                     <span>Saldo do mês</span>
@@ -151,10 +151,9 @@ export function AdminFinance() {
                     <small>Entradas registradas − saídas registradas</small>
                 </article>
                 <article className="finance36-kpi is-goal">
-                    <span>Meta de faturamento</span>
-                    <strong>{finance.goals.revenueCents > 0 ? `${Math.round(revenueGoalPercent)}%` : 'Definir meta'}</strong>
-                    <div className="finance36-mini-progress"><i style={{ width: `${revenueGoalPercent}%` }} /></div>
-                    <small>{finance.goals.revenueCents > 0 ? `${formatBRL(finance.goals.currentRevenueCents / 100)} de ${formatBRL(finance.goals.revenueCents / 100)}` : 'Informe uma meta mensal para acompanhar o progresso'}</small>
+                    <span>Valor médio por atendimento</span>
+                    <strong>{formatBRL(averageTicket / 100)}</strong>
+                    <small>{current.confirmedAppointments} atendimentos confirmados no mês</small>
                 </article>
             </section>
 
@@ -162,8 +161,7 @@ export function AdminFinance() {
                 <section className="finance36-panel finance36-flow-panel">
                     <header className="finance36-panel-head">
                         <div>
-                            <span className="finance36-panel-kicker">Últimos 6 meses</span>
-                            <h3>Entradas x saídas</h3>
+                            <h3>Receitas e despesas</h3><p className="nr-panel-description">Últimos seis meses</p>
                         </div>
                         <div className="finance36-legend" aria-label="Legenda do gráfico">
                             <span><i className="is-entry" />Entradas</span>
@@ -181,13 +179,12 @@ export function AdminFinance() {
                 <aside className="finance36-panel finance36-reading">
                     <header className="finance36-panel-head">
                         <div>
-                            <span className="finance36-panel-kicker">Leitura do mês</span>
-                            <h3>De onde o número vem</h3>
+                            <h3>Composição da receita</h3>
                         </div>
                         <BarChart3 size={19} />
                     </header>
                     <div className="finance36-reading-list">
-                        <div><span>Serviços confirmados</span><strong>{formatBRL(current.serviceEntriesCents / 100)}</strong></div>
+                        <div><span>Atendimentos confirmados</span><strong>{formatBRL(current.serviceEntriesCents / 100)}</strong></div>
                         <div><span>Entradas manuais</span><strong>{formatBRL(current.manualIncomeCents / 100)}</strong></div>
                         <div><span>Ticket médio dos serviços</span><strong>{formatBRL(averageTicket / 100)}</strong></div>
                         <div><span>Agendamentos confirmados</span><strong>{current.confirmedAppointments}</strong></div>
@@ -204,8 +201,7 @@ export function AdminFinance() {
                 <section className="finance36-panel finance36-transactions">
                     <header className="finance36-panel-head finance36-transactions-head">
                         <div>
-                            <span className="finance36-panel-kicker">Movimentação</span>
-                            <h3>Últimos registros</h3>
+                            <h3>Movimentações recentes</h3>
                         </div>
                         <div className="finance36-filter-group">
                             {filters.map(f => (
@@ -217,7 +213,7 @@ export function AdminFinance() {
                     </header>
                     <div className="finance36-transaction-list">
                         {filteredTransactions.length === 0 ? (
-                            <EmptyState compact image="/icons/hugeicons/wallet-02.svg" title="Nada por aqui ainda" description="Os registros financeiros do período aparecerão nesta lista." />
+                            <EmptyState compact image="/icons/hugeicons/wallet-02.svg" title="Nenhuma movimentação" description="Atendimentos confirmados e movimentações adicionadas aparecerão aqui." />
                         ) : filteredTransactions.map((transaction) => (
                             <article className="finance36-transaction" key={transaction.id}>
                                 <div className={`finance36-transaction-sign ${transaction.type}`} aria-hidden="true">{transaction.type === 'income' ? '+' : '−'}</div>
@@ -242,8 +238,7 @@ export function AdminFinance() {
                     <section className="finance36-panel finance36-goals">
                         <header className="finance36-panel-head">
                             <div>
-                                <span className="finance36-panel-kicker">Metas</span>
-                                <h3>Ritmo do mês</h3>
+                                <h3>Metas da barbearia</h3>
                             </div>
                             <button type="button" className="finance36-icon-btn" onClick={() => setShowGoalsModal(true)} aria-label="Editar metas"><Edit2 size={15} /></button>
                         </header>
@@ -255,7 +250,7 @@ export function AdminFinance() {
                         <div className="finance36-goal is-client">
                             <div><span>Novos clientes</span><strong>{finance.goals.newClients > 0 ? `${Math.round(clientGoalPercent)}%` : 'Definir meta'}</strong></div>
                             <div className="finance36-progress"><i style={{ width: `${clientGoalPercent}%` }} /></div>
-                            <small>{finance.goals.currentNewClients} de {finance.goals.newClients} clientes</small>
+                            <small>{finance.goals.newClients>0 ? `${finance.goals.currentNewClients} de ${finance.goals.newClients} clientes` : 'Defina uma meta de novos clientes'}</small>
                         </div>
                         <button type="button" className="finance36-inline-action" onClick={() => askAssistant('Com base no meu financeiro atual e nas minhas metas deste mês, o que eu deveria priorizar para chegar mais perto da meta sem depender de descontos?')}>Como chegar na meta? <Sparkles size={14} /></button>
                     </section>
@@ -263,8 +258,7 @@ export function AdminFinance() {
                     <section className="finance36-panel finance36-expenses">
                         <header className="finance36-panel-head">
                             <div>
-                                <span className="finance36-panel-kicker">Saídas</span>
-                                <h3>Principais categorias</h3>
+                                <h3>Despesas por categoria</h3>
                             </div>
                             <Wallet size={18} />
                         </header>
@@ -436,6 +430,7 @@ function ExtractModal({ isOpen, onClose, todayYmd, currentMonthYm, timeZone }: {
     status: string
   }
   const [transactions, setTransactions] = useState<FinanceTransactionRow[]>([])
+  const [extractError,setExtractError] = useState<string|null>(null)
   const [start, setStart] = useState(() => `${currentMonthYm}-01`)
   const [end, setEnd] = useState(todayYmd)
   const [type, setType] = useState('all')
@@ -453,13 +448,16 @@ function ExtractModal({ isOpen, onClose, todayYmd, currentMonthYm, timeZone }: {
 
   async function load() {
       setLoading(true)
+      setExtractError(null)
       try {
           const res = await api<{ transactions: FinanceTransactionRow[] }>(
             `/api/admin/finance/extract?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}&type=${encodeURIComponent(type)}`,
           )
           if (res.ok) setTransactions(res.data.transactions)
+          else setExtractError(res.error.message)
       } catch (err) {
           console.error(err)
+          setExtractError('Não foi possível carregar o extrato. Tente novamente.')
       } finally {
           setLoading(false)
       }
@@ -526,12 +524,13 @@ function ExtractModal({ isOpen, onClose, todayYmd, currentMonthYm, timeZone }: {
                         ]}
                     />
                 </div>
-                <button type="button" className="btn finance40-export-btn" onClick={handleExport} disabled={transactions.length === 0}>
+                <button type="button" className="btn finance40-export-btn" onClick={handleExport} disabled={loading || Boolean(extractError) || transactions.length === 0}>
                     <Download size={15} /> Exportar CSV
                 </button>
             </div>
 
-            <div className="table-scroll finance40-extract-table">
+            {extractError ? <div className="product-load-state" role="alert"><p>{extractError}</p><button type="button" className="btn" onClick={()=>void load()}>Tentar novamente</button></div> : null}
+            <div className="table-scroll finance40-extract-table" hidden={Boolean(extractError)}>
                 <table className="data-table">
                     <thead>
                         <tr>

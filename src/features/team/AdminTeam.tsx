@@ -124,9 +124,8 @@ export function AdminTeam({
     <section className="team-page" aria-labelledby="team-title">
       <header className="team-heading">
         <div>
-          <span className="team-eyebrow">EQUIPE DO ESTÚDIO</span>
           <h2 className="ld-ds-page-title" id="team-title">
-            Cada profissional, uma agenda organizada.
+            Profissionais da barbearia
           </h2>
           <p>
             Escolha quem atende, quais serviços realiza e quando está
@@ -172,7 +171,7 @@ export function AdminTeam({
               <span>
                 {atLimit
                   ? 'Todas as vagas do plano estão ocupadas.'
-                  : `${data.seatLimit - active} vaga(s) disponível(is) para novas profissionais.`}
+                  : `${data.seatLimit - active} vagas disponíveis para novos profissionais.`}
               </span>
             </div>
             <button

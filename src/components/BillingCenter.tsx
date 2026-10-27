@@ -50,7 +50,8 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
         const plans = orderedTeamPlans(res.data.plans)
         setCatalog({ ...res.data, checkoutAvailable: res.data.checkoutAvailable === true, plans })
         setCode(
-          plans.find((plan) => plan.seats >= res.data.activeProfessionals)
+          plans.find((plan) => plan.code === res.data.currentSubscription?.planCode)
+            ?.code ?? plans.find((plan) => plan.seats >= res.data.activeProfessionals)
             ?.code ?? 'TEAM_15',
         )
         setOrders((previous) => [
@@ -150,8 +151,7 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
     >
       <div className="billing-intro">
         <div>
-          <span className="eyebrow">Assinatura NaRégua</span>
-          <h1 id="billing-title">O tamanho certo para o seu espaço</h1>
+          <h2 id="billing-title">Plano da barbearia</h2>
           <p>
             Uma assinatura para a equipe, agenda por profissional e um WhatsApp
             do espaço. O valor é mensal por faixa de profissionais.
@@ -184,12 +184,13 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
               <span className="billing-plan__total">
                 Até {plan.seats} profissionais agendáveis
               </span>
+              {catalog?.currentSubscription?.planCode===plan.code ? <span className="billing-plan__current">Plano atual</span> : null}
             </button>
           ))}
         </div>
         <aside className="card billing-summary" data-tour="billing-summary">
-          <span className="eyebrow">{active ? catalog?.currentSubscription?.planCode === selected.code ? 'Seu plano atual' : 'Comparar faixa' : 'Sua assinatura'}</span>
-          <h2>{selected.label}</h2>
+          <h3>{active ? catalog?.currentSubscription?.planCode === selected.code ? 'Seu plano atual' : 'Faixa selecionada' : 'Resumo da contratação'}</h3>
+          <p>{selected.label}</p>
           <div className="billing-summary__price">
             <strong>{money(finalAmount)}</strong>
             <span>por um mês</span>
@@ -213,13 +214,13 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
             </p>
           ) : null}
           {error ? <p role="alert">{error}</p> : null}
-          {!loading && !catalog?.checkoutAvailable ? (
+          {!loading && !active && !catalog?.checkoutAvailable ? (
             <p role="status">
               Contratação temporariamente indisponível. Os planos e valores
               continuam atualizados.
             </p>
           ) : null}
-          <button
+          {!active && catalog?.checkoutAvailable ? <button
             type="button"
             className="btn btnPrimary billing-checkout"
             disabled={
@@ -238,9 +239,9 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
                 : !catalog?.checkoutAvailable
                   ? 'Contratação indisponível'
                   : active ? 'Assinatura ativa' : 'Continuar para pagamento'}
-          </button>
+          </button> : null}
           {active ? <a className="btn btn-ghost billing-help" href="/admin?view=support">Quero ajuda com meu plano</a> : null}
-          {!loading && !catalog?.checkoutAvailable ? (
+          {!loading && error ? (
             <button
               type="button"
               className="btn btn-ghost"
@@ -251,7 +252,7 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
           ) : null}
         </aside>
       </div>
-      <div
+      {!active && catalog?.checkoutAvailable ? <div
         className={`billing-mobile-cta ${active ? 'is-active-subscription' : ''}`}
         aria-label={`Plano selecionado: ${selected.label}`}
       >
@@ -276,7 +277,7 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
                   ? 'Plano ativo'
                   : 'Continuar'}
         </button>
-      </div>
+      </div> : null}
       {!locked && orders.length ? (
         <div className="billing-history">
           <div>
