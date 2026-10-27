@@ -31,4 +31,8 @@ PRODUCT.md e DESIGN.md continuam descrevendo a identidade aplicada. A unica alte
 
 ## Limites
 
-Os testes usam fixtures e os contextos exercitados. Superficies fotograficas, opacidade composta, estados de integracoes externas, dados reais e combinacoes nao exercitadas exigem verificacao propria. Resultado automatizado sem achados nao equivale a certificacao WCAG global. Ornamentos herdados e textos tenues nao sao promovidos a padroes conformes por este registro. Nao houve deploy por esta passagem.
+Os testes usam fixtures e os contextos exercitados. Superficies fotograficas, opacidade composta, estados de integracoes externas, dados reais e combinacoes nao exercitadas exigem verificacao propria. Resultado automatizado sem achados nao equivale a certificacao WCAG global. Ornamentos herdados e textos tenues nao sao promovidos a padroes conformes por este registro. Publicacao registrada abaixo.
+
+## Publicacao
+
+Commit funcional d0fd2a4 publicado na imagem naregua:3.0-ui-d0fd2a4, com backup criptografado previo. Readiness publico confirmou banco pronto. Login publico abriu no navegador com os estilos novos. Painel autenticado e estados de erro foram exercitados localmente com API controlada, sem alterar registros de clientes reais ou enviar mensagens/cobrancas. Regressao geral adicional: 70/70 verificacoes em .validation/panel-general-final.log.
