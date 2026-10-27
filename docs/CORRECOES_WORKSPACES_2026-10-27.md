@@ -35,3 +35,5 @@ A verificacao e local e restrita ao pacote de estados e contextos fornecido. Nao
 ## Validacao real da configuracao WhatsApp
 
 Depois do deploy visual 2e01612, o teste real de preparacao encontrou divergencia: o runtime por tenant consultava somente platform_settings, enquanto a configuracao global efetiva utilizava fallback do ambiente. O runtime agora recebe platformEvolutionConfig da mesma fonte canonica usada pelo painel DEV, preservando isolamento e sem copiar chaves em texto puro para cada tenant. Oito testes Node22 de configuracao, QR, webhook, isolamento, persistencia e transporte passaram, incluindo regressao para ambiente configurado e banco sem configuracao global persistida. A geracao real do QR ainda sera conferida apos publicar esse ajuste.
+
+A prova real identificou tambem o contrato antigo de webhook: a API instalada respondeu HTTP400 exigindo a propriedade webhook. O runtime passou a enviar o objeto aninhado da Evolution, com eventos, cabecalho secreto e webhookBase64/webhookByEvents. A requisicao real corrigida recebeu HTTP201. O diagnostico da tela agora recarrega ao conectar. Os oito testes Node22 passaram novamente com o contrato aninhado.

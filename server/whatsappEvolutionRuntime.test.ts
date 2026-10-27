@@ -163,10 +163,14 @@ test('webhook passa pela resolução HTTPS protegida e valida contrato completo'
   assert.equal(await runtime.evolutionWebhookConfiguredForTenant(tenantOne), true)
   assert.deepEqual(resolved, ['https://tenant.example/', 'https://tenant.example/'])
   assert.match(requests[0].url, /\/webhook\/set\/studio-one$/)
-  const body = JSON.parse(String(requests[0].init?.body)) as Record<string, unknown>
+  const payload = JSON.parse(String(requests[0].init?.body)) as {webhook:Record<string,unknown>}
+  assert.ok(payload.webhook)
+  const body = payload.webhook
   assert.equal(body.url, `https://app.example/api/webhooks/evolution/${tenantOne}`)
   assert.deepEqual(body.events, ['MESSAGES_UPSERT', 'MESSAGES_UPDATE', 'CONNECTION_UPDATE'])
   assert.deepEqual(body.headers, { 'x-webhook-secret': 'webhook-secret' })
+  assert.equal(body.webhookBase64,false)
+  assert.equal(body.webhookByEvents,false)
   assert.equal(requests.every(request => request.init?.redirect === 'error' || request.url.includes('/webhook/find/')), true)
   db.close()
 })

@@ -394,7 +394,7 @@ export function WhatsAppCenter() {
 
   useEffect(() => {
     if (connected) {
-      void Promise.all([loadConversationsEffect(false), loadCampaigns()])
+      void Promise.all([loadConversationsEffect(false), loadCampaigns(), loadDiagnostics()])
       return
     }
     if (connectionState === null) return

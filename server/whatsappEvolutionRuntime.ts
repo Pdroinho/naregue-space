@@ -259,7 +259,7 @@ export function createWhatsappEvolutionRuntime({
     if (!config?.baseUrl || !config.apiKey || !config.instanceName || !appBaseUrl || !webhookSecret) return false
     const response = await fetchFn(`${await resolveExternalHttpsBaseUrl(config.baseUrl)}/webhook/set/${encodeURIComponent(config.instanceName)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', apikey: config.apiKey }, redirect: 'error', signal: AbortSignal.timeout(10_000),
-      body: JSON.stringify({ enabled: true, url: webhookUrl(tenantId), events: ['MESSAGES_UPSERT', 'MESSAGES_UPDATE', 'CONNECTION_UPDATE'], headers: { 'x-webhook-secret': webhookSecret }, base64: false }),
+      body: JSON.stringify({ webhook: { enabled: true, url: webhookUrl(tenantId), events: ['MESSAGES_UPSERT', 'MESSAGES_UPDATE', 'CONNECTION_UPDATE'], headers: { 'x-webhook-secret': webhookSecret }, webhookBase64: false, webhookByEvents: false } }),
     }).catch(() => null)
     return Boolean(response?.ok)
   }
