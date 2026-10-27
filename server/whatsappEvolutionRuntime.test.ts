@@ -76,6 +76,7 @@ function createTestDb() {
 
 function createRuntime(db: Database.Database, options: {
   production?: boolean
+  platformEvolutionConfig?: () => {baseUrl:string|null;apiKey:string|null}
   fetchFn?: typeof fetch
   resolveExternalHttpsBaseUrl?: (raw: string) => Promise<string>
   events?: Array<Record<string, unknown>>
@@ -87,6 +88,7 @@ function createRuntime(db: Database.Database, options: {
   return createWhatsappEvolutionRuntime({
     db,
     production: options.production ?? false,
+    platformEvolutionConfig: options.platformEvolutionConfig,
     appBaseUrl: 'https://app.example/',
     webhookSecret: 'webhook-secret',
     normalizeFallbackPhone: raw => raw.replace(/\D/g, ''),
@@ -123,6 +125,20 @@ test('configuração por tenant respeita segredos locais, modo gerenciado e cria
   assert.match(created?.instanceName ?? '', /^lash-studio-lua-22222222$/)
   assert.equal(created?.apiKey, 'global-secret')
   assert.equal((db.prepare(`SELECT COUNT(*) as n FROM whatsapp_instances WHERE tenant_id = ?`).get(tenantOne) as { n: number }).n, 1)
+  db.close()
+})
+
+test('configuração gerenciada usa a fonte global canônica mesmo sem configuração persistida', () => {
+  const db=createTestDb()
+  db.prepare('DELETE FROM platform_settings').run()
+  const runtime=createRuntime(db,{production:true,platformEvolutionConfig:()=>({baseUrl:'https://environment.example',apiKey:'environment-key'})})
+  assert.equal(runtime.requireWhatsappConfig(tenantOne)?.apiKey,'environment-key')
+  const prepared=runtime.ensurePlatformWhatsappConfig(tenantTwo)
+  assert.equal(prepared?.baseUrl,'https://environment.example')
+  assert.equal(prepared?.apiKey,'environment-key')
+  const stored=db.prepare('SELECT api_key FROM whatsapp_instances WHERE tenant_id=?').get(tenantTwo) as {api_key:string|null}
+  assert.equal(stored.api_key,null)
+  assert.notEqual(prepared?.instanceName,runtime.requireWhatsappConfig(tenantOne)?.instanceName)
   db.close()
 })
 

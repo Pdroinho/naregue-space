@@ -54,6 +54,7 @@ type WhatsappEvolutionRuntimeOptions = {
   production: boolean
   appBaseUrl?: string
   webhookSecret?: string
+  platformEvolutionConfig?: () => { baseUrl?: string | null; apiKey?: string | null }
   normalizeFallbackPhone: (raw: string) => string
   decryptPlatformApiKey: (value: string | null | undefined) => string | null
   decryptTenantApiKey: (value: string | null | undefined, tenantId: string) => string | null
@@ -69,6 +70,7 @@ export function createWhatsappEvolutionRuntime({
   production,
   appBaseUrl,
   webhookSecret,
+  platformEvolutionConfig,
   normalizeFallbackPhone,
   decryptPlatformApiKey,
   decryptTenantApiKey,
@@ -79,6 +81,12 @@ export function createWhatsappEvolutionRuntime({
   randomId = randomUUID,
 }: WhatsappEvolutionRuntimeOptions) {
   const whatsappPhone = (raw: string) => normalizeBrazilPhone(raw) ?? normalizeFallbackPhone(raw)
+  const readPlatformConfig = () => {
+    if (platformEvolutionConfig) return platformEvolutionConfig()
+    const rows = db.prepare(`SELECT key, value FROM platform_settings WHERE key IN ('evolution_api_url', 'evolution_api_key')`).all() as Array<{key:string;value:string}>
+    const defaults = Object.fromEntries(rows.map(row=>[row.key,row.value]))
+    return {baseUrl:defaults.evolution_api_url || null,apiKey:decryptPlatformApiKey(defaults.evolution_api_key)}
+  }
 
   const requireWhatsappConfig = (tenantId: string): WhatsappConfig | undefined => {
     const row = db.prepare(`
@@ -87,17 +95,16 @@ export function createWhatsappEvolutionRuntime({
       FROM whatsapp_instances WHERE tenant_id = ? ORDER BY updated_at DESC LIMIT 1
     `).get(tenantId) as Omit<WhatsappConfig, 'storedBaseUrl' | 'storedApiKeyCiphertext' | 'usesGlobalBaseUrl' | 'usesGlobalApiKey'> | undefined
     if (!row) return undefined
-    const globals = db.prepare(`SELECT key, value FROM platform_settings WHERE key IN ('evolution_api_url', 'evolution_api_key')`).all() as Array<{ key: string; value: string }>
-    const defaults = Object.fromEntries(globals.map(item => [item.key, item.value])) as Record<string, string>
+    const globalConfig = readPlatformConfig()
     const tenantApiKey = decryptTenantApiKey(row.apiKey, tenantId)
-    const globalApiKey = decryptPlatformApiKey(defaults.evolution_api_key)
+    const globalApiKey = globalConfig.apiKey
     return {
       ...row,
       storedBaseUrl: row.baseUrl,
       storedApiKeyCiphertext: row.apiKey,
-      baseUrl: production ? (defaults.evolution_api_url || null) : (row.baseUrl || defaults.evolution_api_url || null),
+      baseUrl: production ? (globalConfig.baseUrl || null) : (row.baseUrl || globalConfig.baseUrl || null),
       apiKey: production ? (globalApiKey || null) : (tenantApiKey || globalApiKey || null),
-      usesGlobalBaseUrl: production ? Boolean(defaults.evolution_api_url) : (!row.baseUrl && Boolean(defaults.evolution_api_url)),
+      usesGlobalBaseUrl: production ? Boolean(globalConfig.baseUrl) : (!row.baseUrl && Boolean(globalConfig.baseUrl)),
       usesGlobalApiKey: production ? Boolean(globalApiKey) : (!row.apiKey && Boolean(globalApiKey)),
     }
   }
@@ -105,10 +112,8 @@ export function createWhatsappEvolutionRuntime({
   const ensurePlatformWhatsappConfig = (tenantId: string) => {
     const existing = requireWhatsappConfig(tenantId)
     if (existing) return existing
-    const globals = db.prepare(`SELECT key, value FROM platform_settings WHERE key IN ('evolution_api_url', 'evolution_api_key')`).all() as Array<{ key: string; value: string }>
-    const defaults = Object.fromEntries(globals.map(item => [item.key, item.value])) as Record<string, string>
-    const globalApiKey = decryptPlatformApiKey(defaults.evolution_api_key)
-    if (!defaults.evolution_api_url || !globalApiKey) return undefined
+    const globalConfig = readPlatformConfig()
+    if (!globalConfig.baseUrl || !globalConfig.apiKey) return undefined
     const tenant = db.prepare(`SELECT slug FROM tenants WHERE id = ?`).get(tenantId) as { slug: string } | undefined
     if (!tenant) return undefined
     const safeSlug = tenant.slug.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 48)

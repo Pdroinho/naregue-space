@@ -105,6 +105,7 @@ const professionalConsent = createProfessionalConsentService({ db })
 const appointmentAutomationBridge: { current?: ReturnType<typeof createAppointmentAutomationRuntime> } = {}
 const whatsapp = createWhatsappEvolutionRuntime({
   db,
+  platformEvolutionConfig: platformEvolution.platformEvolutionConfig,
   production: env.NODE_ENV === 'production',
   appBaseUrl: env.APP_BASE_URL,
   webhookSecret: env.EVOLUTION_WEBHOOK_SECRET,
