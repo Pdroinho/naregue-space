@@ -199,6 +199,7 @@ export function AppRoutes() {
             : <LandingPage />}
         />
         <Route path="/login" element={hostTenant ? <UnifiedLogin hostTenant={hostTenant} /> : <WorkspaceAccessPage />} />
+        <Route path="/acessar" element={hostTenant ? <Navigate to="/login" replace /> : <WorkspaceAccessPage />} />
         <Route path="/termos" element={<LegalPage kind="terms" />} />
         <Route path="/privacidade" element={<LegalPage kind="privacy" />} />
 

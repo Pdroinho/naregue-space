@@ -1,42 +1,82 @@
-/* global window,document */
+/* global document,window */
 import assert from 'node:assert/strict'
-import { readFileSync,existsSync,mkdirSync } from 'node:fs'
+import {readFileSync,existsSync,mkdirSync,writeFileSync} from 'node:fs'
 import path from 'node:path'
-import { chromium } from 'playwright'
-const root=path.resolve('dist/client')
+import {chromium,firefox} from 'playwright'
+import {inspectPanel} from './qa-panel-inspection.mjs'
+
+const root=path.resolve('dist/client'),dir=process.argv.includes('--firefox')?'.validation/lp-renewal-firefox':'.validation/lp-renewal'
+mkdirSync(dir,{recursive:true})
 const plans=[{code:'TEAM_3',seats:3,minProfessionals:1,label:'1 a 3 profissionais',amountCents:7490},{code:'TEAM_6',seats:6,minProfessionals:4,label:'4 a 6 profissionais',amountCents:9990},{code:'TEAM_15',seats:15,minProfessionals:7,label:'7 a 15 profissionais',amountCents:14900}]
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2','.jpg':'image/jpeg'}
-const browser=await chromium.launch()
-let count=0
+const browser=await(process.argv.includes('--firefox')?firefox:chromium).launch()
+let catalogFails=false,count=0
+const reports=[],requests=[]
+async function settle(page){await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(async image=>{image.loading='eager';try{await image.decode()}catch{/* Broken images are reported by inspection. */}}));for(const a of document.getAnimations())if(a.effect?.getTiming().iterations!==Infinity)a.finish()})}
 try{
- const page=await browser.newPage();const errors=[]
+ const page=await browser.newPage(),errors=[]
  page.on('pageerror',e=>errors.push(e.message))
  await page.route('**/*',async route=>{
   const url=new URL(route.request().url())
   if(url.hostname!=='naregua.space')return route.abort()
-  if(url.pathname.startsWith('/api/'))return route.fulfill({contentType:'application/json',body:JSON.stringify(url.pathname.includes('/billing/plans')?{teamPlans:plans,checkoutAvailable:false}:url.pathname.includes('/auth/me')?{user:null}:{})})
-  const file=path.resolve(root,'.'+decodeURIComponent(url.pathname))
-  assert.ok(file===root||file.startsWith(root+path.sep))
+  if(url.pathname.startsWith('/api/')){
+   requests.push(url.pathname+url.search);assert.equal(route.request().method(),'GET','LP checks must never create orders or users')
+   const body=url.pathname.includes('/billing/plans')?(catalogFails?{message:'Falha de catálogo para teste'}:{teamPlans:plans,checkoutAvailable:false}):url.pathname.includes('/auth/me')?{user:null}:url.pathname.includes('/public/legal')?{documents:{termsVersion:'qa',privacyVersion:'qa',updatedAt:'2026-10-27',bundleHash:'qa'}}:url.pathname.includes('/team-quote')?{quote:{amountCents:14900,discountPercent:0,fingerprint:'qa'}}:{}
+   return route.fulfill({status:catalogFails&&url.pathname.includes('/billing/plans')?503:200,contentType:'application/json',body:JSON.stringify(body)})
+  }
+  const file=path.resolve(root,'.'+decodeURIComponent(url.pathname));assert.ok(file===root||file.startsWith(root+path.sep))
   const target=existsSync(file)&&path.extname(file)?file:path.join(root,'index.html')
   return route.fulfill({body:readFileSync(target),contentType:mime[path.extname(target)]||'application/octet-stream'})
  })
- mkdirSync('.validation',{recursive:true})
- for(const width of [1440,768,390,320]){
-  await page.setViewportSize({width,height:900});await page.goto('https://naregua.space/')
-  await page.locator('.nr-sales-hero h1').waitFor();await page.evaluate(()=>document.fonts.ready)
-  const metrics=await page.evaluate(()=>{
-   const logo=document.querySelector('.nr-sales-header .nr-brand-logo'),header=document.querySelector('.nr-sales-nav')
-   return {overflow:document.documentElement.scrollWidth>window.innerWidth+1,logoHeight:logo.getBoundingClientRect().height,logoWidth:logo.getBoundingClientRect().width,navDisplay:window.getComputedStyle(header).display,background:window.getComputedStyle(document.querySelector('.nr-sales-header')).backgroundColor}
-  })
-  assert.equal(metrics.overflow,false);assert.ok(metrics.logoHeight>=20&&metrics.logoHeight<=60);assert.ok(metrics.logoWidth<300);assert.equal(metrics.navDisplay,'grid')
-  await page.screenshot({path:`.validation/landing-fixed-${width}.png`})
-  await page.locator('.nr-sales-plan-grid article').last().scrollIntoViewIfNeeded();assert.equal(await page.locator('.nr-sales-plan-grid article').count(),3)
-  await page.locator('.nr-sales-plan-button').first().click();const dialog=page.getByRole('dialog');await dialog.waitFor()
-  assert.equal(await dialog.getByRole('radio').count(),3);assert.equal(await dialog.getByRole('button',{name:'Contratação indisponível'}).isDisabled(),true)
-  const bounds=await dialog.boundingBox();assert.ok(bounds.width<=width&&bounds.x>=-1)
-  await page.screenshot({path:`.validation/landing-checkout-fixed-${width}.png`})
-  await dialog.getByRole('button',{name:'Fechar compra'}).click()
-  console.log(`PASS landing styles, brand dimensions, plan catalog and disabled checkout at ${width}px`);count++
+ for(const width of [1440,1280,1024,768,390,320]){
+  await page.setViewportSize({width,height:1000});await page.goto('https://naregua.space/?ref=demonstracao')
+  await page.locator('.lp-hero h1').waitFor();await settle(page)
+  const initial=await inspectPanel(page);reports.push({width,state:'initial',...initial})
+  assert.equal(initial.overflow,false);assert.equal(await page.getByRole('heading',{level:1}).count(),1)
+  assert.equal(await page.locator('.lp-screen-images img.is-active').evaluate(el=>el.complete&&el.naturalWidth>0),true)
+  await page.screenshot({path:`${dir}/hero-${width}.png`,animations:'disabled'})
+  if(width===1440||width===390)await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'})
+  const topic=page.getByRole('button',{name:'Escolher área da demonstração',exact:true})
+  await topic.click();await page.getByRole('option',{name:'equipe',exact:true}).click()
+  assert.ok((await page.locator('.lp-screen-images img.is-active').getAttribute('src')).endsWith('/team.webp'))
+  await topic.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.getAttribute('role')==='listbox');await page.keyboard.press('End');await page.keyboard.press('Enter')
+  await page.waitForFunction(()=>document.querySelector('.lp-screen-images img.is-active')?.getAttribute('src')?.endsWith('/dashboard.webp'))
+  await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Escolher área da demonstração')
+  await page.getByRole('button',{name:'agenda',exact:true}).click()
+  await page.getByRole('button',{name:'Quero minha barbearia na régua',exact:false}).click()
+  const slider=page.getByRole('slider',{name:'Quantos profissionais atendem aí?',exact:true});await slider.fill('7')
+  await page.waitForFunction(()=>window.scrollY>1000)
+  await page.waitForFunction(()=>document.querySelector('.lp-plan-label')?.textContent==='7 a 15 profissionais')
+  assert.ok((await page.locator('.lp-price-digits').getAttribute('aria-label')).includes('149,00'))
+  await page.locator('.lp-plan-result').getByRole('button',{name:'Ver este plano',exact:false}).click()
+  const dialog=page.getByRole('dialog');await dialog.waitFor();await settle(page)
+  assert.equal(await dialog.getByRole('radio').count(),3)
+  assert.equal(await dialog.getByRole('radio').last().getAttribute('aria-checked'),'true')
+  await dialog.getByRole('status').filter({hasText:'Não há desconto aplicado'}).waitFor()
+  assert.equal(await dialog.getByText('0% de desconto',{exact:false}).count(),0)
+  assert.equal(await dialog.getByText('Etapa 1 de 2 · Equipe',{exact:true}).count(),1)
+  assert.equal(await dialog.getByRole('button',{name:'Contratação indisponível',exact:true}).isDisabled(),true)
+  const bounds=await dialog.boundingBox();assert.ok(bounds.x>=-1&&bounds.width<=width)
+  await page.screenshot({path:`${dir}/checkout-${width}.png`,animations:'disabled'})
+  await dialog.getByRole('button',{name:'Fechar compra',exact:true}).click()
+  assert.ok(requests.some(url=>url.includes('referralToken=demonstracao')))
+  await page.getByRole('button',{name:'Confirmar exemplo',exact:false}).click();assert.equal(await page.locator('.lp-confirmation-demo').getAttribute('aria-hidden'),'false')
+  await settle(page);await page.screenshot({path:`${dir}/story-${width}.png`,animations:'disabled'})
+  const caption=await page.locator('.lp-story-caption').boundingBox(),confirmation=await page.locator('.lp-confirmation-demo').boundingBox();assert.ok(caption.y>=confirmation.y+confirmation.height,'Demonstration caption must stay below confirmation')
+  const question=page.locator('.lp-faq summary').first();await question.click();assert.equal(await page.locator('.lp-faq details').first().getAttribute('open'),'')
+  if(width<=900){const menu=page.getByRole('button',{name:'Abrir menu',exact:true});await menu.click();assert.equal(await page.getByRole('navigation',{name:'Navegação principal'}).isVisible(),true);await page.keyboard.press('Escape');assert.equal(await menu.evaluate(el=>el===document.activeElement),true)}
+  assert.equal(await page.locator('a.lp-login').getAttribute('href'),'/acessar')
+  const final=await inspectPanel(page);reports.push({width,state:'interactive',...final});assert.equal(final.overflow,false)
+  console.log(`PASS ${width}px: real assets, hero selection, keyboard, team price, referral checkout, demo, FAQ and menu`);count++
  }
- assert.deepEqual(errors,[]);console.log(`${count}/${count} landing regression checks passed; all network requests intercepted locally`)
+ catalogFails=true;await page.goto('https://naregua.space/');await page.getByRole('alert').filter({hasText:'Não foi possível atualizar'}).waitFor();assert.equal(await page.locator('.lp-plan-result button').isDisabled(),true)
+ catalogFails=false;await page.getByRole('button',{name:'Atualizar planos',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('.lp-plan-result button')?.disabled);count++;console.log('PASS catalogue error is explicit and retry recovers')
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('https://naregua.space/');await page.locator('.lp-hero h1').waitFor();await settle(page);await page.getByRole('slider',{name:'Quantos profissionais atendem aí?',exact:true}).fill('15');assert.equal(await page.locator('.lp-digit-strip').first().evaluate(el=>window.getComputedStyle(el).transitionDuration),'0s');count++;console.log('PASS reduced motion retains content and interactive prices without animation')
+ await page.goto('https://naregua.space/?checkout=return&workspace=central');await page.locator('.lp-return').waitFor();assert.equal(await page.getByText('Pagamento recebido.',{exact:false}).count(),0);assert.ok((await page.locator('.lp-return a').getAttribute('href')).includes('central.naregua.space/login'));count++;console.log('PASS checkout return keeps workspace access without claiming an unverified payment')
+ await page.goto('https://naregua.space/acessar');await page.locator('#workspace-slug').fill('endereço inválido');await page.getByRole('button',{name:'Acessar meu espaço',exact:false}).click();await page.locator('.landing-access-error').waitFor();assert.equal(await page.locator('form input').count(),1);count++;console.log('PASS existing workspace access form and validation preserved')
+ assert.deepEqual(errors,[])
+ writeFileSync(`${dir}/report${process.argv.includes('--firefox')?'-firefox':''}.json`,JSON.stringify(reports,null,2))
+ const findings=reports.filter(r=>r.contrast.length||r.unnamed.length||r.lowContrastIcons.length||r.brokenImages.length||r.overflow)
+ console.log('VISUAL FINDINGS',JSON.stringify(findings));console.log(`${count}/${count} landing checks passed; all requests intercepted, no orders or messages created`)
+ if(findings.length)process.exitCode=1
 }finally{await browser.close()}

@@ -639,7 +639,7 @@
   .checkout-cycle-note { align-items: flex-start; flex-direction: column; }
   .checkout-cycle-note > div { justify-content: flex-start; }
   .checkout-actions { grid-template-columns: 1fr; }
-  .checkout-actions > span { display: none; }
+  .checkout-actions > span:not(.checkout-step-status) { display: none; }
   .checkout-back,
   .checkout-next { width: 100%; }
   .checkout-next { min-width: 0; }

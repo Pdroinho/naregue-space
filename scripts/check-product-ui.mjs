@@ -80,7 +80,7 @@ try{
   if(p==='/api/public/tenant'){if(tenantHold)await tenantHold;return json(route,{tenant})}
   if(p==='/api/auth/security')return json(route,{phone:null,whatsappMfaReady:false,devices:[],sessions:[]})
   if(p==='/api/admin/brand/prepare-image'){const body=route.request().postDataJSON();logoPreparations.push(body);try{return json(route,await prepareLogoImage(body.imageDataUrl,body.mode))}catch(error){return json(route,{message:error.message,code:'LOGO_PREPARATION_FAILED'},400)}}
-  if(p==='/api/auth/me')return json(route,{user:role?{id:'user',email:'qa@example.com',role,tenantId:'studio',tenantSlug:'studio',subscriptionStatus:'ACTIVE'}:null,isTestMode:false})
+  if(p==='/api/auth/me')return json(route,{user:role?{id:'user',email:process.argv.includes('--landing-assets')?'demo@naregua.space':'qa@example.com',role,tenantId:'studio',tenantSlug:'studio',subscriptionStatus:'ACTIVE'}:null,isTestMode:false})
   if(p==='/api/auth/legal-preferences')return json(route,{currentDocuments:{termsVersion:'qa',privacyVersion:'qa',bundleHash:'qa'},latestAcceptance:{termsVersion:'qa',privacyVersion:'qa',bundleHash:'qa'},whatsappPromotions:false})
   if(p==='/api/public/client-access/request'){assert.equal(route.request().postDataJSON().phone,'5571999999999');return json(route,{sent:true})}
   if(p==='/api/public/client-access/verify'){assert.equal(route.request().postDataJSON().code,'123456');return json(route,{message:'Código de teste inválido'},400)}
@@ -139,7 +139,23 @@ try{
   return json(route,{message:'Auxiliary fixture not supplied'},403)
  })
  role='ADMIN'
- if(process.argv.includes('--workspace-review')||process.argv.includes('--referrals-narrow')){
+ if(process.argv.includes('--landing-assets')){
+  const {mkdirSync}=await import('node:fs');mkdirSync('public/landing/renewal',{recursive:true})
+  tenant.name='Barbearia Central';professionalRows[0].name='Rafael';professionalRows[0].photoUrl=null;professionalRows[1].name='Pedro'
+  const demoSlots=[['João',1,9],['Lucas',1,11],['Mateus',2,9],['André',2,12],['Caio',3,10],['Gabriel',4,11],['Bruno',5,9],['Davi',6,10]]
+  const template=appointments[0];appointments.splice(0)
+  for(const [index,[name,weekday,hour]] of demoSlots.entries()){
+   const start=new Date(today+'T12:00:00Z');start.setUTCDate(start.getUTCDate()-start.getUTCDay()+Number(weekday));start.setUTCHours(Number(hour)+3)
+   const professional=professionalRows[index%2];appointments.push({...template,id:'demo-'+index,professionalId:professional.id,professionalName:professional.name,clientName:String(name),clientEmail:'demonstracao@example.com',startsAt:start.toISOString(),endsAt:new Date(start.getTime()+3600000).toISOString(),confirmationStatus:index%3?'CONFIRMED':'AWAITING_CONFIRMATION'})
+  }
+  await page.setViewportSize({width:1440,height:1000})
+  for(const [view,selector] of [['calendar','.ld-agenda'],['team','.team-person'],['dashboard','.ld-dashboard-page'],['finance','.nr-finance']]){
+   await page.goto(origin+'/admin?view='+view);await page.locator(selector).first().waitFor();await page.evaluate(async()=>{document.documentElement.dataset.theme='dark';await document.fonts.ready;for(const a of document.getAnimations())if(a.effect?.getTiming().iterations!==Infinity)a.finish()})
+   const box=await page.locator('.ld-main').boundingBox();const buffer=await page.screenshot({clip:{x:box.x,y:0,width:box.width,height:850},animations:'disabled'})
+   await sharp(buffer).withMetadata({exif:{IFD0:{ImageDescription:'NaRegua application rendered with synthetic demonstration fixtures; not an AI-generated interface.',Artist:'NaRegua'}}}).webp({quality:88}).toFile(`public/landing/renewal/${view}.webp`)
+  }
+  role=null;await page.setViewportSize({width:390,height:820});await page.goto(origin+'/agendar');await page.locator('.booking30-service').first().click();await page.locator('.dateScrollerWrapper').waitFor();await page.evaluate(async()=>{await document.fonts.ready;for(const a of document.getAnimations())if(a.effect?.getTiming().iterations!==Infinity)a.finish()});await sharp(await page.screenshot({animations:'disabled'})).withMetadata({exif:{IFD0:{ImageDescription:'NaRegua booking interface; synthetic demonstration data.',Artist:'NaRegua'}}}).webp({quality:88}).toFile('public/landing/renewal/booking.webp');pass('five current product screenshots exported with demonstration provenance')
+ }else if(process.argv.includes('--workspace-review')||process.argv.includes('--referrals-narrow')){
   await runWorkspaceReview({page,origin,pass,shot,requestedPaths,domainWrites,onlyReferrals:process.argv.includes('--referrals-narrow'),setBillingActive:value=>{billingActive=value},setWaUnconfigured:value=>{waUnconfigured=value},setExtractFailed:value=>{extractFailed=value},professionalRows,snapshot})
  }else if(process.argv.includes('--panel-dialogs')){
   await runPanelDialogs({page,origin,pass})

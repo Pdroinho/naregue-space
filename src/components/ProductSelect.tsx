@@ -57,6 +57,7 @@ export function ProductSelect({
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(-1)
   const [position, setPosition] = useState<MenuPosition | null>(null)
+  const menuReady = Boolean(position)
 
   const selectedIndex = useMemo(() => options.findIndex((option) => option.value === value), [options, value])
   const selected = selectedIndex >= 0 ? options[selectedIndex] : undefined
@@ -176,8 +177,6 @@ export function ProductSelect({
   useEffect(() => {
     if (!open) return
     measure()
-    const listbox = listboxRef.current
-    requestAnimationFrame(() => listbox?.focus({ preventScroll: true }))
 
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node
@@ -196,9 +195,13 @@ export function ProductSelect({
   }, [open, measure])
 
   useEffect(() => {
+    if (open && menuReady) listboxRef.current?.focus({ preventScroll: true })
+  }, [open, menuReady])
+
+  useEffect(() => {
     if (!open || highlighted < 0) return
     optionRefs.current[highlighted]?.scrollIntoView({ block: 'nearest' })
-  }, [highlighted, open])
+  }, [highlighted, open, menuReady])
 
   useEffect(() => () => {
     if (searchTimerRef.current) window.clearTimeout(searchTimerRef.current)

@@ -129,7 +129,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
     <section className="landing-checkout-panel" role="dialog" aria-modal="true" aria-labelledby="landing-checkout-title" onClick={(event) => event.stopPropagation()}>
       <div className="checkout-progress" aria-label={`Etapa ${step} de 2`}><i className="is-active" /><i className={step === 2 ? 'is-active' : ''} /></div>
       <header className="landing-checkout-header">
-        <div><span>{step === 1 ? '1 de 2 · escolha a equipe' : '2 de 2 · crie seu acesso'}</span><h2 id="landing-checkout-title">{step === 1 ? 'Um plano para o tamanho da sua equipe.' : 'Só o essencial. Sua marca vem depois do pagamento.'}</h2><p>{step === 1 ? 'O valor é mensal por espaço, conforme o número de profissionais.' : 'No setup inicial você envia logo, escolhe cores, horários e serviços.'}</p></div>
+        <div><h2 id="landing-checkout-title">{step === 1 ? 'Um plano para o tamanho da sua equipe.' : 'Só o essencial. Sua marca vem depois do pagamento.'}</h2><p>{step === 1 ? 'O valor é mensal por espaço, conforme o número de profissionais.' : 'No setup inicial você envia logo, escolhe cores, horários e serviços.'}</p></div>
         <button type="button" className="landing-checkout-close" data-modal-close onClick={onClose} aria-label="Fechar compra" disabled={busy}><X size={19} /></button>
       </header>
 
@@ -138,7 +138,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
           <div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe">{teamPlans.map(plan => <button type="button" role="radio" aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
             <span>{plan.label}</span><strong>{money(plan.amountCents)}<small>/mês</small></strong><p>Até {plan.seats} profissionais · 1 mês</p><b>{teamCode === plan.code ? <Check size={14} /> : null}</b>
           </button>)}</div>
-          {referralToken ? <div className="checkout-cycle-note" role="status">{quoteLoading ? 'Validando indicação…' : quoteError ? quoteError : referralQuote ? `${referralQuote.discountPercent}% de desconto na primeira assinatura: ${money(finalAmount)} agora. As próximas mensalidades seguem o valor da faixa escolhida.` : 'Indicação indisponível.'}{quoteError ? <button type="button" className="checkout-back" onClick={()=>setUseReferral(false)}>Continuar sem indicação e sem desconto</button> : null}</div> : null}
+          {referralToken ? <div className="checkout-cycle-note" role="status">{quoteLoading ? 'Validando indicação…' : quoteError ? quoteError : referralQuote ? referralQuote.discountPercent > 0 ? `${referralQuote.discountPercent}% de desconto na primeira assinatura: ${money(finalAmount)} agora. As próximas mensalidades seguem o valor da faixa escolhida.` : `Valor da primeira assinatura: ${money(finalAmount)}. Não há desconto aplicado a esta indicação.` : 'Indicação indisponível.'}{quoteError ? <button type="button" className="checkout-back" onClick={()=>setUseReferral(false)}>Continuar sem indicação e sem desconto</button> : null}</div> : null}
           <div className="checkout-cycle-note"><span>Incluído em qualquer plano</span><div><i><Check size={13} />Agenda e clientes</i><i><Check size={13} />Financeiro</i><i><Check size={13} />Mestre AI</i><i><Check size={13} />Setup guiado</i></div></div>
         </> : <div className="checkout-account-layout">
           <div className="landing-checkout-fields">
@@ -165,7 +165,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         {error ? <div className="landing-checkout-error" role="alert">{error}</div> : null}
         {recoverySlug ? <a href={`/acessar?workspace=${encodeURIComponent(recoverySlug)}`} className="checkout-back">Acessar meu espaço e tentar novamente</a> : null}
         <footer className="checkout-actions">
-          {step === 2 ? <button type="button" className="checkout-back" onClick={() => setStep(1)} disabled={busy}>Voltar</button> : <span />}
+          {step === 2 ? <button type="button" className="checkout-back" onClick={() => setStep(1)} disabled={busy}>Voltar à etapa 1</button> : <span className="checkout-step-status">Etapa 1 de 2 · Equipe</span>}
           <button type="submit" className="checkout-next" disabled={busy || quoteLoading || Boolean(referralToken && !referralQuote) || catalogLoading || !checkoutAvailable || !selected || (step === 2 && (!legalConfig || !legalAccepted))}>{catalogLoading ? 'Verificando disponibilidade…' : !checkoutAvailable ? 'Contratação indisponível' : busy ? 'Preparando pagamento…' : step === 1 ? <>Continuar com {selected?.label?.toLowerCase() ?? 'este plano'} <ArrowRight size={17} /></> : <>Ir para o pagamento seguro <ArrowRight size={17} /></>}</button>
         </footer>
       </form>
