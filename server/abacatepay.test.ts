@@ -21,8 +21,8 @@ function fixture() {
     if (String(url).endsWith('/customers/create')) return Response.json({success:true,data:{id:'cust_test',devMode:mode}})
     if (String(url).endsWith('/products/create')) return Response.json({success:true,data:{id:'prod_test'}})
     if (String(url).includes('/subscriptions/list'))return Response.json({success:true,data:status==='PENDING'?[]:[{id:'subs_test',checkoutId:'bill_test',customerId,status:subscriptionStatus,devMode:mode,amount,createdAt}]})
-    if (String(url).includes('/subscriptions/get'))return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',customerId:null,status:subscriptionStatus,devMode:mode,amount,createdAt}})
-    if (String(url).endsWith('/subscriptions/cancel')){subscriptionStatus='CANCELLED';return Response.json({success:true,data:{id:'subs_test'}})}
+    if (String(url).includes('/subscriptions/get'))return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',customerId,status:subscriptionStatus,devMode:mode,amount,createdAt}})
+    if (String(url).endsWith('/subscriptions/cancel')){subscriptionStatus='CANCELLED';return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',devMode:mode,status:subscriptionStatus}})}
     if (String(url).endsWith('/checkouts/create')||String(url).endsWith('/subscriptions/create')){externalId = body.externalId;customerId=body.customerId??null}
     if (String(url).endsWith('/checkouts/create')) assert.match(externalId,/^naregua-sandbox-/)
     return Response.json({success:true,data:{id:'bill_test',externalId,url:'https://app.abacatepay.com/pay/bill_test',status,devMode:mode,amount,paidAmount}})

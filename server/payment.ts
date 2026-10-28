@@ -141,8 +141,11 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
     const rows=await request<Subscription[]>(`/subscriptions/list?checkoutId=${encodeURIComponent(local.providerId)}`)
     const matches=rows.filter(row=>row.checkoutId===local.providerId&&(!local.customerId||row.customerId===local.customerId))
     if(matches.length!==1)return null
-    const sub=matches[0]
+    // The list endpoint may lag after a change. Fetch the individual resource
+    // before applying lifecycle state or replacing a confirmed cancellation.
+    const sub=await request<Subscription>(`/subscriptions/get?id=${encodeURIComponent(matches[0].id)}`)
     if(sub.devMode!==devMode||!['ACTIVE','CANCELLED'].includes(sub.status)||!sub.id.startsWith('subs_')||
+      sub.id!==matches[0].id||sub.checkoutId!==local.providerId||(local.customerId&&sub.customerId!==local.customerId)||
       (local.subscriptionId&&sub.id!==local.subscriptionId)||![local.amountCents,local.renewalAmountCents].includes(sub.amount)||!Number.isFinite(Date.parse(sub.createdAt)))throw new PaymentRequestError('A assinatura não corresponde ao pedido.',0)
     db.prepare('UPDATE abacatepay_checkouts SET subscription_id=?,subscription_status=?,provider_created_at=? WHERE id=?').run(sub.id,sub.status,sub.createdAt,id)
     if(local.planSyncRequired&&sub.status==='ACTIVE') {
@@ -169,8 +172,7 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
     if(!sub)throw new PaymentRequestError('Assinatura não encontrada.',404)
     const before=await request<RecurringState>(`/subscriptions/get?id=${encodeURIComponent(sub.id)}`)
     if(before.id!==sub.id||before.checkoutId!==local?.providerId||before.devMode!==devMode)throw new PaymentRequestError('Assinatura incompatível.',0)
-    if(before.status!=='CANCELLED')await request('/subscriptions/cancel',{id:sub.id})
-    const confirmed=await request<RecurringState>(`/subscriptions/get?id=${encodeURIComponent(sub.id)}`)
+    const confirmed=before.status==='CANCELLED'?before:await request<RecurringState>('/subscriptions/cancel',{id:sub.id})
     if(confirmed.id!==sub.id||confirmed.checkoutId!==local.providerId||confirmed.devMode!==devMode||confirmed.status!=='CANCELLED')throw new PaymentRequestError('Cancelamento ainda não confirmado.',0)
     db.prepare("UPDATE abacatepay_checkouts SET subscription_status='CANCELLED' WHERE id=?").run(id)
     return {...confirmed,localId:id}
