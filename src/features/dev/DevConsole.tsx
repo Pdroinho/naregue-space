@@ -750,6 +750,14 @@ export function Dev() {
         setLoading(false)
     }
 
+    useEffect(()=>{
+        let current=true
+        const refresh=()=>{if(document.visibilityState==='hidden')return;void api<{tenants:TenantDev[]}>('/api/dev/tenants').then(result=>{if(current&&result.ok)setTenants(result.data.tenants)})}
+        window.addEventListener('focus',refresh)
+        const timer=window.setInterval(refresh,30_000)
+        return()=>{current=false;window.removeEventListener('focus',refresh);window.clearInterval(timer)}
+    },[])
+
     const filteredTenants = useMemo(() => {
         if (!searchTerm) return tenants
         const lower = searchTerm.toLowerCase()

@@ -1,5 +1,11 @@
 # AbacatePay no NaRégua
 
+## Retorno do checkout — correção de 28/10/2026
+
+O retorno dos novos checkouts de equipe passa por `/api/public/onboarding/checkout-return?intent=UUID`. O servidor localiza a intenção, consulta o pagamento pelo adaptador e redireciona somente ao login do tenant persistido, com `welcome=1`. Nenhum parâmetro do navegador concede acesso; confirmação exige valor, identidade e ambiente corretos na API. Falha/pendência continua sendo conciliada pelo worker. Após login autenticado, o onboarding pendente segue o fluxo normal. O painel dev atualiza os tenants ao receber foco e a cada 30 segundos para não manter status anterior à conciliação.
+
+O teste reportado pelo usuário já estava confirmado pelo provedor, com intenção PAID e assinatura ACTIVE; não foi necessário criar assinatura manualmente. O problema de navegação era a completionUrl genérica sem vínculo com o espaço. Regressões cobrem URL vinculada, redirecionamento para o tenant correto, UUID inválido e ausência de assinatura duplicada.
+
 ## Validação de credencial — 28/10/2026
 
 A credencial fornecida é de desenvolvimento. Foi armazenada somente em arquivo privado na VPS, com permissão 0600, separado do ambiente de produção e fora do repositório. Autenticação v2 validada nas consultas de loja e checkouts (HTTP 200). O adaptador publicado criou e consultou um checkout sandbox de R$74,90 usando banco SQLite em memória; a consulta retornou pendente, sem conceder acesso ou alterar o banco de produção. Cinco testes automatizados de adaptador, conciliação, assinatura de webhook e idempotência passaram. Não houve pagamento real nem validação de entrega de webhook pelo provedor. Para habilitar vendas, faltam credencial live e cadastro/homologação do webhook de produção. Por autorização do usuário, o checkout sandbox será ativado no site publicado enquanto o KYC estiver pendente; isso não habilita cobranças reais. A criação de webhook retornou HTTP 403 por falta de permissão; o worker consulta os checkouts a cada 60 segundos. A entrega de webhook pelo provedor permanece não homologada.

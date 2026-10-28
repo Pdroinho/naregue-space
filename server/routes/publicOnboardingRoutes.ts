@@ -68,6 +68,21 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
     } catch(error){next(error)}
   })
 
+  router.get('/onboarding/checkout-return', publicCheckoutLimiter, async (req,res,next)=>{
+    try{
+      const intentId=z.string().uuid().parse(req.query.intent)
+      const order=db.prepare(`SELECT i.id,i.tenant_id tenantId,i.payment_link_id linkId,t.slug FROM payment_checkout_intents i JOIN tenants t ON t.id=i.tenant_id WHERE i.id=?`).get(intentId) as {id:string;tenantId:string;linkId:number|null;slug:string}|undefined
+      if(!order)throw badRequest('Pedido não encontrado.','CHECKOUT_NOT_FOUND')
+      if(paymentEnabled&&paymentBilling&&order.linkId){
+        try{await paymentBilling.reconcileOrder({tenantId:order.tenantId,intentId:order.id,orderId:order.linkId})}catch{/* Pending provider checks remain with the durable worker. */}
+      }
+      const target=new URL(env.APP_BASE_URL!)
+      target.hostname=`${order.slug}.${target.hostname.replace(/^www\./,'')}`
+      target.pathname='/login';target.search='?welcome=1&checkout=return';target.hash=''
+      res.setHeader('Cache-Control','no-store');res.redirect(303,target.toString())
+    }catch(error){next(error)}
+  })
+
   router.post('/onboarding/team-checkout', publicCheckoutLimiter, publicCheckoutEmailLimiter, async (req, res, next) => {
     try {
       if (!paymentEnabled || !paymentBilling) throw badRequest('Contratação por equipe indisponível.', 'TEAM_CHECKOUT_DISABLED')

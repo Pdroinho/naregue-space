@@ -10,6 +10,7 @@ import { buildBillingPlans } from '../plans.js'
 import { discountQuote } from '../referrals.js'
 import { createPublicOnboardingRouter } from './publicOnboardingRoutes.js'
 import { createPaymentBillingService } from '../paymentBillingService.js'
+import { env } from '../env.js'
 
 function createFixtureDb() {
   const db = new Database(':memory:')
@@ -171,6 +172,14 @@ test('checkout público de equipe vincula espaço, valor e ativação apenas ao 
     assert.equal(await paymentBilling.confirmOrder({ tenantId: tenant.id, intentId: checkout.intentId, orderId: 77 }), true)
     assert.equal((db.prepare('SELECT plan_code AS code FROM subscriptions WHERE tenant_id = ?').get(tenant.id) as { code: string }).code, 'TEAM_6')
     assert.equal((db.prepare('SELECT status FROM tenants WHERE id = ?').get(tenant.id) as { status: string }).status, 'ACTIVE')
+    const previousBase=env.APP_BASE_URL;env.APP_BASE_URL='https://naregua.space'
+    try{
+      const returned=await fetch(url+'checkout-return?intent='+checkout.intentId,{redirect:'manual'})
+      assert.equal(returned.status,303)
+      assert.equal(returned.headers.get('location'),'https://studio-equipe.naregua.space/login?welcome=1&checkout=return')
+      assert.equal((db.prepare('SELECT COUNT(*) count FROM subscriptions WHERE tenant_id=?').get(tenant.id) as {count:number}).count,1)
+      assert.equal((await fetch(url+'checkout-return?intent=invalid',{redirect:'manual'})).status,400)
+    }finally{env.APP_BASE_URL=previousBase}
     const failed = await post('team-checkout', { ...body, studioName: 'Studio Falha', slug: 'studio-falha', email: 'falha@example.com' })
     assert.equal(failed.status, 503)
     assert.equal((await failed.json() as { code: string }).code, 'TEAM_CHECKOUT_RECOVERABLE')

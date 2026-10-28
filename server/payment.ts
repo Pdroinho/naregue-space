@@ -40,7 +40,7 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
     db.prepare('UPDATE abacatepay_checkouts SET status=?,updated_at=? WHERE id=?').run(data.status, new Date().toISOString(), local.id)
     return data
   }
-  async function createPaymentLink(input: { name: string; amountCents: number; description: string }) {
+  async function createPaymentLink(input: { name: string; amountCents: number; description: string; checkoutIntentId?: string }) {
     if (!Number.isSafeInteger(input.amountCents) || input.amountCents < 100) throw new PaymentRequestError('Valor de cobrança inválido.', 400)
     const externalId = `naregua-${devMode ? 'sandbox-' : ''}${randomUUID()}`, now = new Date().toISOString()
     const result = db.prepare('INSERT INTO abacatepay_checkouts(external_id,amount_cents,created_at,updated_at) VALUES(?,?,?,?)')
@@ -52,7 +52,7 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
     const data = await request<Checkout>('/checkouts/create', {
       items: [{ id: product.id, quantity: 1 }], methods: ['PIX', 'CARD'], externalId,
       returnUrl: `${appBaseUrl.replace(/\/$/, '')}/login`,
-      completionUrl: `${appBaseUrl.replace(/\/$/, '')}/?checkout=return`,
+      completionUrl: input.checkoutIntentId ? `${appBaseUrl.replace(/\/$/, '')}/api/public/onboarding/checkout-return?intent=${encodeURIComponent(input.checkoutIntentId)}` : `${appBaseUrl.replace(/\/$/, '')}/?checkout=return`,
       metadata: { application: 'naregua', localCheckoutId: String(localId) },
     })
     const url = new URL(data.url)

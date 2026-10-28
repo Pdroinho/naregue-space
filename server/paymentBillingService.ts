@@ -9,7 +9,7 @@ import { teamPlanByCode, type TeamPlanCode } from './teamPlans.js'
 
 type Link = { linkId: number; checkoutUrl: string }
 type Provider = {
-  createPaymentLink: (input: { name: string; amountCents: number; description: string }) => Promise<Link>
+  createPaymentLink: (input: { name: string; amountCents: number; description: string; checkoutIntentId?: string }) => Promise<Link>
   verifyPaymentLinkOrder: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<boolean>
   inspectPaymentLinkOrder?: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<'PAID' | 'REVERSED' | 'UNKNOWN'>
   listPaymentLinkOrders?: (linkId: number) => Promise<Array<{ id: number; status: string }>>
@@ -55,7 +55,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     if (existing.intent.status === 'PENDING') return { intentId: existing.intent.id, checkoutUrl: existing.intent.checkoutUrl! }
 
     try {
-      const link = await provider.createPaymentLink({ name: existing.name, amountCents: existing.intent.amountCents, description: `NaRégua · ${plan.label} · um mês` })
+      const link = await provider.createPaymentLink({ name: existing.name, amountCents: existing.intent.amountCents, description: `NaRégua · ${plan.label} · um mês`, checkoutIntentId: existing.intent.id })
       const updated = db.prepare(`UPDATE payment_checkout_intents SET payment_link_id = ?, checkout_url = ?, status = 'PENDING'
         WHERE id = ? AND tenant_id = ? AND status = 'CREATING'`).run(link.linkId, link.checkoutUrl, existing.intent.id, tenantId)
       if (updated.changes !== 1) throw new Error('A intenção de pagamento mudou durante a criação do link.')

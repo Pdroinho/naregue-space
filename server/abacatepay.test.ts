@@ -29,11 +29,12 @@ function fixture() {
 test('AbacatePay v2 creates product + one-time checkout with cents and persistent provider IDs', async()=>{
   const {db,provider,calls}=fixture()
   try {
-    const checkout=await provider.createPaymentLink({name:'NaRégua',description:'Equipe',amountCents:7490})
+    const checkout=await provider.createPaymentLink({name:'NaRégua',description:'Equipe',amountCents:7490,checkoutIntentId:'a72e667c-b20f-4c76-b5ad-457741241f5b'})
     assert.equal(checkout.linkId,1)
     assert.equal(calls[0].body?.price,7490)
     assert.deepEqual(calls[1].body?.items,[{id:'prod_test',quantity:1}])
     assert.deepEqual(calls[1].body?.methods,['PIX','CARD'])
+    assert.equal(calls[1].body?.completionUrl,'https://naregua.space/api/public/onboarding/checkout-return?intent=a72e667c-b20f-4c76-b5ad-457741241f5b')
     assert.match(String(calls[1].body?.externalId),/^naregua-/)
     assert.equal((db.prepare('SELECT provider_id p FROM abacatepay_checkouts').get() as {p:string}).p,'bill_test')
   } finally {db.close()}
