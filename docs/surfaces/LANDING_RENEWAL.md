@@ -43,7 +43,7 @@ The hero demo now meets the end of its colored opening block, without a caption 
 
 ## Current evidence and review
 
-The new 12-case entry revision checks are in progress; prior results below predate this caption, framing, access and plan-modal revision.
+The new 12-case entry revision passed in Chromium and Firefox with no visual findings. Build, typecheck and lint passed. The independent visual review found no material blockers in the revised hero, notebook, access page or either checkout step. Tests intercepted all APIs and created no orders or messages. Prior results below are historical.
 
 Art-v2 captures in `.validation/lp-renewal` and `.validation/lp-renewal-firefox` cover desktop and mobile. Chromium and Firefox each passed 10/10 checks from 320 to 1440px with no visual findings. Build, typecheck and lint passed. Specific checks preserve the official logo, warm campaign accent and complete financial illustration. The independent finish review found no remaining material blockers after fixing the mobile finance crop. This is implementation review, not user aesthetic approval or a global accessibility audit. Safari and physical devices were not tested.
 
