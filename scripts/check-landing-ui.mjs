@@ -1,4 +1,4 @@
-/* global document,window */
+/* global document,window,requestAnimationFrame */
 import assert from 'node:assert/strict'
 import {readFileSync,existsSync,mkdirSync,writeFileSync} from 'node:fs'
 import path from 'node:path'
@@ -34,13 +34,16 @@ try{
   const initial=await inspectPanel(page);reports.push({width,state:'initial',...initial})
   assert.equal(initial.overflow,false);assert.equal(await page.getByRole('heading',{level:1}).count(),1)
   assert.equal(await page.locator('.lp-screen-images img.is-active').evaluate(el=>el.complete&&el.naturalWidth>0),true)
+  assert.equal(await page.locator('.lp-hero-art img').count(),2)
+  assert.equal(await page.locator('.lp-demo-caption').getByText('Ilustração conceitual',{exact:false}).count(),1)
   await page.screenshot({path:`${dir}/hero-${width}.png`,animations:'disabled'})
-  if(width===1440||width===390)await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'})
+  if(width===1440||width===390){await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'});for(const section of ['intro','workspace','ai','pricing-wrap','close','footer']){const target=page.locator(`.lp-${section}`);await target.scrollIntoViewIfNeeded();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await settle(page);await target.screenshot({path:`${dir}/${section}-${width}.png`,animations:'disabled'})}await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))}
+  if(width===1440){await page.mouse.move(200,300);await page.waitForFunction(()=>Math.abs(parseFloat(document.querySelector('.nr-lp').style.getPropertyValue('--art-x')))>1);assert.ok((await page.locator('#preco').boundingBox()).height<850,'Desktop pricing should fit a compact section')}
   const topic=page.getByRole('button',{name:'Escolher área da demonstração',exact:true})
   await topic.click();await page.getByRole('option',{name:'equipe',exact:true}).click()
   assert.ok((await page.locator('.lp-screen-images img.is-active').getAttribute('src')).endsWith('/team.webp'))
   await topic.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.getAttribute('role')==='listbox');await page.keyboard.press('End');await page.keyboard.press('Enter')
-  await page.waitForFunction(()=>document.querySelector('.lp-screen-images img.is-active')?.getAttribute('src')?.endsWith('/dashboard.webp'))
+  await page.waitForFunction(()=>document.querySelector('.lp-screen-images img.is-active')?.getAttribute('src')?.endsWith('/finance.webp'))
   await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Escolher área da demonstração')
   await page.getByRole('button',{name:'agenda',exact:true}).click()
   await page.getByRole('button',{name:'Quero minha barbearia na régua',exact:false}).click()
@@ -67,7 +70,7 @@ try{
   if(width<=900){const menu=page.getByRole('button',{name:'Abrir menu',exact:true});await menu.click();assert.equal(await page.getByRole('navigation',{name:'Navegação principal'}).isVisible(),true);await page.keyboard.press('Escape');assert.equal(await menu.evaluate(el=>el===document.activeElement),true)}
   assert.equal(await page.locator('a.lp-login').getAttribute('href'),'/acessar')
   const final=await inspectPanel(page);reports.push({width,state:'interactive',...final});assert.equal(final.overflow,false)
-  console.log(`PASS ${width}px: real assets, hero selection, keyboard, team price, referral checkout, demo, FAQ and menu`);count++
+  console.log(`PASS ${width}px: illustrated assets, hero selection, keyboard, team price, referral checkout, demo, FAQ and menu`);count++
  }
  catalogFails=true;await page.goto('https://naregua.space/');await page.getByRole('alert').filter({hasText:'Não foi possível atualizar'}).waitFor();assert.equal(await page.locator('.lp-plan-result button').isDisabled(),true)
  catalogFails=false;await page.getByRole('button',{name:'Atualizar planos',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('.lp-plan-result button')?.disabled);count++;console.log('PASS catalogue error is explicit and retry recovers')

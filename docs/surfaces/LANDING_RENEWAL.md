@@ -1,39 +1,43 @@
-# Landing pública — reformulação
+# Public landing - illustrated barber atelier
 
-Modo: Persuade. Rota: `/`. Referência escolhida pelo usuário: https://www.abacatepay.com/ (inspecionada em desktop, incluindo controles e rolagem). A composição antiga foi rejeitada. Preservar assets oficiais, produto, identidade, planos e fluxos existentes. Não alterar a identidade do painel.
+Mode: Persuade. Route: `/`. User-selected reference: https://www.abacatepay.com/, inspected on desktop with controls and scrolling. This is the artistic revision requested on 27 October 2026. It supersedes the earlier screenshot-only, existing-photography-only and no-abstract-art contracts for this landing. Operational panel rules remain unchanged.
 
 ## Direction contract
 
-THESIS: a barbearia entende a ferramenta experimentando a organização da própria rotina; a primeira tela demonstra o produto em vez de oferecer uma coleção de promessas.
+The user rejected the sober composition, blurred enlarged UI captures, CSS phone, tall pricing and weak closing/footer. They explicitly requested generated illustrations, clean fictional mockups, abstract backgrounds and more motion, with Renaissance hands and artistic collage from the reference as authority.
 
-OWN-WORLD: creme claro, petróleo e cobre do NaRégua, Manrope, monograma aprovado, Hugeicons e fotografia realista já existente. Grandes superfícies sólidas e cantos generosos na LP; sem verde da referência nem gradientes decorativos.
+THESIS: barbershop talent meets organization in a digital atelier, with human gestures and tools as protagonists.
 
-STORY: escolher uma área da operação, ver a interface atual com dados ilustrativos, entender agendamento/relacionamento/gestão, encontrar a faixa correta para a equipe e consultar o plano. Acesso e documentos legais permanecem disponíveis.
+OWN-WORLD: engraved gouache hands, chrome, copper and a marble fade bust; petroleum, cream and pale citrus; original art and clearly identified conceptual UI. Preserve Manrope, Hugeicons and the official brand.
 
-FIRST VIEWPORT: navegação flutuante clara dentro de uma superfície creme; título central de grande escala com seletor de agenda/equipe/gestão; CTA para planos e grande demonstração da interface. O produto continua após a dobra.
+STORY: citrus opening with hands/tools, clean mockup, marble bust, physically rendered booking phone, visual management, conversation ribbons, compact plan selection and a campaign close with full petroleum footer.
 
-FORM: composição reference-led explicitamente escolhida pelo usuário, implementada em código no mundo de marca estabelecido. Não é uma rodada aberta de conceitos nem uma troca de identidade. Interação assinatura: escolha da área com transição da captura; fluxo de reserva acompanhado na rolagem; preço por faixa com dígitos animados. Todos operam por teclado e respeitam movimento reduzido.
+FIRST VIEWPORT: central headline and working topic selector framed by large illustrated hands; citrus, petroleum and copper provide contrast around the CTA and clean conceptual preview.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FORM: preserve real commercial content and functional HTML controls. Native-alpha artwork and sculpted paper backgrounds create material depth. Interruptible movement supports reading with reduced-motion and coarse-pointer alternatives.
 
-## Verdades e limites
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
 
-- Planos e preços vêm do catálogo existente. Checkout, token de indicação e retorno de assinatura são preservados.
-- Nenhuma métrica de crescimento, economia, depoimento ou número de clientes é inventado.
-- Capturas: interface realmente renderizada pelo projeto, com dados sintéticos identificados como demonstração; não são imagens geradas de UI.
-- Fotografias e logos: assets oficiais preexistentes de `public/naregua` e `public/brand`.
-- A primeira hipótese de conversão é conhecer os planos, seguindo o fluxo já existente. A preferência opcional foi perguntada durante a análise.
+## Product truth and boundaries
 
-## Referência observada
+- Plans and prices come from the existing catalog. Checkout, referral and subscription return are preserved; access uses `/acessar`.
+- Do not invent metrics, savings, testimonials or customer counts.
+- Agenda, team, finance and phone images are generated conceptual illustrations, not actual screenshots or exact product specifications. Visible captions identify fictional data and illustrative UI; the message demonstration sends nothing.
+- Nine current WebPs live in `public/landing/art`. Exact prompts and origin prompts are in `docs/assets/landing-art-prompts.json`; provenance is documented in LANDING_ASSETS.md.
+- The artistic direction applies only to the public landing, without changing operational panel identity, density or rules.
 
-A AbacatePay demonstra o mecanismo já na frase de abertura, integra controles à tipografia, apresenta produto em escala, alterna seções claras e escuras e usa números animados em uma simulação. Serão adaptados esses princípios de composição e interação; textos, provas, imagens, promessas e identidade daquela empresa não serão transplantados.
+## Implemented expression
 
-## Express?o implementada
+`LandingExperience.tsx`, `landing-experience.css` and `landing-art-direction.css` implement the surface. The citrus opening integrates scissors and comb held by engraved gouache hands. A marble fade bust stands over a sculpted paper field. Booking uses a physically rendered native-alpha phone. Conversation ribbons accompany Mestre AI. Compact pricing leads to a close combining hands, bust and material field, followed by a full petroleum footer with complete brand and navigation.
 
-A abertura central combina seletor tipogr?fico e captura ampla; seguem capacidades, fotografia editorial, reserva em tr?s passos, financeiro, Mestre AI, pre?o por faixa, d?vidas e chamada final com fotografia. Navega??o flutuante e se??es s?lidas generosamente arredondadas pertencem apenas ? LP p?blica em modo Persuade. Tokens `lp-*` em DESIGN.md e extens?es de movimento/sombra no sidecar registram esta exce??o sem alterar o painel.
+The agenda/team/management selector changes conceptual mockups. The booking story responds to scrolling and explicit step selection; confirming changes local state only. The 1-15 professional range resolves real catalog plans of up to 3, 6 or 15 seats with refresh/error handling. Rolling digits do not claim savings or individual pricing.
 
-A sele??o agenda/equipe/gest?o troca capturas da interface renderizada. A hist?ria acompanha a rolagem ou a escolha expl?cita dos passos; confirmar o exemplo muda apenas estado local. A faixa de 1?15 profissionais resolve os planos reais de at? 3, 6 ou 15 vagas, com pre?os do cat?logo e erro/repeti??o de atualiza??o. Os d?gitos animados n?o representam economia ou c?lculo por profissional. Checkout existente preserva indica??o e retorno; acesso usa `/acessar`.
+Navigation contracts after 32px scrolling, becomes a menu below 900px and closes with Escape, returning focus. Skip link, visible focus, keyboard controls and native FAQ remain available. Fine-pointer hands follow a requestAnimationFrame spring (stiffness 220, damping 24); the loop stops at rest. Coarse pointers and reduced motion bypass it. Reduced motion also removes reveals, transitions and smooth scrolling while retaining content and controls.
 
-A navega??o contrai ap?s 32px de rolagem, vira menu abaixo de 900px e fecha por Escape com retorno de foco. H? link de salto, foco vis?vel e controles por teclado. Movimento reduzido desativa revela??es, transi??es, assentamento por rolagem e rolagem suave, sem ocultar conte?do. Demonstra??es permanecem legendadas; imagens sint?ticas s?o capturas reais com dados de teste e EXIF de origem, conforme LANDING_ASSETS.md, sem imagens de IA.
+## Current evidence and review
 
-Evid?ncia visual: `.validation/lp-renewal/full-1440.png`, `full-390.png`, `hero-1440.png` e `hero-390.png`. A revis?o encontrou sobreposi??o da legenda no celular, alega??o de desconto de 0% e eyebrow no checkout; os tr?s pontos foram corrigidos. O veredito final do revisor ? ship no escopo desses tr?s ajustes. Valida??o final: 10/10 verifica??es da LP em Chromium e Firefox e 39/39 do painel. Registro: `docs/LP_REFORMULACAO_2026-10-27.md`.
+Current captures: `.validation/lp-renewal/hero-1440.png`, `hero-390.png`, `full-1440.png`, `full-390.png`, plus desktop/mobile crops for `intro`, `workspace`, `ai`, `pricing-wrap`, `close` and `footer`. The fresh final five-section review returned **SHIP for the whole landing**, with no visual fix required. Its documentation reconciliation request is addressed by this contract and LANDING_ASSETS.md.
+
+Chromium and Firefox each passed 10/10 landing checks without reported errors. Typecheck, lint and build passed. This is not a global accessibility audit. Final record: `docs/LP_DIRECAO_ARTISTICA_2026-10-27.md`.
+
+The earlier review limited to mobile captions, a zero-percent discount and checkout eyebrow belongs to the screenshot-era version; it is not approval evidence for the current artwork. `public/landing/renewal` captures are historical assets, no longer displayed on this landing.

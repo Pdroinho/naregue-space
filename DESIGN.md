@@ -19,6 +19,7 @@ colors:
   warning-soft: "#fff2d2"
   danger: "#a6463e"
   danger-soft: "#fbe9e4"
+  lp-citrus: "#e9f68b"
   lp-paper: "#fffdf8"
   lp-cream: "#eee7d9"
   lp-ink: "#082a39"
@@ -31,9 +32,9 @@ typography:
     fontSize: "clamp(2.8rem, 5vw, 4.8rem)"
   lp-display:
     fontFamily: "Manrope, Segoe UI Variable, Segoe UI, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "clamp(2.7rem, 5.1vw, 4.65rem)"
+    fontSize: "clamp(3rem, 5.2vw, 4.7rem)"
     fontWeight: 750
-    lineHeight: 1.22
+    lineHeight: 1.15
     letterSpacing: "-.04em"
   lp-section:
     fontSize: "clamp(2.15rem, 4vw, 3.5rem)"
@@ -63,7 +64,7 @@ rounded:
   lp-opening: "44px"
   lp-section: "40px"
   lp-photo: "32px"
-  lp-plan: "26px"
+  lp-plan: "20px"
   lp-mobile-surface: "28px"
   lp-pill: "100px"
 spacing:
@@ -86,7 +87,7 @@ components:
     backgroundColor: "{colors.lp-paper}"
     textColor: "{colors.lp-ink}"
     rounded: "{rounded.lp-plan}"
-    padding: "34px"
+    padding: "25px 28px"
   button-primary:
     backgroundColor: "{colors.brand-action}"
     textColor: "{colors.raised}"
@@ -121,14 +122,14 @@ components:
 
 NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.
 
-Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression uses larger display type, generous surface radii and a floating pill navigation; these are public-surface exceptions, not operational defaults.
+Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: engraved gouache hands, chrome tools, a marble fade bust, sculpted paper and conversation ribbons, with a citrus opening and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.
 
 **Key Characteristics:**
 - Cream reading surfaces and petroleum structure.
 - Manrope interface with local Hugeicons Stroke Rounded.
-- Restrained copper actions and real barber photography.
+- Copper actions and realistic photography in operations; citrus and crafted campaign art on the public landing.
 
-This document records the incumbent operational system and the completed public landing replacement within that visual world. Evidence: PRODUCT.md, BRANDING.md, src/main.tsx, naregua-identity.css, naregua-integration.css, theme.ts, Shell.tsx and BookingPage.tsx; representative dashboard and booking review captures. Identity is imported after feature styles; integration is last. Frontmatter records default light primitives and explicitly prefixed public landing variants, not every feature override or runtime tenant value. Landing evidence: src/features/marketing/LandingExperience.tsx, landing-experience.css and .validation/lp-renewal/{hero,full}-{1440,390}.png. Its composition contract and raster provenance live in docs/surfaces/LANDING_RENEWAL.md and LANDING_ASSETS.md.
+This document records the incumbent operational system and the completed public landing replacement within that visual world. Evidence: PRODUCT.md, BRANDING.md, src/main.tsx, naregua-identity.css, naregua-integration.css, theme.ts, Shell.tsx and BookingPage.tsx; representative dashboard and booking review captures. Identity is imported after feature styles; integration is last. Frontmatter records default light primitives and explicitly prefixed public landing variants, not every feature override or runtime tenant value. Landing evidence: src/features/marketing/LandingExperience.tsx, landing-experience.css and .validation/lp-renewal/{hero,full}-{1440,390}.png. The campaign layer is implemented in landing-art-direction.css. Its composition contract and raster provenance live in docs/surfaces/LANDING_RENEWAL.md and LANDING_ASSETS.md.
 
 ## Colors
 
@@ -148,7 +149,7 @@ Warm cream supports reading; petroleum provides structure; copper marks actions 
 
 Green, amber and coral belong to success, warning and danger. Dark mode replaces surface, ink, line, semantic and shadow values under the explicit admin/tenant/dev theme selectors in naregua-identity.css. The integration aliases intentionally match the dark theme selectors' specificity so both component generations resolve to the canonical product neutrals and semantic colors. Use live CSS variables rather than hardcoding light values in new components.
 
-The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above; its copper actions and body ink retain the shared brand values. These scoped variants do not recolor the panel.
+The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above, plus pale citrus for the opening, selected controls and campaign accents; its copper actions and body ink retain the shared brand values. These scoped variants do not recolor the panel.
 
 ## Typography
 
@@ -158,7 +159,7 @@ The declared display and page sizes are role tokens, not universal computed head
 
 Space Mono remains declared for numeric/code roles, but fonts.css currently self-hosts Manrope only. Do not claim the mono font is supplied locally. Use the existing local Hugeicons components for actions and navigation.
 
-Public landing display and section roles are separately prefixed in frontmatter. Below 900px its display uses clamp(2.5rem, 6.7vw, 4rem); below 640px it uses clamp(2rem, 7.8vw, 3.15rem), 1.3 line height and -.035em tracking. Public section headings become 2.15rem/1.15. These expressive scales do not alter compact operational headings.
+Public landing display and section roles are separately prefixed in frontmatter. The campaign heading becomes 3.1rem below 900px and clamp(2rem, 7.8vw, 3.1rem) with 1.23 line height below 640px. These expressive scales do not alter compact operational headings.
 
 ## Layout
 
@@ -172,7 +173,7 @@ The public landing uses a 1200px content ceiling with 96px total desktop gutters
 
 Tonal layering and thin borders do most structural work. Shared cards use the smallest ambient shadow; larger shadows belong to elevated panels and dialogs. Primary buttons are flat at rest and move upward one pixel on hover. The sidecar preserves the exact shadow and motion vocabulary. Short transitions use the standard ease; reduced motion collapses animations and transitions to .01ms and disables smooth scrolling.
 
-Public landing depth is reserved for the product frame, floating navigation and illustrative booking layers. Capture changes use opacity and short translation; story layers and price digits settle with the emphasized curve. Reveals run once for 650ms. The landing reduced-motion mode removes transitions and animations, disables smooth scrolling and resets staged transforms; content and controls remain available. Exact scoped shadow and motion values are in the sidecar.
+Public landing depth comes from native-alpha campaign cutouts, physically rendered phone artwork, the product frame, floating navigation and illustrative booking layers. Fictional mockup changes use opacity and short translation; story layers and price digits settle with the emphasized curve. Fine-pointer hero art follows a requestAnimationFrame spring (stiffness 220, damping 24), cancels at rest and is bypassed for reduced motion and coarse pointers. Reveals run once for 650ms. The landing reduced-motion mode removes transitions and animations, disables smooth scrolling and resets staged transforms; content and controls remain available. Exact scoped shadow and motion values are in the sidecar.
 
 ## Shapes
 
@@ -219,7 +220,7 @@ Use the established Mestre AI name, existing mark and Manrope wordmark. Assistan
 
 ### Don't:
 - **Don't** let tenant accents recolor neutral surfaces or semantic states.
-- **Don't** invent testimonials, metrics or generated product screenshots.
-- **Don't** introduce gradients except as readability masks over photography.
+- **Don't** invent testimonials or product metrics. Label public fictional UI as conceptual illustration with fictitious data; never present it as an actual screenshot.
+- **Don't** introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds.
 
-Existing drift is not normative: decorative date/section kickers and small faint metadata remain in inherited screens; generic faint table headers/placeholders and muted chips are not certified as contrast-compliant by their presence here. Legacy feature names, fallback wine values and Space Mono declarations do not authorize a new identity. This document does not repair that broader backlog. The earlier operational review disposition remains limited to its five resolved fixes; it is not a global accessibility audit. The landing finish review identified mobile caption overlap, a zero-percent discount claim and a checkout eyebrow; all three were corrected and the final reviewer disposition is ship within those fixes. Validation passed 10/10 landing checks in both Chromium and Firefox and 39/39 panel checks; this is not a global accessibility audit. See docs/LP_REFORMULACAO_2026-10-27.md.
+Existing drift is not normative: decorative date/section kickers and small faint metadata remain in inherited screens; generic faint table headers/placeholders and muted chips are not certified as contrast-compliant by their presence here. Legacy feature names, fallback wine values and Space Mono declarations do not authorize a new identity. This document does not repair that broader backlog. The earlier operational review disposition remains limited to its five resolved fixes; it is not a global accessibility audit. The current illustrated landing has a fresh whole-page ship recommendation; Chromium and Firefox each passed 10/10 landing checks. Evidence and scope are recorded in docs/surfaces/LANDING_RENEWAL.md; earlier screenshot-era review findings are historical, not approval of the current art.
