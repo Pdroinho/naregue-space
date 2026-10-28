@@ -19,7 +19,7 @@ colors:
   warning-soft: "#fff2d2"
   danger: "#a6463e"
   danger-soft: "#fbe9e4"
-  lp-citrus: "#e9f68b"
+  lp-highlight: "#efd3be"
   lp-paper: "#fffdf8"
   lp-cream: "#eee7d9"
   lp-ink: "#082a39"
@@ -122,14 +122,14 @@ components:
 
 NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.
 
-Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: engraved gouache hands, chrome tools, a marble fade bust, sculpted paper and conversation ribbons, with a citrus opening and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.
+Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: fine ink crosshatching and restrained watercolor hands, a vintage barber chair and a hand writing in an appointment notebook, with an ivory opening, peach accents and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.
 
 **Key Characteristics:**
 - Cream reading surfaces and petroleum structure.
 - Manrope interface with local Hugeicons Stroke Rounded.
-- Copper actions and realistic photography in operations; citrus and crafted campaign art on the public landing.
+- Copper actions and realistic photography in operations; ivory, peach and ink-and-watercolor campaign art on the public landing.
 
-This document records the incumbent operational system and the completed public landing replacement within that visual world. Evidence: PRODUCT.md, BRANDING.md, src/main.tsx, naregua-identity.css, naregua-integration.css, theme.ts, Shell.tsx and BookingPage.tsx; representative dashboard and booking review captures. Identity is imported after feature styles; integration is last. Frontmatter records default light primitives and explicitly prefixed public landing variants, not every feature override or runtime tenant value. Landing evidence: src/features/marketing/LandingExperience.tsx, landing-experience.css and .validation/lp-renewal/{hero,full}-{1440,390}.png. The campaign layer is implemented in landing-art-direction.css. Its composition contract and raster provenance live in docs/surfaces/LANDING_RENEWAL.md and LANDING_ASSETS.md.
+This document records the incumbent operational system and the completed public landing replacement within that visual world. Evidence: PRODUCT.md, BRANDING.md, src/main.tsx, naregua-identity.css, naregua-integration.css, theme.ts, Shell.tsx and BookingPage.tsx; representative dashboard and booking review captures. Identity is imported after feature styles; integration is last. Frontmatter records default light primitives and explicitly prefixed public landing variants, not every feature override or runtime tenant value. Landing evidence: src/features/marketing/LandingExperience.tsx, landing-experience.css and .validation/lp-renewal/{hero,full}-{1440,390}.png. The campaign layer is implemented in landing-art-direction.css. Its composition contract and raster provenance live in docs/surfaces/LANDING_RENEWAL.md and docs/surfaces/LANDING_ASSETS.md.
 
 ## Colors
 
@@ -149,7 +149,7 @@ Warm cream supports reading; petroleum provides structure; copper marks actions 
 
 Green, amber and coral belong to success, warning and danger. Dark mode replaces surface, ink, line, semantic and shadow values under the explicit admin/tenant/dev theme selectors in naregua-identity.css. The integration aliases intentionally match the dark theme selectors' specificity so both component generations resolve to the canonical product neutrals and semantic colors. Use live CSS variables rather than hardcoding light values in new components.
 
-The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above, plus pale citrus for the opening, selected controls and campaign accents; its copper actions and body ink retain the shared brand values. These scoped variants do not recolor the panel.
+The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above, plus peach (`lp-highlight`) for restrained campaign accents; the opening is ivory and selected plan controls are copper. The public palette is petroleum, copper and ivory with peach accents: green and citrus are explicitly rejected. These scoped variants do not recolor the panel or remove operational semantic success colors.
 
 ## Typography
 
@@ -173,7 +173,7 @@ The public landing uses a 1200px content ceiling with 96px total desktop gutters
 
 Tonal layering and thin borders do most structural work. Shared cards use the smallest ambient shadow; larger shadows belong to elevated panels and dialogs. Primary buttons are flat at rest and move upward one pixel on hover. The sidecar preserves the exact shadow and motion vocabulary. Short transitions use the standard ease; reduced motion collapses animations and transitions to .01ms and disables smooth scrolling.
 
-Public landing depth comes from native-alpha campaign cutouts, physically rendered phone artwork, the product frame, floating navigation and illustrative booking layers. Fictional mockup changes use opacity and short translation; story layers and price digits settle with the emphasized curve. Fine-pointer hero art follows a requestAnimationFrame spring (stiffness 220, damping 24), cancels at rest and is bypassed for reduced motion and coarse pointers. Reveals run once for 650ms. The landing reduced-motion mode removes transitions and animations, disables smooth scrolling and resets staged transforms; content and controls remain available. Exact scoped shadow and motion values are in the sidecar.
+Public landing depth comes from native-alpha ink-and-watercolor campaign cutouts, physically rendered phone artwork, the product frame, floating navigation and illustrative booking layers. Fictional mockup changes use opacity and short translation; story layers and price digits settle with the emphasized curve. Fine-pointer hero art follows a requestAnimationFrame spring (stiffness 220, damping 24), cancels at rest and is bypassed for reduced motion and coarse pointers. Reveals run once for 650ms. The landing reduced-motion mode removes transitions and animations, disables smooth scrolling and resets staged transforms; content and controls remain available. Exact scoped shadow and motion values are in the sidecar.
 
 ## Shapes
 
@@ -203,6 +203,10 @@ Raised-paper fields use a strong line, the control radius and recorded padding. 
 
 Sidebar rows combine local rounded-stroke icons and labels. Active navigation uses a pale accent surface, action ink and an inset three-pixel accent marker; hover uses soft neutral fill. Preserve keyboard focus and accessible labels when collapsed. The booking step navigation reports current and completed progress with a thin underline and adapts its labels on mobile.
 
+### Public Landing Artwork
+
+Seven generated WebPs in `public/landing/art-v2` are current: hands, chair, conversation and phone have native alpha; agenda, team and finance are opaque. Product mockups use actual NaRégua screenshots and the official PNG as generation references, while remaining visibly labeled conceptual illustrations with fictitious data. The exact official PNG is also an HTML overlay on desktop mockups. Preserve that overlay rather than trusting generated typography or logos. Exact prompts live in `docs/assets/landing-art-v2-prompts.json`. Marble, resin, citrus and green campaign art are rejected.
+
 ### Public Landing Controls
 
 Public copper pill buttons use the prefixed component token, a 52px minimum height and 700 weight; the hero button reaches 56px. Hover darkens copper and lifts 2px; active returns to rest. The public header is an 80px floating pill, contracts on scroll and exposes a button-controlled menu below 900px; Escape closes it and returns focus. Visible focus is a 3px copper outline with 5px offset. The title selector and pressed-state preview controls share the same demonstration selection. The team range chooses actual catalog bands; rolling digits are visual only, with a complete accessible currency label. Native details/summary supplies the FAQ. The existing checkout remains the transaction surface, and /acessar is the explicit access route.
@@ -223,4 +227,4 @@ Use the established Mestre AI name, existing mark and Manrope wordmark. Assistan
 - **Don't** invent testimonials or product metrics. Label public fictional UI as conceptual illustration with fictitious data; never present it as an actual screenshot.
 - **Don't** introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds.
 
-Existing drift is not normative: decorative date/section kickers and small faint metadata remain in inherited screens; generic faint table headers/placeholders and muted chips are not certified as contrast-compliant by their presence here. Legacy feature names, fallback wine values and Space Mono declarations do not authorize a new identity. This document does not repair that broader backlog. The earlier operational review disposition remains limited to its five resolved fixes; it is not a global accessibility audit. The current illustrated landing has a fresh whole-page ship recommendation; Chromium and Firefox each passed 10/10 landing checks. Evidence and scope are recorded in docs/surfaces/LANDING_RENEWAL.md; earlier screenshot-era review findings are historical, not approval of the current art.
+Existing drift is not normative: decorative date/section kickers and small faint metadata remain in inherited screens; generic faint table headers/placeholders and muted chips are not certified as contrast-compliant by their presence here. Legacy feature names, fallback wine values and Space Mono declarations do not authorize a new identity. This document does not repair that broader backlog. The earlier operational review disposition remains limited to its five resolved fixes; it is not a global accessibility audit. The prior art revision received a whole-page ship recommendation and Chromium/Firefox 10/10 checks; those results are historical and do not certify the current art-v2 replacement. Current validation evidence belongs in docs/surfaces/LANDING_RENEWAL.md.

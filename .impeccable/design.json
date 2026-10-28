@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-28T00:59:02.939247+00:00",
+  "generatedAt": "2026-10-28T01:18:15.069034+00:00",
   "title": "Design System: NaRégua",
   "extensions": {
     "colorMeta": {
@@ -18,10 +18,10 @@
           "#fdf2ea"
         ]
       },
-      "lp-citrus": {
+      "lp-highlight": {
         "role": "secondary",
-        "displayName": "Campaign pale citrus",
-        "canonical": "#e9f68b"
+        "displayName": "Campaign peach",
+        "canonical": "#efd3be"
       }
     },
     "shadows": [
@@ -225,11 +225,11 @@
   ],
   "narrative": {
     "northStar": "Precision of the barbershop",
-    "overview": "NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.\n\nOperational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: engraved gouache hands, chrome tools, a marble fade bust, sculpted paper and conversation ribbons, with a citrus opening and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.",
+    "overview": "NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.\n\nOperational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: fine ink crosshatching and restrained watercolor hands, a vintage barber chair and a hand writing in an appointment notebook, with an ivory opening, peach accents and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.",
     "keyCharacteristics": [
       "Cream reading surfaces and petroleum structure.",
       "Manrope interface with local Hugeicons Stroke Rounded.",
-      "Copper actions and realistic photography in operations; citrus and crafted campaign art on the public landing."
+      "Copper actions and realistic photography in operations; ivory, peach and ink-and-watercolor campaign art on the public landing."
     ],
     "rules": [
       {
@@ -246,7 +246,8 @@
     "donts": [
       "Don't let tenant accents recolor neutral surfaces or semantic states.",
       "Don't invent testimonials or product metrics. Label public fictional UI as conceptual illustration with fictitious data; never present it as an actual screenshot.",
-      "Don't introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds."
+      "Don't introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds.",
+      "Don't use green, citrus, marble or resin in the public campaign; preserve petroleum, copper, ivory and restrained peach accents."
     ]
   }
 }

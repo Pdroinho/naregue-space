@@ -1,27 +1,29 @@
 # Landing asset provenance
 
-## Current artistic revision
+## Current artistic revision: art-v2
 
-The current landing uses nine original images generated with the built-in `image_gen` tool and optimized as WebP in `public/landing/art` (approximately 1.5 MB total). The latest explicit user brief authorized illustrations, clean fictional UI mockups and abstract backgrounds, superseding this landing's earlier screenshot-only direction.
+The current landing uses seven original images generated with the built-in `image_gen` tool and optimized as WebP in `public/landing/art-v2`. The user requested fine ink crosshatching and restrained watercolor, with petroleum, copper and ivory and a peach accent. Green and citrus are rejected, as are marble sculptures, resin ribbons and shiny decorative 3D material.
 
-| File | Use and nature |
-|---|---|
-| scissors.webp | Engraved gouache hand with chrome scissors; native alpha |
-| comb.webp | Engraved gouache hand with ivory comb; native alpha |
-| agenda.webp | Clean conceptual agenda mockup; not an actual screenshot |
-| team.webp | Clean conceptual team mockup; not an actual screenshot |
-| finance.webp | Conceptual cash-flow mockup with fictional amounts; not an actual screenshot |
-| phone.webp | Physically rendered phone with conceptual booking UI; native alpha |
-| bust.webp | Marble fade bust on copper plinth; native alpha |
-| field.webp | Abstract material background of paper, copper and citrus arc |
-| conversation.webp | Copper/citrus resin conversation ribbons; native alpha |
+| File | Use and nature | Transparency |
+|---|---|---|
+| hands.webp | Ink-and-watercolor barber hands holding scissors and comb; reused as left/right crops in hero and close | Native alpha |
+| chair.webp | Ink-and-watercolor vintage barber chair; introduction and close | Native alpha |
+| conversation.webp | Hand writing on an appointment card and notebook; Mestre AI section | Native alpha |
+| agenda.webp | Conceptual agenda mockup based on the actual product interface | Opaque |
+| team.webp | Conceptual team mockup based on the actual product interface | Opaque |
+| finance.webp | Conceptual finance mockup with fictional amounts, based on the actual product interface | Opaque |
+| phone.webp | Physically rendered phone with conceptual booking UI based on the actual product interface | Native alpha |
 
-There are five native-alpha cutouts and four opaque images. Exact prompts are recorded in `docs/assets/landing-art-prompts.json`, including name, path, tool and transparency. Agenda, team and finance additionally record `originPrompt`, because they were edited for sans-serif typography and label fidelity. Each shipping WebP embeds the exact prompt in EXIF and has a `.webp.json` tool/provenance sidecar. The metadata scan found nine WebPs and zero missing origins.
+Exact generation prompts, paths, tool and requested transparency are recorded in `docs/assets/landing-art-v2-prompts.json`. The four alpha assets are generated cutouts rather than opaque paper rectangles. The three desktop mockups are deliberately opaque product panels.
 
-Visible captions identify conceptual illustration and fictional data. These images do not prove commercial outcomes or promise exact equivalence with the live panel. The generated phone complements functional HTML demonstration controls without creating a real booking. Official logos in `public/brand` remain preserved. AbacatePay guided composition, hands and interaction; none of its image assets were incorporated.
+Actual NaRégua product screenshots and the actual official logo PNG were input references for product-image generation. They constrain the existing interface, petroleum panels, ivory text, copper actions and Portuguese labels. These remain generated conceptual illustrations, not actual screenshots or promises of exact interface equivalence. The exact official `/brand/logo-wordmark-approved-web.png` is additionally rendered by the HTML `ProductBrand` overlay above the desktop mockups, preserving the real graphic independently of generated lettering. Official header and footer assets remain native images.
 
-## Historical captures - not displayed on the current landing
+Visible captions identify conceptual illustration and fictional data. The phone complements functional HTML demonstration controls without creating a real booking; the message demonstration sends nothing. No asset proves commercial outcomes. AbacatePay guided composition, artistic hands and interaction; its imagery was a style reference, not incorporated campaign artwork. The art-v2 prompts explicitly reject its green palette and avocado subject.
 
-`public/landing/renewal/*.webp` contains five actual product captures produced on 27 October 2026 by `node scripts/check-product-ui.mjs --landing-assets`: `calendar`, `team`, `dashboard`, `finance` and `booking`. They were rendered from the compiled project with intercepted APIs and synthetic in-memory data, without creating real records. They contain origin/authorship EXIF and were not AI generated. They document the first renewal, rather than the current artistic revision.
+## Historical assets - not displayed on the current landing
 
-Photographs in `public/naregua` remain official pre-existing project assets. Their presence does not impose exclusive photography on the current campaign.
+`public/landing/art` and `docs/assets/landing-art-prompts.json` record the superseded nine-image art-v1 direction. Its marble bust, sculpted field and resin conversation ribbons are historical provenance, not the current visual contract.
+
+`public/landing/renewal/*.webp` contains five actual product captures produced on 27 October 2026 by `node scripts/check-product-ui.mjs --landing-assets`: `calendar`, `team`, `dashboard`, `finance` and `booking`. They were rendered from the compiled project with intercepted APIs and synthetic in-memory data, without creating real records. They contain origin/authorship EXIF and were not AI generated. They document the first renewal and supplied product-reference material rather than the current displayed campaign images.
+
+Photographs in `public/naregua` remain official pre-existing project assets. Their presence does not impose exclusive photography on the current campaign. The public art revision does not change the operational panel system or its semantic state colors.

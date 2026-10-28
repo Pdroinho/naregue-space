@@ -35,6 +35,9 @@ try{
   assert.equal(initial.overflow,false);assert.equal(await page.getByRole('heading',{level:1}).count(),1)
   assert.equal(await page.locator('.lp-screen-images img.is-active').evaluate(el=>el.complete&&el.naturalWidth>0),true)
   assert.equal(await page.locator('.lp-hero-art img').count(),2)
+  assert.equal(await page.locator('.lp-product-brand img').first().getAttribute('src'),'/brand/logo-wordmark-approved-web.png')
+  assert.equal(await page.locator('.lp-finance-mockup>img').evaluate(el=>window.getComputedStyle(el).objectFit),'contain','Financial illustration must preserve all columns')
+  assert.equal(await page.locator('.nr-lp').evaluate(el=>window.getComputedStyle(el).getPropertyValue('--lp-highlight').trim()),'#efd3be','Campaign accent must retain the approved warm palette')
   assert.equal(await page.locator('.lp-demo-caption').getByText('Ilustração conceitual',{exact:false}).count(),1)
   await page.screenshot({path:`${dir}/hero-${width}.png`,animations:'disabled'})
   if(width===1440||width===390){await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'});for(const section of ['intro','workspace','ai','pricing-wrap','close','footer']){const target=page.locator(`.lp-${section}`);await target.scrollIntoViewIfNeeded();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await settle(page);await target.screenshot({path:`${dir}/${section}-${width}.png`,animations:'disabled'})}await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))}
@@ -42,6 +45,7 @@ try{
   const topic=page.getByRole('button',{name:'Escolher área da demonstração',exact:true})
   await topic.click();await page.getByRole('option',{name:'equipe',exact:true}).click()
   assert.ok((await page.locator('.lp-screen-images img.is-active').getAttribute('src')).endsWith('/team.webp'))
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
   await topic.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.getAttribute('role')==='listbox');await page.keyboard.press('End');await page.keyboard.press('Enter')
   await page.waitForFunction(()=>document.querySelector('.lp-screen-images img.is-active')?.getAttribute('src')?.endsWith('/finance.webp'))
   await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Escolher área da demonstração')

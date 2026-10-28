@@ -1,18 +1,18 @@
-# LP — direção artística após revisão do usuário
+﻿# LP — revisão de identidade e assets
 
-O usuário aprovou a estrutura e pediu mais caráter, cor, contraste, ilustração e movimento. Substituídas as fotografias e capturas ampliadas da LP por nove assets originais gerados com o ImageGen integrado: mãos com tesoura e pente, busto de mármore com fade, celular físico com tela conceitual, agenda, equipe, financeiro, fitas de conversa e fundo abstrato de papel/cobre.
+A revisão art-v2 atende à correção explícita do usuário: AbacatePay é referência de composição, ilustração e movimento, sem transferir sua paleta. O NaRégua permanece em petróleo, cobre e creme, com detalhes pêssego. Verde fica restrito a estados semânticos de confirmação.
 
-A primeira dobra usa cítrico com petróleo/cobre, recortes ilustrados e reação ao ponteiro com mola amortecida. O código para o movimento roda apenas durante o deslocamento e para ao estabilizar; ponteiro grosso e movimento reduzido recebem composição estática. Os controles permanecem HTML e a narrativa mantém seu funcionamento por teclado.
+Sete assets gerados com o ImageGen integrado substituem integralmente o conjunto rejeitado: mãos com tesoura e pente, cadeira de barbeiro, mãos escrevendo no caderno, celular e três demonstrações conceituais de agenda, equipe e financeiro. As ilustrações usam tinta, hachura e aquarela. Capturas reais e o logo oficial orientaram as demonstrações; o PNG oficial também é aplicado em HTML nos mockups desktop. Legendas identificam conteúdo conceitual e dados fictícios.
 
-O agendamento passa a uma seção petróleo. Financeiro e Mestre AI ganham composições próprias. Planos têm hierarquia e espaçamento compactos, com altura desktop validada abaixo de 850 px. Encerramento em colagem integra um rodapé petróleo com grupos de links legíveis. O painel operacional não muda.
+Assets em public/landing/art-v2; prompts exatos em docs/assets/landing-art-v2-prompts.json, EXIF e sidecars. Quatro recortes têm alpha nativo. Scanner: sete rasters, zero origens ausentes. Os assets rejeitados foram removidos da entrega.
 
-Os mockups são fictícios e sinalizados como conceituais; não prometem uma interface idêntica nem métricas de resultado. Valores comerciais continuam vindos do catálogo. Nenhum pagamento, mensagem ou conta foi criado.
+## Validação art-v2
 
-## Evidência
+- Build, TypeScript e ESLint passaram.
+- Chromium e Firefox: 10/10 verificações cada, entre 320 e 1440 px; nenhum achado do verificador visual.
+- Marca oficial, paleta e preservação das colunas do financeiro têm verificações específicas.
+- Controles, teclado, movimento reduzido, preços reais, recuperação do catálogo, checkout informativo, FAQ e acesso preservados. Nenhum pedido, pagamento ou mensagem criado pelos testes.
+- Revisão visual independente: sem bloqueios materiais após corrigir o recorte do financeiro no celular. Isso não representa aprovação estética do usuário.
+- Safari e aparelhos físicos não foram testados.
 
-- Build, TypeScript e ESLint aprovados.
-- Chromium e Firefox: 10/10 verificações em cada, de 320 a 1440 px, sem achados do verificador visual.
-- Verificados controles, teclado, ponteiro com mola, movimento reduzido, faixas/preços reais, catálogo/recuperação, indicação, checkout, FAQ e acesso.
-- Revisão visual independente completa: **ship**, após comparar a nova composição desktop/mobile com o feedback e as referências do usuário. Documentação reconciliada com a nova direção.
-- Nove WebPs em `public/landing/art`; alpha nativo validado nos cinco recortes. Prompts exatos em EXIF, sidecars e `docs/assets/landing-art-prompts.json`. Scanner de origem: nove rasters, zero ausentes.
-- Safari e aparelhos físicos não fizeram parte desta verificação.
+O painel operacional e a disponibilidade do checkout não foram alterados.
