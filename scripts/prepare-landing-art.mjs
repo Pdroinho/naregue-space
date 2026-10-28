@@ -15,7 +15,7 @@ for(const item of manifest){
   if(!metadata.hasAlpha||stats.channels.at(-1).min!==0)throw new Error(`Missing native transparent alpha: ${item.name}`)
   output=output.trim({background:'#00000000',threshold:5})
  }
- await output.resize({width:item.name==='hands'?2200:item.transparent?1400:2000,withoutEnlargement:true}).withMetadata({exif:{IFD0:{ImageDescription:item.prompt,Artist:'NaRégua — generated with OpenAI ImageGen',Copyright:'NaRégua illustrative campaign asset; not an actual product screenshot'}}}).webp({quality:item.transparent?92:95,alphaQuality:100}).toFile(`${outputDir}/${item.name}.webp`)
+ await output.resize({width:item.width??(item.name==='hands'?2200:item.transparent?1400:2000),withoutEnlargement:true}).withMetadata({exif:{IFD0:{ImageDescription:item.prompt,Artist:'NaRégua — generated with OpenAI ImageGen',Copyright:'NaRégua illustrative campaign asset; not an actual product screenshot'}}}).webp({quality:item.transparent?92:95,alphaQuality:100}).toFile(`${outputDir}/${item.name}.webp`)
  const result=await sharp(`${outputDir}/${item.name}.webp`).metadata()
  console.log(`${item.name}: ${result.width}x${result.height}, alpha ${result.hasAlpha}, ${result.size} bytes`)
 }

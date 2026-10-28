@@ -1,10 +1,17 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react'
 import { ArrowRight, ShieldCheck } from './components/Icons'
 import { workspaceLoginUrl } from './features/marketing/landingLinks'
 import './landing.css'
 import './naregua-landing.css'
 import './features/marketing/landing-entry.css'
-export { LandingExperience as LandingPage } from './features/marketing/LandingExperience'
+const DesktopLanding=lazy(()=>import('./features/marketing/LandingExperience').then(module=>({default:module.LandingExperience})))
+const MobileLanding=lazy(()=>import('./features/marketing/MobileLanding'))
+const mobileLandingQuery='(max-width:640px), (max-height:640px) and (pointer:coarse)'
+export function LandingPage(){
+  const [mobile,setMobile]=useState(()=>window.matchMedia(mobileLandingQuery).matches)
+  useEffect(()=>{const media=window.matchMedia(mobileLandingQuery),sync=()=>setMobile(media.matches);media.addEventListener('change',sync);return()=>media.removeEventListener('change',sync)},[])
+  return <Suspense fallback={<main aria-busy="true" style={{minHeight:'100dvh',display:'grid',placeItems:'center',background:'#fffdf8'}}><img src="/brand/logo-wordmark-approved-web.png" alt="NaRégua" width="158" height="48"/></main>}>{mobile?<MobileLanding/>:<DesktopLanding/>}</Suspense>
+}
 
 function BrandWordmark({ inverse = false }: { inverse?: boolean }) {
   return <img className="nr-brand-logo" src={inverse ? '/brand/logo-wordmark-approved-inverse.png' : '/brand/logo-wordmark-approved-web.png'} alt="NaRégua" />

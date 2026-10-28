@@ -2,7 +2,7 @@
 
 ## Current artistic revision: art-v2
 
-The current landing uses seven original images generated with the built-in `image_gen` tool and optimized as WebP in `public/landing/art-v2`. The user requested fine ink crosshatching and restrained watercolor, with petroleum, copper and ivory and a peach accent. Green and citrus are rejected, as are marble sculptures, resin ribbons and shiny decorative 3D material.
+The desktop landing uses seven original images generated with the built-in `image_gen` tool and optimized as WebP in `public/landing/art-v2`. The user requested fine ink crosshatching and restrained watercolor, with petroleum, copper and ivory and a peach accent. Green and citrus are rejected, as are marble sculptures, resin ribbons and shiny decorative 3D material.
 
 | File | Use and nature | Transparency |
 |---|---|---|
@@ -27,3 +27,15 @@ The user explicitly revoked visible demo captions on 28 October 2026; image alte
 `public/landing/renewal/*.webp` contains five actual product captures produced on 27 October 2026 by `node scripts/check-product-ui.mjs --landing-assets`: `calendar`, `team`, `dashboard`, `finance` and `booking`. They were rendered from the compiled project with intercepted APIs and synthetic in-memory data, without creating real records. They contain origin/authorship EXIF and were not AI generated. They document the first renewal and supplied product-reference material rather than the current displayed campaign images.
 
 Photographs in `public/naregua` remain official pre-existing project assets. Their presence does not impose exclusive photography on the current campaign. The public art revision does not change the operational panel system or its semantic state colors.
+
+## Current independent mobile artwork
+
+The user rejected revision `d3b49ab` and its prototype, explicitly commissioning new assets for an independent mobile landing. `MobileLanding.tsx` uses three original built-in `image_gen` illustrations in `public/landing/mobile-art`, all native alpha, approximately 761 kB total:
+
+| Asset | Dimensions | Nature |
+|---|---|---|
+| booking-hand | 960 x 1216 | Booking/hand illustration using actual brand and booking references |
+| cash-notebook | 800 x 887 | Notebook illustration for the warm finance section |
+| team-handoff | 800 x 466 | Team handoff artwork for the mobile closing |
+
+Exact prompts and provenance are in `docs/assets/landing-mobile-art-prompts.json`. These are new mobile assets; the seven desktop art-v2 images and their origins remain unchanged. Mobile screenshots live in `.validation/mobile-art`. Generated illustrations do not substantiate commercial outcomes or measured conversion gains.

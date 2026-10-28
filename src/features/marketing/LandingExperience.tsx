@@ -1,3 +1,4 @@
+import {landingFaqs as faqs} from './landingContent'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { api } from '../../api'
 import { PUBLIC_TEAM_PLANS, validTeamPlans, orderedTeamPlans, type TeamPlan } from '../../teamPlans'
@@ -7,8 +8,6 @@ import { LandingCheckout } from '../../components/LandingCheckout'
 import { workspaceLoginUrl } from './landingLinks'
 import './landing-experience.css'
 import './landing-art-direction.css'
-import './landing-mobile.css'
-import {MobileProductDemo} from './MobileProductDemo'
 
 const areas = [
   { id:'calendar',label:'agenda',image:'/landing/art-v2/agenda.webp',alt:'Mockup conceitual ilustrativo de uma agenda de barbearia' },
@@ -20,14 +19,7 @@ const steps = [
   {title:'A conversa continua.',text:'Conecte o WhatsApp da barbearia para enviar confirmações e lembretes. A resposta do cliente acompanha o agendamento.'},
   {title:'Você acompanha.',text:'Horários, confirmações e histórico ficam organizados no painel. Cada profissional tem acesso à própria rotina.'},
 ]
-const faqs = [
-  ['Meus clientes precisam baixar um aplicativo?','Não. Seu link de agendamento abre no navegador do celular. O cliente escolhe o serviço, o profissional e o horário disponível.'],
-  ['Como conecto o WhatsApp da barbearia?','Na área de WhatsApp do painel, você prepara a conexão e lê o QR Code em Aparelhos conectados no seu celular. Depois de conectado, o espaço pode usar a central de conversas, confirmações e lembretes.'],
-  ['Posso usar com a minha equipe?','Sim. Você cadastra os profissionais, define os serviços e a disponibilidade de cada um. A assinatura é por barbearia, em faixas de até 3, 6 ou 15 profissionais.'],
-  ['O financeiro substitui a contabilidade?','Não. Ele organiza os valores dos atendimentos confirmados e as receitas e despesas registradas na plataforma. Os indicadores ajudam a acompanhar a operação; não substituem a contabilidade.'],
-  ['O que o Mestre AI faz?','Ele ajuda com perguntas sobre agenda, financeiro, clientes e a rotina do espaço, usando os dados disponíveis no sistema. É opcional e tem condições de uso próprias, apresentadas no painel.'],
-  ['Como funciona a assinatura?','Você escolhe a faixa da sua equipe e consulta o valor mensal antes de contratar. O pagamento usa a AbacatePay. A contratação depende da disponibilidade informada no checkout; a renovação é manual, sem cobrança automática.'],
-] as const
+
 const money=(cents:number)=>(cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 function track(location:string){
   window.dispatchEvent(new CustomEvent('naregua:cta',{detail:{location}}))
@@ -43,7 +35,7 @@ export function LandingExperience(){
  const root=useRef<HTMLDivElement>(null),menuButton=useRef<HTMLButtonElement>(null)
  const [area,setArea]=useState<string>('calendar'),[step,setStep]=useState(0),[confirmed,setConfirmed]=useState(false)
  const [menuOpen,setMenuOpen]=useState(false),[scrolled,setScrolled]=useState(false)
- const [mobileDock,setMobileDock]=useState(false)
+
  const [people,setPeople]=useState(3),[plans,setPlans]=useState<readonly TeamPlan[]>(PUBLIC_TEAM_PLANS),[pricingError,setPricingError]=useState(''),[pricingLoading,setPricingLoading]=useState(true),[retry,setRetry]=useState(0)
  const [checkoutOpen,setCheckoutOpen]=useState(false),[checkoutPlan,setCheckoutPlan]=useState<TeamPlan['code']>('TEAM_3')
  const [params]=useState(()=>new URLSearchParams(window.location.search))
@@ -51,12 +43,6 @@ export function LandingExperience(){
  const supportUrl=String(import.meta.env.VITE_SUPPORT_URL??import.meta.env.VITE_SALES_URL??'').trim()
  const terms=String(import.meta.env.VITE_TERMS_URL??'').trim()||'/termos',privacy=String(import.meta.env.VITE_PRIVACY_URL??'').trim()||'/privacidade'
  const plan=plans.find(p=>p.seats>=people)??plans[plans.length-1]
- useEffect(()=>{
-  let frame=0
-  const update=()=>{frame=0;if(!window.matchMedia('(max-width:640px)').matches){setMobileDock(false);return}const hero=root.current?.querySelector('.lp-opening')?.getBoundingClientRect(),pricing=document.getElementById('preco')?.getBoundingClientRect(),closing=root.current?.querySelector('.lp-close')?.getBoundingClientRect();setMobileDock(Boolean(hero&&hero.bottom<0&&pricing&&(pricing.bottom<0||pricing.top>window.innerHeight)&&closing&&closing.top>window.innerHeight))}
-  const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)}
-  update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);return()=>{window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);cancelAnimationFrame(frame)}
- },[])
  useEffect(()=>{
   const host=root.current,hero=host?.querySelector<HTMLElement>('.lp-hero')
   if(!host||!hero||window.matchMedia('(prefers-reduced-motion: reduce)').matches||!window.matchMedia('(pointer:fine)').matches)return
@@ -119,13 +105,13 @@ export function LandingExperience(){
      <div className="lp-hero-art" aria-hidden="true"><img className="lp-hand-scissors" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" fetchPriority="high"/><img className="lp-hand-comb" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" fetchPriority="high"/></div>
      <div className="lp-hero-copy">
       <h1 id="lp-title">Sua <ProductSelect value={area} onChange={setArea} ariaLabel="Escolher área da demonstração" className="lp-topic-trigger" menuClassName="lp-topic-menu" options={areas.map(a=>({value:a.id,label:a.label}))}/> na régua.<br/><span>Seu foco, no próximo corte.</span></h1>
-      <p><span className="lp-hero-desktop-copy">Agendamento online, equipe, WhatsApp e financeiro no mesmo lugar.<br className="lp-desktop-break"/> A organização que acompanha o ritmo da sua barbearia.</span><span className="lp-hero-mobile-copy">Seu cliente agenda pelo link.<br/>Você cuida do próximo corte.</span></p>
+      <p><span className="lp-hero-desktop-copy">Agendamento online, equipe, WhatsApp e financeiro no mesmo lugar.<br className="lp-desktop-break"/> A organização que acompanha o ritmo da sua barbearia.</span></p>
       <button className="lp-button lp-button-hero" type="button" onClick={toPlans}>Quero minha barbearia na régua <ArrowRight size={20}/></button>
       <div className="lp-hero-facts"><span><Check size={16}/> Cliente sem aplicativo</span><span><Check size={16}/> Mensalidade por equipe</span></div>
      </div>
      <div className="lp-preview-wrap">
       <div className="lp-preview-controls" role="group" aria-label="Demonstração do produto">{areas.map(a=><button type="button" key={a.id} aria-pressed={area===a.id} onClick={()=>setArea(a.id)}>{a.id==='calendar'?<Calendar size={17}/>:a.id==='team'?<Users size={17}/>:<Wallet size={17}/>}<span>{a.label}</span></button>)}</div>
-      <div className="lp-screen-shell"><div className="lp-screen-images">{areas.map((a,index)=><picture key={a.id}><source media="(max-width:640px)" srcSet="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/><img src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1586" height="992" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/></picture>)}</div><MobileProductDemo area={area}/></div>
+      <div className="lp-screen-shell"><div className="lp-screen-images">{areas.map((a,index)=><picture key={a.id}><source media="(max-width:640px)" srcSet="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/><img src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1586" height="992" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/></picture>)}</div></div>
      </div>
     </section>
   </div>
@@ -147,14 +133,14 @@ export function LandingExperience(){
       <div className={`lp-confirmation-demo ${step===2?'is-active':''}`} aria-hidden={step!==2}><span><Check size={18}/></span><div><strong>Horário confirmado</strong><p>João · Corte clássico · 10h30</p></div></div>
       <small className="lp-story-caption">Demonstração ilustrativa. Nenhuma mensagem é enviada.</small>
      </div>
-     <div className="lp-story-steps">{steps.map((s,index)=><article key={s.title} data-lp-step={index} className={step===index?'is-active':''}><button type="button" onClick={()=>setStep(index)} aria-pressed={step===index}><span>{index+1}</span><h3><span className="lp-story-desktop-label">{s.title}</span><span className="lp-story-mobile-label">{['Escolha','Confirmação','Painel'][index]}</span></h3><ChevronDown size={19}/></button><p>{s.text}</p></article>)}</div>
+     <div className="lp-story-steps">{steps.map((s,index)=><article key={s.title} data-lp-step={index} className={step===index?'is-active':''}><button type="button" onClick={()=>setStep(index)} aria-pressed={step===index}><span>{index+1}</span><h3>{s.title}</h3><ChevronDown size={19}/></button><p>{s.text}</p></article>)}</div>
     </div>
    </div>
   </section>
   <section className="lp-workspace lp-container" id="produto" data-lp-reveal>
    <div className="lp-workspace-copy"><h2>Abra o painel.<br/>Entenda a barbearia.</h2><p>O que está agendado, quem atende, quais clientes voltam e o que foi registrado no financeiro. Cada informação no seu lugar.</p><ul><li><Check size={18}/> Disponibilidade e serviços por profissional</li><li><Check size={18}/> Histórico e contexto dos clientes</li><li><Check size={18}/> Receitas, despesas e metas do espaço</li></ul><a className="lp-text-link" href="#preco">Encontrar o plano da minha equipe <ArrowRight size={18}/></a></div>
    <figure className="lp-workspace-image lp-laptop" aria-label="Demonstração ilustrativa do financeiro em um notebook"><div className="lp-laptop-lid"><i className="lp-laptop-camera" aria-hidden="true"/><div className="lp-finance-mockup"><img src="/landing/art-v2/finance.webp" alt="Demonstração do financeiro com valores fictícios" width="1586" height="992" loading="lazy"/></div></div><div className="lp-laptop-base" aria-hidden="true"><i/></div></figure>
-   <div className="lp-mobile-finance"><MobileProductDemo area="dashboard"/></div>
+
   </section>
   <section className="lp-ai lp-container" id="mestre" data-lp-reveal><div className="lp-ai-art"><img src="/landing/art-v2/conversation.webp" alt="Ilustração a tinta e aquarela de uma mão escrevendo na agenda da barbearia" width="1400" height="672" loading="lazy"/></div><div className="lp-ai-copy"><img className="lp-ai-brand" src="/brand/logo-symbol-approved-web.png" alt="Mestre AI" width="42" height="42"/><h2>Uma pergunta.<br/>Um próximo passo.</h2><p>O Mestre AI ajuda você a explorar os dados da barbearia, da agenda ao financeiro. Pergunte com as suas palavras e leve contexto para suas decisões.</p><div className="lp-ai-prompts"><span>Como está minha agenda esta semana?</span><span>O que entrou e saiu neste mês?</span><span>Me ajude a responder este cliente.</span><small>Exemplos de perguntas. Assistente opcional, com disponibilidade e uso informados no painel.</small></div></div></section>
   <section className="lp-pricing-wrap" id="preco">
@@ -170,7 +156,6 @@ export function LandingExperience(){
   <section className="lp-close"><div className="lp-container"><h2>Seu talento merece<br/><span>uma rotina na régua.</span></h2><p>O próximo passo da sua barbearia começa com organização.</p><a href="#preco" className="lp-button" onClick={()=>track('closing-plans')}>Encontrar meu plano <ArrowRight size={19}/></a></div><div className="lp-close-art" aria-hidden="true"><img className="lp-close-scissors" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" loading="lazy"/><img className="lp-close-bust" src="/landing/art-v2/chair.webp" alt="" width="800" height="1000" loading="lazy"/><img className="lp-close-comb" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" loading="lazy"/></div></section>
   </main>
   <footer className="lp-footer"><div className="lp-container"><div className="lp-footer-top"><div className="lp-footer-signature"><a href="#inicio" className="lp-brand"><img src="/brand/logo-wordmark-approved-inverse.png" alt="NaRégua" width="300" height="80"/></a><p>Talento na cadeira.<br/>Organização no resto.</p></div><nav aria-label="Rodapé — produto"><strong>NaRégua</strong><a href="#como-funciona">Como funciona</a><a href="#produto">O produto</a><a href="#preco">Planos para sua equipe</a></nav><nav aria-label="Rodapé — acesso"><strong>Seu espaço</strong><a href="/acessar">Entrar na minha barbearia</a><a href="#duvidas">Dúvidas frequentes</a>{supportUrl?<a href={supportUrl} target="_blank" rel="noopener noreferrer">Falar com a gente</a>:null}</nav><nav aria-label="Rodapé — legal"><strong>Transparência</strong><a href={terms}>Termos de uso</a><a href={privacy}>Privacidade</a><span>Pagamentos pela AbacatePay</span></nav></div><div className="lp-footer-bottom"><span>© {new Date().getFullYear()} NaRégua.</span><a href="#inicio">De volta ao topo ↑</a></div></div></footer>
-  {mobileDock&&!checkoutOpen&&!menuOpen&&!pricingLoading&&!pricingError?<div className="lp-mobile-dock"><span>Planos a partir de<strong>{money(plans[0].amountCents)}<small>/mês</small></strong></span><button type="button" onClick={()=>{track('mobile-dock');toPlans()}}>Ver planos <ArrowRight size={17}/></button></div>:null}
   <LandingCheckout open={checkoutOpen} onClose={()=>setCheckoutOpen(false)} initialTeamPlan={checkoutPlan} referralToken={referral}/>
  </div>
 }
