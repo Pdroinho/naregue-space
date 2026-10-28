@@ -3,7 +3,7 @@ import type Database from 'better-sqlite3'
 
 const API = 'https://api.abacatepay.com/v2'
 export class PaymentRequestError extends Error {
-  constructor(message: string, public status: number) { super(`${message} (HTTP ${status})`) }
+  constructor(message: string, public status: number, public permissionDenied = false) { super(`${message} (HTTP ${status})`) }
 }
 type Options = { db: Database.Database; apiKey: string; devMode: boolean; appBaseUrl: string; fetchFn?: typeof fetch }
 type Checkout = { id: string; externalId: string; amount: number; paidAmount: number | null; status: string; devMode: boolean; url: string }
@@ -29,7 +29,8 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
     const envelope = await response.json().catch(() => null) as { success?: boolean; data?: T; error?: unknown } | null
     if (!response.ok || envelope?.success !== true || !envelope.data) {
       // Do not expose credentials, customer data or upstream payloads to logs/UI.
-      throw new PaymentRequestError('A AbacatePay não confirmou a operação.', response.status)
+      const permissionDenied = response.status === 403 && envelope?.error === 'Insufficient permissions'
+      throw new PaymentRequestError('A AbacatePay não confirmou a operação.', response.status, permissionDenied)
     }
     return envelope.data
   }
@@ -81,7 +82,7 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
       created = await request<{ id: string; devMode: boolean }>('/customers/create', profile)
     } catch (error) {
       // Prefill is optional. A restricted key must not disable otherwise working checkout.
-      if (!(error instanceof PaymentRequestError) || error.status !== 403) throw error
+      if (!(error instanceof PaymentRequestError) || !error.permissionDenied) throw error
       if (!customerPermissionWarning) console.warn('AbacatePay: CUSTOMER:CREATE permission required for checkout prefill; continuing with hosted customer entry.')
       customerPermissionWarning = true
       return undefined

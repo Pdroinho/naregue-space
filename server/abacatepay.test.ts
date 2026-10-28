@@ -117,6 +117,18 @@ test('ambiguous product timeout keeps durable reservation and cannot duplicate o
   assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_catalog WHERE provider_id IS NULL').get() as {n:number}).n,1)
  }finally{db.close()}
 })
+test('non-JSON gateway 403 is not misclassified as missing API permission',async()=>{
+ const {db}=fixture()
+ try{
+  const fetchFn=(async()=>new Response('error code: 1010',{status:403})) as typeof fetch
+  const provider=createPaymentClient({db,apiKey:'gateway-test-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
+  await assert.rejects(provider.createPaymentLink({name:'Shop',description:'Equipe',amountCents:7490,customer:{email:'buyer@example.com'}}),error=>{
+   assert.equal((error as {permissionDenied:boolean}).permissionDenied,false)
+   return true
+  })
+  assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_catalog').get() as {n:number}).n,0)
+ }finally{db.close()}
+})
 test('webhook integrity is checked against exact raw bytes, not reserialized JSON',()=>{
   const raw=Buffer.from('{ "event": "checkout.completed" }')
   const signature=createHmac('sha256',ABACATEPAY_PUBLIC_KEY).update(raw).digest('base64')
