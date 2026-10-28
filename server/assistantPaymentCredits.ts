@@ -1,12 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
 import { badRequest } from './http.js'
+import type { PaymentLinkInput } from './payment.js'
 type Provider = {
-  createPaymentLink: (input: {
-    name: string
-    amountCents: number
-    description: string
-  }) => Promise<{ linkId: number; checkoutUrl: string }>
+  createPaymentLink: (input: PaymentLinkInput) => Promise<{ linkId: number; checkoutUrl: string }>
   inspectPaymentLinkOrder: (input: {
     linkId: number
     orderId: number
@@ -68,8 +65,12 @@ export function createAssistantPaymentCredits(
       ).run(id, input.tenantId, now)
     })()
     try {
+      const buyer = db.prepare('SELECT billing_name AS name,email,phone AS cellphone FROM users WHERE id=? AND tenant_id=?').get(input.userId,input.tenantId) as {name:string|null;email:string;cellphone:string|null}|undefined
       const link = await provider.createPaymentLink({
         name: `Assistant ${id}`,
+        productName: `Mestre AI · ${input.pack.credits} mensagens extras`,
+        catalogKey: `assistant:${input.pack.id}:${input.pack.credits}`,
+        ...(buyer ? {customer:{email:buyer.email,...(buyer.name?{name:buyer.name}:{}),...(buyer.cellphone?{cellphone:buyer.cellphone}:{})}} : {}),
         amountCents: input.pack.amountCents,
         description: `${input.pack.credits} mensagens extras do Mestre AI, sem expiração`,
       })

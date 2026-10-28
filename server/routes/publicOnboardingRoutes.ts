@@ -133,6 +133,7 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
         recordPlatformMarketingChoice({ userId, tenantId, granted: body.platformMarketingWhatsapp, source: 'PUBLIC_CHECKOUT' })
       })()
       try {
+        db.prepare('UPDATE users SET billing_name=? WHERE id=? AND tenant_id=?').run(body.ownerName, userId, tenantId)
         const checkout = await paymentBilling.startCheckout(tenantId, body.planCode,body.referralToken,body.quoteFingerprint)
         return res.json({ activated: false, url: checkout.checkoutUrl, workspaceSlug: body.slug,
           intentId: checkout.intentId, amountCents: paymentBilling.quoteForTenant(tenantId,body.planCode).amountCents })

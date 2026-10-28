@@ -1,5 +1,5 @@
 import { createPaymentReferralService, referralQuoteFingerprint, type TeamQuote } from './paymentReferralService.js'
-import { PaymentRequestError } from './payment.js'
+import { PaymentRequestError, type PaymentLinkInput } from './payment.js'
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
 import { nextBillingPeriodEnd } from './plans.js'
@@ -9,7 +9,7 @@ import { teamPlanByCode, type TeamPlanCode } from './teamPlans.js'
 
 type Link = { linkId: number; checkoutUrl: string }
 type Provider = {
-  createPaymentLink: (input: { name: string; amountCents: number; description: string; checkoutIntentId?: string }) => Promise<Link>
+  createPaymentLink: (input: PaymentLinkInput) => Promise<Link>
   verifyPaymentLinkOrder: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<boolean>
   inspectPaymentLinkOrder?: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<'PAID' | 'REVERSED' | 'UNKNOWN'>
   listPaymentLinkOrders?: (linkId: number) => Promise<Array<{ id: number; status: string }>>
@@ -55,7 +55,10 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     if (existing.intent.status === 'PENDING') return { intentId: existing.intent.id, checkoutUrl: existing.intent.checkoutUrl! }
 
     try {
-      const link = await provider.createPaymentLink({ name: existing.name, amountCents: existing.intent.amountCents, description: `NaRégua · ${plan.label} · um mês`, checkoutIntentId: existing.intent.id })
+      const owner = db.prepare("SELECT billing_name AS name,email,phone AS cellphone FROM users WHERE tenant_id=? AND role='ADMIN' ORDER BY created_at,id LIMIT 1").get(tenantId) as { name: string | null; email: string; cellphone: string | null } | undefined
+      const link = await provider.createPaymentLink({ name: existing.name, productName: `NaRégua · ${plan.label}`, catalogKey: `team:${plan.code}`, amountCents: existing.intent.amountCents, description: `NaRégua · ${plan.label} · um mês`, checkoutIntentId: existing.intent.id,
+        ...(owner ? { customer: { email: owner.email, ...(owner.name ? { name: owner.name } : {}), ...(owner.cellphone ? { cellphone: owner.cellphone } : {}) } } : {}),
+      })
       const updated = db.prepare(`UPDATE payment_checkout_intents SET payment_link_id = ?, checkout_url = ?, status = 'PENDING'
         WHERE id = ? AND tenant_id = ? AND status = 'CREATING'`).run(link.linkId, link.checkoutUrl, existing.intent.id, tenantId)
       if (updated.changes !== 1) throw new Error('A intenção de pagamento mudou durante a criação do link.')

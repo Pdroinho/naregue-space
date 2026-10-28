@@ -2,6 +2,12 @@
 
 As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tags anotadas `vMAJOR.MINOR.PATCH`; `package.json`, `package-lock.json` e a tag devem concordar.
 
+## Não lançado
+
+- Checkout AbacatePay reutiliza produtos por plano/pacote e preço; nomes de compradores deixam de virar produtos.
+- Nome, e-mail e telefone seguem para pré-preenchimento via cliente do provedor quando a chave permite `CUSTOMER:CREATE`; HTTP 403 preserva o fluxo hospedado.
+- Migração 116 preserva o nome de cobrança e os identificadores de catálogo/clientes. Planos existentes e renovação manual permanecem preservados.
+
 ## [3.0.0] — 2026-10-28
 
 Primeira entrega consolidada neste repositório GitHub. Inclui a integração funcional da referência 5.14.2 e as correções realizadas sobre a base NaRégua 2.2.2.

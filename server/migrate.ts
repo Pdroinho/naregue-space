@@ -1226,4 +1226,15 @@ export function migrate(db = getDb()) {
     );
   `))
 
+  apply(116, () => db.exec(`
+    ALTER TABLE users ADD COLUMN billing_name TEXT;
+    CREATE TABLE abacatepay_catalog (
+      cache_key TEXT PRIMARY KEY, external_id TEXT NOT NULL UNIQUE,
+      provider_id TEXT, created_at TEXT NOT NULL
+    );
+    CREATE TABLE abacatepay_customers (
+      cache_key TEXT PRIMARY KEY, provider_id TEXT NOT NULL, created_at TEXT NOT NULL
+    );
+  `))
+
 }

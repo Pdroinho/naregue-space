@@ -32,7 +32,7 @@ As referências são [criação de checkout](https://docs.abacatepay.com/pages/p
 ## Comportamento
 
 1. A regra comercial grava uma intenção com cotação e desconto reservados.
-2. O adaptador grava a referência, cria o produto com preço exato e solicita o checkout, retornando somente a URL HTTPS do domínio oficial.
+2. O adaptador grava a referência, reutiliza o produto do catálogo por plano e preço exato e solicita o checkout, retornando somente a URL HTTPS do domínio oficial.
 3. O webhook autenticado é persistido antes da resposta. O worker consulta a API e exige identidade, valor e ambiente correspondentes.
 4. A concessão acontece em transação condicionada ao estado pendente. Uma entrega repetida não gera outro período ou outro crédito.
 5. Reembolso e disputa autenticados ficam registrados e seguem a conciliação/restrição de acesso. Uma compra mais recente não é suspensa por um estorno antigo.
@@ -46,3 +46,13 @@ Testar conta dev e depois uma compra live controlada: checkout de cada faixa, in
 Se houver timeout após envio ao provedor, não repetir a cobrança cegamente. A intenção pode ficar em `CREATING`; conferir a referência no painel e na tabela de checkouts, documentar a resolução e conciliar. Não transformar um timeout em pagamento recusado nem liberar assinatura por captura de tela.
 
 Os planos continuam de renovação manual por mês, como na referência. Assinaturas antigas preservam o período já pago; não se abre outra cobrança de migração enquanto estiverem ativas sem uma política comercial definida. Pedidos InfinitePay antigos continuam conciliáveis; nenhuma nova contratação usa Appmax ou InfinitePay.
+
+## Checkout: dados e catálogo compartilhado (28/10/2026)
+
+A migração 116 adiciona o nome de cobrança do responsável em `users.billing_name`, um registro persistente de produtos e um cache de identificadores de clientes. O checkout público preserva o nome preenchido e envia nome, e-mail e telefone via `POST /customers/create`, vinculando o `customerId` ao checkout. CPF/CNPJ e endereço não são solicitados no cadastro NaRégua: o provedor ainda pode pedi-los. Dados pessoais não são enviados em query strings nem em metadados.
+
+A chave precisa de `CUSTOMER:CREATE`. A chave sandbox instalada respondeu HTTP 403 na verificação dessa rota; nenhum cliente de teste foi criado. Enquanto faltar essa permissão, o checkout continua disponível com a etapa de dados no provedor e um aviso sem dados pessoais no log. O pré-preenchimento está implementado e testado com API simulada, mas depende da troca da chave para funcionar na conta atual. Nunca registrar chaves neste documento.
+
+Produtos recebem nomes comerciais do NaRégua, não o nome de cada comprador. A chave de reutilização considera plano/pacote, valor em centavos, moeda e ambiente/credencial. Preços com desconto geram variantes reutilizáveis; o preço de um produto compartilhado nunca é alterado para atender outro pedido. O mesmo vale para pacotes de mensagens. Reservas persistentes impedem criação concorrente duplicada; um timeout de produto deixa a reserva para revisão pela referência externa, sem repetir a criação cegamente. Nenhum produto antigo foi excluído ou modificado e os pagamentos anteriores continuam conciliáveis.
+
+Reutilizar produtos é diferente de ativar recorrência. O comportamento atual continua sendo um mês com renovação manual. Uma assinatura automática exige produto com ciclo, checkout de assinatura, conciliação dos eventos `subscription.*`, cancelamento e tratamento de falhas de renovação; não basta mudar o nome do produto. A escolha comercial de migrar os novos planos permanece pendente de confirmação.

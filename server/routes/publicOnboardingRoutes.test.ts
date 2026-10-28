@@ -115,9 +115,10 @@ test('checkout público de equipe vincula espaço, valor e ativação apenas ao 
   const db = createFixtureDb()
   db.exec(`CREATE TABLE payment_checkout_intents (id TEXT PRIMARY KEY, tenant_id TEXT NOT NULL REFERENCES tenants(id), plan_code TEXT NOT NULL, amount_cents INTEGER NOT NULL, payment_link_id INTEGER UNIQUE, checkout_url TEXT, status TEXT NOT NULL, order_id INTEGER UNIQUE, created_at TEXT NOT NULL, paid_at TEXT);`)
   const createdAmounts: number[] = []
+  const checkoutCustomers: unknown[] = []
   extendPaymentReferralFixture(db)
   const paymentBilling = createPaymentBillingService(db, {
-    createPaymentLink: async input => { if (input.name === 'Studio Falha') throw new Error('sandbox indisponível'); createdAmounts.push(input.amountCents); return { linkId: 913, checkoutUrl: 'https://sandbox.payment.com.br/pagar/913' } },
+    createPaymentLink: async input => { if (input.name === 'Studio Falha') throw new Error('sandbox indisponível'); createdAmounts.push(input.amountCents); checkoutCustomers.push(input.customer); assert.equal(input.catalogKey,'team:TEAM_6'); return { linkId: 913, checkoutUrl: 'https://sandbox.payment.com.br/pagar/913' } },
     verifyPaymentLinkOrder: async input => input.linkId === 913 && input.orderId === 77 && input.expectedAmountCents === 9_990,
   })
   let acceptanceCount = 0
@@ -163,6 +164,7 @@ test('checkout público de equipe vincula espaço, valor e ativação apenas ao 
     assert.equal(checkout.workspaceSlug, body.slug)
     assert.equal(checkout.amountCents, 9_990)
     assert.deepEqual(createdAmounts, [9_990])
+    assert.deepEqual(checkoutCustomers,[{name:body.ownerName,email:body.email,cellphone:'+5571999999999'}])
     assert.equal(acceptanceCount, 1)
     const tenant = db.prepare('SELECT id, status FROM tenants WHERE slug = ?').get(body.slug) as { id: string; status: string }
     assert.equal(tenant.status, 'ONBOARDING')

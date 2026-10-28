@@ -16,6 +16,7 @@ function fixture() {
     const body = init?.body ? JSON.parse(String(init.body)) : undefined
     calls.push({url:String(url),body})
     assert.equal(new Headers(init?.headers).get('authorization'),'Bearer test-key')
+    if (String(url).endsWith('/customers/create')) return Response.json({success:true,data:{id:'cust_test',devMode:mode}})
     if (String(url).endsWith('/products/create')) return Response.json({success:true,data:{id:'prod_test'}})
     if (String(url).endsWith('/checkouts/create')) externalId = body.externalId
     if (String(url).endsWith('/checkouts/create')) assert.match(externalId,/^naregua-sandbox-/)
@@ -52,6 +53,69 @@ test('payment requires paid status, exact amount, checkout association and match
     setState({amount:7490,mode:false});await assert.rejects(provider.verifyPaymentLinkOrder(order),/ambiente/)
     setState({mode:true,status:'REFUNDED'});assert.equal(await provider.inspectPaymentLinkOrder(order),'REVERSED')
   } finally {db.close()}
+})
+test('catalog and customer survive adapter restart; names never turn into per-buyer products', async()=>{
+ const {db,provider,calls}=fixture()
+ try{
+  const input={name:'Barbearia A',productName:'NaRégua · 1 a 3 profissionais',catalogKey:'team:TEAM_3',description:'Equipe',amountCents:7490,customer:{name:'João Silva',email:'JOAO@example.com',cellphone:'+5571999999999'}}
+  await provider.createPaymentLink(input)
+  const fetchFn=(async(url:string|URL|Request,init?:RequestInit)=>{
+   calls.push({url:String(url),body:JSON.parse(String(init?.body))})
+   assert.ok(String(url).endsWith('/checkouts/create'),'cached customer and product must be reused')
+   const body=JSON.parse(String(init?.body));return Response.json({success:true,data:{id:'bill_other',externalId:body.externalId,url:'https://app.abacatepay.com/pay/bill_other',status:'PENDING',devMode:true,amount:7490,paidAmount:null}})
+  }) as typeof fetch
+  const restarted=createPaymentClient({db,apiKey:'test-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
+  await restarted.createPaymentLink({...input,name:'Barbearia B'})
+  assert.equal(calls.filter(c=>c.url.endsWith('/products/create')).length,1)
+  assert.equal(calls.filter(c=>c.url.endsWith('/customers/create')).length,1)
+  assert.deepEqual(calls.find(c=>c.url.endsWith('/customers/create'))?.body,{name:'João Silva',email:'joao@example.com',cellphone:'+5571999999999'})
+  assert.equal(calls.find(c=>c.url.endsWith('/products/create'))?.body?.name,input.productName)
+  for(const checkout of calls.filter(c=>c.url.endsWith('/checkouts/create')))assert.equal(checkout.body?.customerId,'cust_test')
+ }finally{db.close()}
+})
+test('catalog separates quoted prices and concurrent creation never creates duplicate products',async()=>{
+ const {db,provider,calls}=fixture()
+ try{
+  const input={name:'A',description:'Equipe',catalogKey:'team:TEAM_3',amountCents:7490}
+  const results=await Promise.allSettled([provider.createPaymentLink(input),provider.createPaymentLink(input)])
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1)
+  assert.equal(calls.filter(c=>c.url.endsWith('/products/create')).length,1)
+  // Different quoted amount gets its own stable catalog variant, even if the response is refused.
+  await assert.rejects(provider.createPaymentLink({...input,amountCents:5992}),/incompatível/)
+  assert.equal(calls.filter(c=>c.url.endsWith('/products/create')).length,2)
+  const products=calls.filter(c=>c.url.endsWith('/products/create'))
+  assert.notEqual(products[0].body?.externalId,products[1].body?.externalId)
+ }finally{db.close()}
+})
+test('restricted customer permission preserves checkout and never embeds PII in URLs or metadata',async()=>{
+ const {db}=fixture();const bodies:Record<string,unknown>[]=[]
+ try{
+  const fetchFn=(async(url:string|URL|Request,init?:RequestInit)=>{
+   const body=JSON.parse(String(init?.body));bodies.push(body)
+   if(String(url).endsWith('/customers/create'))return Response.json({success:false,error:'Insufficient permissions'},{status:403})
+   if(String(url).endsWith('/products/create'))return Response.json({success:true,data:{id:'prod_shared'}})
+   return Response.json({success:true,data:{id:'bill_prefill_denied',externalId:body.externalId,url:'https://app.abacatepay.com/pay/bill_prefill_denied',status:'PENDING',devMode:true,amount:7490,paidAmount:null}})
+  }) as typeof fetch
+  const provider=createPaymentClient({db,apiKey:'restricted-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
+  const result=await provider.createPaymentLink({name:'Shop',description:'Equipe',amountCents:7490,customer:{email:'private@example.com',name:'Private Name'}})
+  assert.match(result.checkoutUrl,/bill_prefill_denied/)
+  const checkout=bodies.at(-1)!
+  assert.equal(checkout.customerId,undefined)
+  assert.ok(!JSON.stringify(checkout).includes('private@example.com'))
+  assert.ok(!JSON.stringify(checkout).includes('Private Name'))
+ }finally{db.close()}
+})
+test('ambiguous product timeout keeps durable reservation and cannot duplicate on retry',async()=>{
+ const {db}=fixture();let attempts=0
+ try{
+  const fetchFn=(async()=>{attempts++;throw new Error('timeout after provider accepted request')}) as typeof fetch
+  const provider=createPaymentClient({db,apiKey:'timeout-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
+  const input={name:'Shop',catalogKey:'team:TEAM_3',description:'Equipe',amountCents:7490}
+  await assert.rejects(provider.createPaymentLink(input),/Consulte o pedido/)
+  await assert.rejects(provider.createPaymentLink(input),/produto ainda/)
+  assert.equal(attempts,1)
+  assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_catalog WHERE provider_id IS NULL').get() as {n:number}).n,1)
+ }finally{db.close()}
 })
 test('webhook integrity is checked against exact raw bytes, not reserialized JSON',()=>{
   const raw=Buffer.from('{ "event": "checkout.completed" }')

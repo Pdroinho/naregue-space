@@ -26,7 +26,7 @@ function baseline() {
   return db
 }
 
-test('upgrade 40 → 115 preserves IDs, branding, personal hours, links and scoped blocks; replay is safe', () => {
+test('upgrade 40 → 116 preserves IDs, branding, personal hours, links and scoped blocks; replay is safe', () => {
   const db = baseline()
   try {
     db.prepare("INSERT INTO time_off(id,tenant_id,professional_id,starts_at,ends_at,reason,created_at) VALUES('block',?,'barber','2026-10-20T10:00:00Z','2026-10-20T10:30:00Z','Folga',?)").run(tenant,now)
@@ -36,7 +36,9 @@ test('upgrade 40 → 115 preserves IDs, branding, personal hours, links and scop
     assert.equal((db.prepare('SELECT count(*) n FROM time_off').get() as {n:number}).n,0)
     assert.equal((db.prepare('SELECT count(*) n FROM professional_services WHERE professional_id=?').get('barber') as {n:number}).n,1)
     assert.deepEqual(db.pragma('foreign_key_check'),[])
-    assert.equal((db.prepare('SELECT max(version) v FROM schema_migrations').get() as {v:number}).v,115)
+    assert.equal((db.prepare('SELECT max(version) v FROM schema_migrations').get() as {v:number}).v,116)
+    assert.equal((db.prepare('SELECT billing_name FROM users WHERE id=?').get(client) as {billing_name:string|null}).billing_name,null)
+    assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_catalog').get() as {n:number}).n,0)
   } finally { db.close() }
 })
 

@@ -11,6 +11,9 @@ export function extendPaymentReferralFixture(db: Database.Database) {
     CREATE TABLE IF NOT EXISTS referral_redemptions (id TEXT PRIMARY KEY,link_id TEXT,invited_tenant_id TEXT,order_nsu TEXT,status TEXT,gross_amount_cents INTEGER,discount_amount_cents INTEGER,referrer_reward_percent INTEGER,created_at TEXT,paid_at TEXT);
     CREATE TABLE IF NOT EXISTS referral_credits (id TEXT PRIMARY KEY,owner_tenant_id TEXT,redemption_id TEXT UNIQUE,discount_percent INTEGER,status TEXT,applied_order_nsu TEXT,reserved_at TEXT,applied_at TEXT,created_at TEXT);
   `)
+  for (const name of ['billing_name','created_at']) {
+    if (!(db.pragma('table_info(users)') as Array<{name:string}>).some(column=>column.name===name)) db.exec(`ALTER TABLE users ADD COLUMN ${name} TEXT`)
+  }
   if (
     !(db.pragma('table_info(referral_links)') as Array<{ name: string }>).some(
       (column) => column.name === 'label',
