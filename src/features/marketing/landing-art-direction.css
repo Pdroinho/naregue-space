@@ -122,7 +122,7 @@
 /* Crop the generated mastheads; only the product interface remains visible. */
 .nr-lp-art .lp-preview-wrap{margin-bottom:0;padding-bottom:0}
 .nr-lp-art .lp-screen-images{aspect-ratio:1.82;border-radius:18px 18px 0 0;overflow:hidden}
-.nr-lp-art .lp-screen-images>img{width:100%;height:auto;max-width:none;top:0;left:0;object-fit:contain;transform:translateY(-12.1%)!important}
+.nr-lp-art .lp-screen-images img{width:100%;height:auto;max-width:none;top:0;left:0;object-fit:contain;transform:translateY(-12.1%)!important}
 .nr-lp-art .lp-workspace-image.lp-laptop{padding:18px 0 34px;overflow:visible;background:none;border:0;box-shadow:none;transform:rotate(-3deg);isolation:isolate}
 .lp-laptop-lid{position:relative;margin-inline:5%;padding:18px 12px 12px;background:linear-gradient(135deg,#d9d8d3,#8f9698 35%,#cdd0cd 65%,#e1dfd9);border:1px solid #929b9c;border-radius:19px 19px 5px 5px;box-shadow:0 24px 38px #082a3921}
 .lp-laptop-camera{position:absolute;width:4px;height:4px;border-radius:50%;background:#233941;top:7px;left:calc(50% - 2px)}

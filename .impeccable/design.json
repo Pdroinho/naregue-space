@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-28T11:54:16.382863+00:00",
+  "generatedAt": "2026-10-28T16:32:30.276783+00:00",
   "title": "Design System: NaRégua",
   "extensions": {
     "colorMeta": {
@@ -230,7 +230,8 @@
       "Cream reading surfaces and petroleum structure.",
       "Manrope interface with local Hugeicons Stroke Rounded.",
       "Copper actions and realistic photography in operations; ivory, peach and ink-and-watercolor campaign art on the public landing.",
-      "Public entry uses cream/copper access with chair artwork and a scrollable plan-row dialog; hero plates have no visible captions or white logo bars and finance uses a CSS notebook frame."
+      "Public entry uses cream/copper access with chair artwork and a scrollable plan-row dialog; hero plates have no visible captions or white logo bars and finance uses a CSS notebook frame.",
+      "Dedicated public mobile composition up to 640px: native HTML product demonstrations marked Demonstração, tap-selected booking story, compact pricing and contextual CTA dock; approved desktop expression is preserved."
     ],
     "rules": [
       {

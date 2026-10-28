@@ -28,7 +28,7 @@ try{
   const target=existsSync(file)&&path.extname(file)?file:path.join(root,'index.html')
   return route.fulfill({body:readFileSync(target),contentType:mime[path.extname(target)]||'application/octet-stream'})
  })
- for(const width of [1440,1280,1024,768,390,320]){
+ for(const width of [1440,1280,1024,768,430,390,360,320]){
   await page.setViewportSize({width,height:1000});await page.goto('https://naregua.space/?ref=demonstracao')
   await page.locator('.lp-hero h1').waitFor();await settle(page)
   const initial=await inspectPanel(page);reports.push({width,state:'initial',...initial})
@@ -40,12 +40,14 @@ try{
   assert.equal(await page.locator('.lp-finance-mockup>img').evaluate(el=>window.getComputedStyle(el).objectFit),'contain','Financial illustration must preserve all columns')
   assert.equal(await page.locator('.nr-lp').evaluate(el=>window.getComputedStyle(el).getPropertyValue('--lp-highlight').trim()),'#efd3be','Campaign accent must retain the approved warm palette')
   const dock=await page.evaluate(()=>({opening:document.querySelector('.lp-opening').getBoundingClientRect().bottom,screen:document.querySelector('.lp-screen-shell').getBoundingClientRect().bottom}));assert.ok(Math.abs(dock.opening-dock.screen)<2,'Hero interface must dock to its lower edge')
+  if(width<=640){assert.equal(await page.locator('.lp-screen-shell .lp-mobile-preview').isVisible(),true);assert.equal(await page.locator('.lp-screen-images').isVisible(),false);const heroAction=await page.locator('.lp-button-hero').boundingBox();assert.ok(heroAction.y+heroAction.height<640,'Mobile hero CTA must appear before 640px');assert.equal(await page.locator('.lp-mobile-finance').isVisible(),true)}
   await page.screenshot({path:`${dir}/hero-${width}.png`,animations:'disabled'})
   if(width===1440||width===390){await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'});for(const section of ['intro','workspace','ai','pricing-wrap','close','footer']){const target=page.locator(`.lp-${section}`);await target.scrollIntoViewIfNeeded();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await settle(page);await target.screenshot({path:`${dir}/${section}-${width}.png`,animations:'disabled'})}await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))}
   if(width===1440){await page.mouse.move(200,300);await page.waitForFunction(()=>Math.abs(parseFloat(document.querySelector('.nr-lp').style.getPropertyValue('--art-x')))>1);assert.ok((await page.locator('#preco').boundingBox()).height<850,'Desktop pricing should fit a compact section')}
   const topic=page.getByRole('button',{name:'Escolher área da demonstração',exact:true})
   await topic.click();await page.getByRole('option',{name:'equipe',exact:true}).click()
   assert.ok((await page.locator('.lp-screen-images img.is-active').getAttribute('src')).endsWith('/team.webp'))
+  if(width<=640)assert.equal(await page.locator('.lp-screen-shell .lp-mobile-preview-heading strong').textContent(),'Sua equipe')
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
   await topic.focus();await page.keyboard.press('Enter');await page.waitForFunction(()=>document.activeElement?.getAttribute('role')==='listbox');await page.keyboard.press('End');await page.keyboard.press('Enter')
   await page.waitForFunction(()=>document.querySelector('.lp-screen-images img.is-active')?.getAttribute('src')?.endsWith('/finance.webp'))
@@ -70,6 +72,7 @@ try{
   assert.ok(requests.some(url=>url.includes('referralToken=demonstracao')))
   await page.getByRole('button',{name:'Confirmar exemplo',exact:false}).click();assert.equal(await page.locator('.lp-confirmation-demo').getAttribute('aria-hidden'),'false')
   await settle(page);await page.screenshot({path:`${dir}/story-${width}.png`,animations:'disabled'})
+  if(width<=640){await page.locator('.lp-mobile-dock button').click();await page.waitForFunction(()=>{const bounds=document.getElementById('preco').getBoundingClientRect();return bounds.top<window.innerHeight&&bounds.bottom>0});assert.equal(await page.locator('.lp-mobile-dock').count(),0)}
   const caption=await page.locator('.lp-story-caption').boundingBox(),confirmation=await page.locator('.lp-confirmation-demo').boundingBox();assert.ok(caption.y>=confirmation.y+confirmation.height,'Demonstration caption must stay below confirmation')
   const question=page.locator('.lp-faq summary').first();await question.click();assert.equal(await page.locator('.lp-faq details').first().getAttribute('open'),'')
   if(width<=900){const menu=page.getByRole('button',{name:'Abrir menu',exact:true});await menu.click();assert.equal(await page.getByRole('navigation',{name:'Navegação principal'}).isVisible(),true);await page.keyboard.press('Escape');assert.equal(await menu.evaluate(el=>el===document.activeElement),true)}

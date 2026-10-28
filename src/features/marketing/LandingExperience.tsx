@@ -7,6 +7,8 @@ import { LandingCheckout } from '../../components/LandingCheckout'
 import { workspaceLoginUrl } from './landingLinks'
 import './landing-experience.css'
 import './landing-art-direction.css'
+import './landing-mobile.css'
+import {MobileProductDemo} from './MobileProductDemo'
 
 const areas = [
   { id:'calendar',label:'agenda',image:'/landing/art-v2/agenda.webp',alt:'Mockup conceitual ilustrativo de uma agenda de barbearia' },
@@ -41,6 +43,7 @@ export function LandingExperience(){
  const root=useRef<HTMLDivElement>(null),menuButton=useRef<HTMLButtonElement>(null)
  const [area,setArea]=useState<string>('calendar'),[step,setStep]=useState(0),[confirmed,setConfirmed]=useState(false)
  const [menuOpen,setMenuOpen]=useState(false),[scrolled,setScrolled]=useState(false)
+ const [mobileDock,setMobileDock]=useState(false)
  const [people,setPeople]=useState(3),[plans,setPlans]=useState<readonly TeamPlan[]>(PUBLIC_TEAM_PLANS),[pricingError,setPricingError]=useState(''),[pricingLoading,setPricingLoading]=useState(true),[retry,setRetry]=useState(0)
  const [checkoutOpen,setCheckoutOpen]=useState(false),[checkoutPlan,setCheckoutPlan]=useState<TeamPlan['code']>('TEAM_3')
  const [params]=useState(()=>new URLSearchParams(window.location.search))
@@ -48,6 +51,12 @@ export function LandingExperience(){
  const supportUrl=String(import.meta.env.VITE_SUPPORT_URL??import.meta.env.VITE_SALES_URL??'').trim()
  const terms=String(import.meta.env.VITE_TERMS_URL??'').trim()||'/termos',privacy=String(import.meta.env.VITE_PRIVACY_URL??'').trim()||'/privacidade'
  const plan=plans.find(p=>p.seats>=people)??plans[plans.length-1]
+ useEffect(()=>{
+  let frame=0
+  const update=()=>{frame=0;if(!window.matchMedia('(max-width:640px)').matches){setMobileDock(false);return}const hero=root.current?.querySelector('.lp-opening')?.getBoundingClientRect(),pricing=document.getElementById('preco')?.getBoundingClientRect(),closing=root.current?.querySelector('.lp-close')?.getBoundingClientRect();setMobileDock(Boolean(hero&&hero.bottom<0&&pricing&&(pricing.bottom<0||pricing.top>window.innerHeight)&&closing&&closing.top>window.innerHeight))}
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)}
+  update();window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule);return()=>{window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);cancelAnimationFrame(frame)}
+ },[])
  useEffect(()=>{
   const host=root.current,hero=host?.querySelector<HTMLElement>('.lp-hero')
   if(!host||!hero||window.matchMedia('(prefers-reduced-motion: reduce)').matches||!window.matchMedia('(pointer:fine)').matches)return
@@ -85,7 +94,7 @@ export function LandingExperience(){
   const reveal=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){if(!reduced)(entry.target as HTMLElement).animate([{opacity:.2,transform:'translateY(24px)'},{opacity:1,transform:'translateY(0)'}],{duration:650,easing:'cubic-bezier(.16,1,.3,1)'});reveal.unobserve(entry.target)}},{threshold:.12})
   host.querySelectorAll('[data-lp-reveal]').forEach(el=>reveal.observe(el))
   const story=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting)setStep(Number((entry.target as HTMLElement).dataset.lpStep))},{rootMargin:'-32% 0px -32% 0px',threshold:.15})
-  host.querySelectorAll('[data-lp-step]').forEach(el=>story.observe(el))
+  if(window.matchMedia('(min-width:641px)').matches)host.querySelectorAll('[data-lp-step]').forEach(el=>story.observe(el))
   return()=>{reveal.disconnect();story.disconnect()}
  },[])
  useEffect(()=>{
@@ -110,13 +119,13 @@ export function LandingExperience(){
      <div className="lp-hero-art" aria-hidden="true"><img className="lp-hand-scissors" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" fetchPriority="high"/><img className="lp-hand-comb" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" fetchPriority="high"/></div>
      <div className="lp-hero-copy">
       <h1 id="lp-title">Sua <ProductSelect value={area} onChange={setArea} ariaLabel="Escolher área da demonstração" className="lp-topic-trigger" menuClassName="lp-topic-menu" options={areas.map(a=>({value:a.id,label:a.label}))}/> na régua.<br/><span>Seu foco, no próximo corte.</span></h1>
-      <p>Agendamento online, equipe, WhatsApp e financeiro no mesmo lugar.<br className="lp-desktop-break"/> A organização que acompanha o ritmo da sua barbearia.</p>
+      <p><span className="lp-hero-desktop-copy">Agendamento online, equipe, WhatsApp e financeiro no mesmo lugar.<br className="lp-desktop-break"/> A organização que acompanha o ritmo da sua barbearia.</span><span className="lp-hero-mobile-copy">Seu cliente agenda pelo link.<br/>Você cuida do próximo corte.</span></p>
       <button className="lp-button lp-button-hero" type="button" onClick={toPlans}>Quero minha barbearia na régua <ArrowRight size={20}/></button>
       <div className="lp-hero-facts"><span><Check size={16}/> Cliente sem aplicativo</span><span><Check size={16}/> Mensalidade por equipe</span></div>
      </div>
      <div className="lp-preview-wrap">
       <div className="lp-preview-controls" role="group" aria-label="Demonstração do produto">{areas.map(a=><button type="button" key={a.id} aria-pressed={area===a.id} onClick={()=>setArea(a.id)}>{a.id==='calendar'?<Calendar size={17}/>:a.id==='team'?<Users size={17}/>:<Wallet size={17}/>}<span>{a.label}</span></button>)}</div>
-      <div className="lp-screen-shell"><div className="lp-screen-images">{areas.map((a,index)=><img key={a.id} src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1586" height="992" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/>)}</div></div>
+      <div className="lp-screen-shell"><div className="lp-screen-images">{areas.map((a,index)=><picture key={a.id}><source media="(max-width:640px)" srcSet="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"/><img src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1586" height="992" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/></picture>)}</div><MobileProductDemo area={area}/></div>
      </div>
     </section>
   </div>
@@ -138,13 +147,14 @@ export function LandingExperience(){
       <div className={`lp-confirmation-demo ${step===2?'is-active':''}`} aria-hidden={step!==2}><span><Check size={18}/></span><div><strong>Horário confirmado</strong><p>João · Corte clássico · 10h30</p></div></div>
       <small className="lp-story-caption">Demonstração ilustrativa. Nenhuma mensagem é enviada.</small>
      </div>
-     <div className="lp-story-steps">{steps.map((s,index)=><article key={s.title} data-lp-step={index} className={step===index?'is-active':''}><button type="button" onClick={()=>setStep(index)} aria-pressed={step===index}><span>{index+1}</span><h3>{s.title}</h3><ChevronDown size={19}/></button><p>{s.text}</p></article>)}</div>
+     <div className="lp-story-steps">{steps.map((s,index)=><article key={s.title} data-lp-step={index} className={step===index?'is-active':''}><button type="button" onClick={()=>setStep(index)} aria-pressed={step===index}><span>{index+1}</span><h3><span className="lp-story-desktop-label">{s.title}</span><span className="lp-story-mobile-label">{['Escolha','Confirmação','Painel'][index]}</span></h3><ChevronDown size={19}/></button><p>{s.text}</p></article>)}</div>
     </div>
    </div>
   </section>
   <section className="lp-workspace lp-container" id="produto" data-lp-reveal>
    <div className="lp-workspace-copy"><h2>Abra o painel.<br/>Entenda a barbearia.</h2><p>O que está agendado, quem atende, quais clientes voltam e o que foi registrado no financeiro. Cada informação no seu lugar.</p><ul><li><Check size={18}/> Disponibilidade e serviços por profissional</li><li><Check size={18}/> Histórico e contexto dos clientes</li><li><Check size={18}/> Receitas, despesas e metas do espaço</li></ul><a className="lp-text-link" href="#preco">Encontrar o plano da minha equipe <ArrowRight size={18}/></a></div>
    <figure className="lp-workspace-image lp-laptop" aria-label="Demonstração ilustrativa do financeiro em um notebook"><div className="lp-laptop-lid"><i className="lp-laptop-camera" aria-hidden="true"/><div className="lp-finance-mockup"><img src="/landing/art-v2/finance.webp" alt="Demonstração do financeiro com valores fictícios" width="1586" height="992" loading="lazy"/></div></div><div className="lp-laptop-base" aria-hidden="true"><i/></div></figure>
+   <div className="lp-mobile-finance"><MobileProductDemo area="dashboard"/></div>
   </section>
   <section className="lp-ai lp-container" id="mestre" data-lp-reveal><div className="lp-ai-art"><img src="/landing/art-v2/conversation.webp" alt="Ilustração a tinta e aquarela de uma mão escrevendo na agenda da barbearia" width="1400" height="672" loading="lazy"/></div><div className="lp-ai-copy"><img className="lp-ai-brand" src="/brand/logo-symbol-approved-web.png" alt="Mestre AI" width="42" height="42"/><h2>Uma pergunta.<br/>Um próximo passo.</h2><p>O Mestre AI ajuda você a explorar os dados da barbearia, da agenda ao financeiro. Pergunte com as suas palavras e leve contexto para suas decisões.</p><div className="lp-ai-prompts"><span>Como está minha agenda esta semana?</span><span>O que entrou e saiu neste mês?</span><span>Me ajude a responder este cliente.</span><small>Exemplos de perguntas. Assistente opcional, com disponibilidade e uso informados no painel.</small></div></div></section>
   <section className="lp-pricing-wrap" id="preco">
@@ -160,6 +170,7 @@ export function LandingExperience(){
   <section className="lp-close"><div className="lp-container"><h2>Seu talento merece<br/><span>uma rotina na régua.</span></h2><p>O próximo passo da sua barbearia começa com organização.</p><a href="#preco" className="lp-button" onClick={()=>track('closing-plans')}>Encontrar meu plano <ArrowRight size={19}/></a></div><div className="lp-close-art" aria-hidden="true"><img className="lp-close-scissors" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" loading="lazy"/><img className="lp-close-bust" src="/landing/art-v2/chair.webp" alt="" width="800" height="1000" loading="lazy"/><img className="lp-close-comb" src="/landing/art-v2/hands.webp" alt="" width="900" height="600" loading="lazy"/></div></section>
   </main>
   <footer className="lp-footer"><div className="lp-container"><div className="lp-footer-top"><div className="lp-footer-signature"><a href="#inicio" className="lp-brand"><img src="/brand/logo-wordmark-approved-inverse.png" alt="NaRégua" width="300" height="80"/></a><p>Talento na cadeira.<br/>Organização no resto.</p></div><nav aria-label="Rodapé — produto"><strong>NaRégua</strong><a href="#como-funciona">Como funciona</a><a href="#produto">O produto</a><a href="#preco">Planos para sua equipe</a></nav><nav aria-label="Rodapé — acesso"><strong>Seu espaço</strong><a href="/acessar">Entrar na minha barbearia</a><a href="#duvidas">Dúvidas frequentes</a>{supportUrl?<a href={supportUrl} target="_blank" rel="noopener noreferrer">Falar com a gente</a>:null}</nav><nav aria-label="Rodapé — legal"><strong>Transparência</strong><a href={terms}>Termos de uso</a><a href={privacy}>Privacidade</a><span>Pagamentos pela AbacatePay</span></nav></div><div className="lp-footer-bottom"><span>© {new Date().getFullYear()} NaRégua.</span><a href="#inicio">De volta ao topo ↑</a></div></div></footer>
+  {mobileDock&&!checkoutOpen&&!menuOpen&&!pricingLoading&&!pricingError?<div className="lp-mobile-dock"><span>Planos a partir de<strong>{money(plans[0].amountCents)}<small>/mês</small></strong></span><button type="button" onClick={()=>{track('mobile-dock');toPlans()}}>Ver planos <ArrowRight size={17}/></button></div>:null}
   <LandingCheckout open={checkoutOpen} onClose={()=>setCheckoutOpen(false)} initialTeamPlan={checkoutPlan} referralToken={referral}/>
  </div>
 }
