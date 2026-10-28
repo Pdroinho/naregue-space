@@ -1,0 +1,12 @@
+/* Tenant artwork owns its aspect ratio; surrounding rows grow with the logo. */
+.tenant-brand .tenant-brand-image,
+.tenant-brand[data-layout=FULL] .tenant-brand-image,
+.booking30-brand .tenant-brand[data-layout=FULL] .tenant-brand-image,
+:root[data-mode=admin] .tenant-brand-mobile .tenant-brand-image{height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;display:block}
+.ld-sidebar-brand{height:auto;flex-shrink:0;overflow:visible}
+.ld-sidebar-brand .tenant-brand-sidebar{min-height:0;overflow:visible}
+.ld-shell.is-sidebar-collapsed .tenant-brand-sidebar .tenant-brand-image{max-width:44px;height:auto}
+@media(max-width:900px){
+ .ld-shell.has-mobile-tabbar .ld-main{grid-template-rows:auto minmax(0,1fr)}
+ .ld-shell.has-mobile-tabbar .ld-topbar{height:auto;min-height:var(--ld-mobile-topbar-height)}
+}
