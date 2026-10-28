@@ -73,7 +73,7 @@ jobs:
           "$scanner_dir/gitleaks" git . --redact=100 --log-opts=--all
 
   release:
-    if: github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: [checks, landing, secrets]
     runs-on: ubuntu-latest
     permissions:
