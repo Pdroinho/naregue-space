@@ -119,3 +119,6 @@
 @media(max-width:640px){.lp-hero-art img{--hand-width:260px;height:calc(var(--hand-width) * 2 / 3)}.nr-lp-art .lp-intro-photo{margin-bottom:15px}.lp-product-brand{padding:4px 10px;min-height:29px}.nr-lp-art .lp-product-brand img{width:100px!important}.lp-close-art .lp-close-scissors,.lp-close-art .lp-close-comb{width:270px;height:180px}}
 @media(max-width:360px){.lp-hero-art img{--hand-width:230px;height:calc(var(--hand-width) * 2 / 3)}}
 .nr-lp-art .lp-workspace-image .lp-finance-mockup>img{width:100%;height:auto;aspect-ratio:auto;object-fit:contain}
+/* A warm copper field frames the opening independently from the ivory page. */
+.nr-lp-art .lp-opening{width:calc(100% - 48px);max-width:1392px;margin:24px auto 0;border-radius:48px;background:radial-gradient(ellipse at 50% 96%,rgba(184,90,48,.2),transparent 65%),linear-gradient(145deg,#f8eee3 0%,#f2dcc8 55%,#edc9ac 100%);box-shadow:inset 0 0 0 1px rgba(184,90,48,.06)}
+@media(max-width:640px){.nr-lp-art .lp-opening{width:calc(100% - 20px);margin-top:10px;border-radius:28px}}

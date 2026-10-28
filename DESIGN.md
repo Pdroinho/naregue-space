@@ -61,7 +61,7 @@ rounded:
   panel: "18px"
   hero: "22px"
   pill: "999px"
-  lp-opening: "44px"
+  lp-opening: "48px"
   lp-section: "40px"
   lp-photo: "32px"
   lp-plan: "20px"
@@ -122,7 +122,7 @@ components:
 
 NaRégua preserves the precision and material character of the barbershop: petroleum structure, cream reading surfaces and copper actions. The original monogram, realistic barber photography and calm task hierarchy carry the identity through owner, staff and public booking experiences.
 
-Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: fine ink crosshatching and restrained watercolor hands, a vintage barber chair and a hand writing in an appointment notebook, with an ivory opening, peach accents and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.
+Operational screens open in light mode, with a persistent petroleum dark option. Tenant logos and action accents may vary; neutral surfaces and semantic states remain product-owned. The public landing composition has been replaced within the established brand. Its Persuade expression is an illustrated barber atelier: fine ink crosshatching and restrained watercolor hands, a vintage barber chair and a hand writing in an appointment notebook, with a framed light-copper opening, peach accents and full petroleum footer. Large display type, generous surface radii and floating pill navigation are public-surface exceptions, not operational defaults. The user explicitly commissioned generated campaign art and clean fictional UI mockups on 27 October 2026; they supersede the earlier screenshot-only direction for this landing.
 
 **Key Characteristics:**
 - Cream reading surfaces and petroleum structure.
@@ -149,7 +149,7 @@ Warm cream supports reading; petroleum provides structure; copper marks actions 
 
 Green, amber and coral belong to success, warning and danger. Dark mode replaces surface, ink, line, semantic and shadow values under the explicit admin/tenant/dev theme selectors in naregua-identity.css. The integration aliases intentionally match the dark theme selectors' specificity so both component generations resolve to the canonical product neutrals and semantic colors. Use live CSS variables rather than hardcoding light values in new components.
 
-The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above, plus peach (`lp-highlight`) for restrained campaign accents; the opening is ivory and selected plan controls are copper. The public palette is petroleum, copper and ivory with peach accents: green and citrus are explicitly rejected. These scoped variants do not recolor the panel or remove operational semantic success colors.
+The public landing uses the prefixed paper, cream, petroleum ink, pale copper and line variants recorded above, plus peach (`lp-highlight`) for restrained campaign accents; the opening is a light-copper/peach field with radial light and selected plan controls are copper. The public palette is petroleum, copper and ivory with peach accents: green and citrus are explicitly rejected. These scoped variants do not recolor the panel or remove operational semantic success colors.
 
 ## Typography
 
@@ -167,7 +167,7 @@ The workspace uses a collapsible sidebar and flexible content column. Its declar
 
 Below 767px the admin header wraps readable page context, retains a compact monogram above 360px and places team scope in its own content toolbar; at 360px and below the redundant header brand is omitted to preserve the full page title. Mobile operational navigation is a bottom dock. Booking uses a bounded shell (1220px) on desktop; below 820px it becomes a vertical journey with short progress labels, two-column photo-led service choices and a centered workspace up to 620px. Its field inputs use 16px on mobile. These breakpoint-specific arrangements are contextual, not one universal mobile breakpoint.
 
-The public landing uses a 1200px content ceiling with 96px total desktop gutters, reducing to 80px below 1150px and 40px below 640px. Navigation collapses below 900px; the narrative, pricing and FAQ become single-column below 640px. Desktop section spacing reaches 128px; mobile sections generally use 70px. The selected page sequence and interaction story remain in the surface brief.
+The public landing uses a 1200px content ceiling with 96px total desktop gutters, reducing to 80px below 1150px and 40px below 640px. Navigation collapses below 900px; the narrative, pricing and FAQ become single-column below 640px. Desktop section spacing reaches 128px; mobile sections generally use 70px. The opening is a distinct rounded block: width calc(100% - 48px), maximum 1392px, margin 24px auto 0 and radius 48px; below 640px it uses width calc(100% - 20px), 10px top margin and radius 28px. The selected page sequence and interaction story remain in the surface brief.
 
 ## Elevation & Depth
 

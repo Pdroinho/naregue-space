@@ -10,9 +10,9 @@ THESIS: barbershop talent meets organization in a digital atelier, with human ge
 
 OWN-WORLD: fine ink crosshatching and restrained watercolor hands, vintage barber chair and appointment notebook; petroleum, copper and ivory with peach accents; original art and clearly identified conceptual UI. Green, citrus, marble and resin are explicitly rejected. Preserve Manrope, Hugeicons and the official brand.
 
-STORY: ivory opening with hands/tools, faithful conceptual mockup, illustrated barber chair, physically rendered booking phone, visual management, a hand writing in an appointment notebook, compact plan selection and a hands/chair campaign close with full petroleum footer.
+STORY: framed light-copper opening with hands/tools, faithful conceptual mockup, illustrated barber chair, physically rendered booking phone, visual management, a hand writing in an appointment notebook, compact plan selection and a hands/chair campaign close with full petroleum footer.
 
-FIRST VIEWPORT: central headline and working topic selector framed by large illustrated hands; ivory, petroleum and copper provide contrast around the CTA and clean conceptual preview.
+FIRST VIEWPORT: central headline and working topic selector framed by large illustrated hands within a light-copper/peach block; ivory, petroleum and copper provide contrast around the CTA and clean conceptual preview.
 
 FORM: preserve real commercial content and functional HTML controls. Native-alpha ink-and-watercolor artwork and restrained peach accents create material depth. Interruptible movement supports reading with reduced-motion and coarse-pointer alternatives.
 
@@ -29,7 +29,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 ## Implemented expression
 
-`LandingExperience.tsx`, `landing-experience.css` and `landing-art-direction.css` implement the surface. The ivory opening integrates scissors and comb held by ink-and-watercolor hands. A vintage barber chair anchors the introduction. Booking uses a physically rendered native-alpha phone. A hand writing in an appointment notebook accompanies Mestre AI. Compact pricing leads to a close combining hands and chair, followed by a full petroleum footer with complete brand and navigation.
+`LandingExperience.tsx`, `landing-experience.css` and `landing-art-direction.css` implement the surface. The light-copper opening integrates scissors and comb held by ink-and-watercolor hands. A vintage barber chair anchors the introduction. Booking uses a physically rendered native-alpha phone. A hand writing in an appointment notebook accompanies Mestre AI. Compact pricing leads to a close combining hands and chair, followed by a full petroleum footer with complete brand and navigation.
+
+The opening follows the reference framing within the NaRégua palette: a light-copper/peach field with radial light, width calc(100% - 48px), maximum 1392px, margin 24px auto 0 and radius 48px. Below 640px it uses width calc(100% - 20px), 10px top margin and radius 28px.
 
 The agenda/team/management selector changes conceptual mockups. The booking story responds to scrolling and explicit step selection; confirming changes local state only. The 1-15 professional range resolves real catalog plans of up to 3, 6 or 15 seats with refresh/error handling. Rolling digits do not claim savings or individual pricing.
 
