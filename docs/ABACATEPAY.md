@@ -1,5 +1,9 @@
 # AbacatePay no NaRégua
 
+## Validação de credencial — 28/10/2026
+
+A credencial fornecida é de desenvolvimento. Foi armazenada somente em arquivo privado na VPS, com permissão 0600, separado do ambiente de produção e fora do repositório. Autenticação v2 validada nas consultas de loja e checkouts (HTTP 200). O adaptador publicado criou e consultou um checkout sandbox de R$74,90 usando banco SQLite em memória; a consulta retornou pendente, sem conceder acesso ou alterar o banco de produção. Cinco testes automatizados de adaptador, conciliação, assinatura de webhook e idempotência passaram. Não houve pagamento real nem validação de entrega de webhook pelo provedor. Para habilitar vendas, faltam credencial live e cadastro/homologação do webhook de produção. O checkout público permanece desativado.
+
 A implementação usa a [API v2 oficial](https://docs.abacatepay.com/llms.txt), com produtos e checkout hospedado. Há cobrança de planos por equipe e pacotes de mensagens do Mestre AI. Os valores são sempre em centavos.
 
 ## Configuração
