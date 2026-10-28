@@ -1,5 +1,5 @@
 import { configuredPlatformHostname } from '../lib/runtime'
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { PUBLIC_TEAM_PLANS, validTeamPlans, orderedTeamPlans, type TeamPlan } from '../teamPlans'
 import { api } from '../api'
@@ -14,6 +14,7 @@ const money = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 
 const slugify = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48)
 
 export function LandingCheckout({ open, onClose, referralToken: providedReferralToken, initialTeamPlan = 'TEAM_3' }: { open: boolean; onClose: () => void; referralToken?: string; initialTeamPlan?: TeamPlan['code'] }) {
+  const bodyRef = useRef<HTMLFormElement>(null)
   const [useReferral,setUseReferral]=useState(true)
   const referralToken=useReferral ? providedReferralToken : undefined
   const [referralQuote, setReferralQuote] = useState<{amountCents:number;discountPercent:number;fingerprint:string}|null>(null)
@@ -32,6 +33,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [platformMarketingWhatsapp, setPlatformMarketingWhatsapp] = useState(false)
   const [form, setForm] = useState({ ownerName: '', studioName: '', slug: '', email: '', phone: '', password: '' })
+  useLayoutEffect(() => { if(bodyRef.current) bodyRef.current.scrollTop=0 }, [step,open])
 
   useEffect(() => {
     if (!open) return
@@ -137,7 +139,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         <button type="button" className="landing-checkout-close" data-modal-close onClick={onClose} aria-label="Fechar compra" disabled={busy}><X size={19} /></button>
       </header>
 
-      <form className="landing-checkout-body" onSubmit={submit}>
+      <form ref={bodyRef} className="landing-checkout-body" onSubmit={submit}>
         {checkoutSandbox ? <div className="checkout-sandbox-notice" role="status"><strong>Modo de teste</strong><span>Nenhum valor real será cobrado. Este fluxo simula a contratação enquanto a conta de pagamentos está em aprovação.</span></div> : null}
         {step === 1 ? <>
           <div className="checkout-choice-layout"><div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe" onKeyDown={event=>{const direction=['ArrowDown','ArrowRight'].includes(event.key)?1:['ArrowUp','ArrowLeft'].includes(event.key)?-1:0;if(!direction&&event.key!=='Home'&&event.key!=='End')return;event.preventDefault();const current=teamPlans.findIndex(plan=>plan.code===teamCode);const next=event.key==='Home'?0:event.key==='End'?teamPlans.length-1:(current+direction+teamPlans.length)%teamPlans.length;setTeamCode(teamPlans[next].code);event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()}}>{teamPlans.map(plan => <button type="button" role="radio" tabIndex={teamCode===plan.code?0:-1} aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
