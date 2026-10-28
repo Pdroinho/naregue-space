@@ -1,5 +1,6 @@
 .nr-landing-body{height:auto;margin:0;background:#fffdf8;overflow-y:visible;overflow-x:clip}
 .nr-landing-body #root{height:auto}
+.nr-lp{display:flow-root}
 .nr-lp{--lp-paper:#fffdf8;--lp-cream:#eee7d9;--lp-ink:#082a39;--lp-body:#39505a;--lp-muted:#526770;--lp-copper:#b85a30;--lp-copper-dark:#934526;--lp-pale:#f5dfd0;--lp-line:rgba(8,42,57,.16);background:var(--lp-paper);color:var(--lp-ink);font-family:var(--font-ui);font-size:16px;line-height:1.6;overflow:clip;isolation:isolate}
 .nr-lp *{box-sizing:border-box}
 .nr-lp :is(h1,h2,h3,p,figure){margin:0}
