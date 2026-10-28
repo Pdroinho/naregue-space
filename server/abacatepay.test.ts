@@ -12,19 +12,25 @@ function fixture() {
   const db = new Database(':memory:'); migrate(db)
   const calls: {url:string;body?:Record<string,unknown>}[] = []
   let externalId = '', status = 'PENDING', paidAmount: number | null = null, amount = 7490, mode = true
+  let subscriptionStatus='ACTIVE'
+  let createdAt=new Date().toISOString(),customerId:string|null=null
   const fetchFn = (async (url: string | URL | Request, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) : undefined
     calls.push({url:String(url),body})
     assert.equal(new Headers(init?.headers).get('authorization'),'Bearer test-key')
     if (String(url).endsWith('/customers/create')) return Response.json({success:true,data:{id:'cust_test',devMode:mode}})
     if (String(url).endsWith('/products/create')) return Response.json({success:true,data:{id:'prod_test'}})
-    if (String(url).endsWith('/checkouts/create')) externalId = body.externalId
+    if (String(url).includes('/subscriptions/list'))return Response.json({success:true,data:status==='PENDING'?[]:[{id:'subs_test',checkoutId:'bill_test',customerId,status:subscriptionStatus,devMode:mode,amount,createdAt}]})
+    if (String(url).includes('/subscriptions/get'))return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',customerId:null,status:subscriptionStatus,devMode:mode,amount,createdAt}})
+    if (String(url).endsWith('/subscriptions/cancel')){subscriptionStatus='CANCELLED';return Response.json({success:true,data:{id:'subs_test'}})}
+    if (String(url).endsWith('/checkouts/create')||String(url).endsWith('/subscriptions/create')){externalId = body.externalId;customerId=body.customerId??null}
     if (String(url).endsWith('/checkouts/create')) assert.match(externalId,/^naregua-sandbox-/)
     return Response.json({success:true,data:{id:'bill_test',externalId,url:'https://app.abacatepay.com/pay/bill_test',status,devMode:mode,amount,paidAmount}})
   }) as typeof fetch
   const provider = createPaymentClient({db,apiKey:'test-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
-  return {db,provider,calls,setState:(value:{status?:string;paidAmount?:number;amount?:number;mode?:boolean})=>{
+  return {db,provider,calls,setState:(value:{status?:string;paidAmount?:number;amount?:number;mode?:boolean;createdAt?:string})=>{
     status=value.status??status; paidAmount=value.paidAmount??paidAmount;amount=value.amount??amount;mode=value.mode??mode
+    createdAt=value.createdAt??createdAt
   }}
 }
 test('AbacatePay v2 creates product + one-time checkout with cents and persistent provider IDs', async()=>{
@@ -127,6 +133,48 @@ test('non-JSON gateway 403 is not misclassified as missing API permission',async
    return true
   })
   assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_catalog').get() as {n:number}).n,0)
+ }finally{db.close()}
+})
+test('monthly checkout uses recurring product and subscription API; cancellation preserves paid period',async()=>{
+ const {db,provider,calls,setState}=fixture()
+ try{
+  const link=await provider.createPaymentLink({name:'Shop',productName:'NaRégua mensal',catalogKey:'team:TEAM_3',description:'Plano mensal',cycle:'MONTHLY',amountCents:7490,customer:{name:'Cliente Teste',email:'buyer@example.com',cellphone:'11999999999',taxId:'39053344705'}})
+  assert.equal(calls.find(c=>c.url.endsWith('/products/create'))?.body?.cycle,'MONTHLY')
+  const request=calls.find(c=>c.url.endsWith('/subscriptions/create'))!
+  assert.deepEqual(request.body?.methods,['CARD'])
+  assert.equal(request.body?.customerId,'cust_test')
+  assert.equal(provider.isRecurring(link.linkId),true)
+  assert.equal(await provider.recurringState(link.linkId),null)
+  setState({status:'PAID',paidAmount:7490})
+  assert.equal((await provider.recurringState(link.linkId))?.status,'ACTIVE')
+  assert.equal((await provider.cancelRecurring(link.linkId)).status,'CANCELLED')
+  assert.equal(calls.filter(c=>c.url.endsWith('/subscriptions/cancel')).length,1)
+  await provider.cancelRecurring(link.linkId)
+  assert.equal(calls.filter(c=>c.url.endsWith('/subscriptions/cancel')).length,1)
+ }finally{db.close()}
+})
+test('verified subscription events renew once per calendar cycle and cancellation keeps paid access',async()=>{
+ const {db,provider,setState}=fixture()
+ try{
+  db.prepare("INSERT INTO tenants(id,slug,name,primary_color,status,created_at) VALUES('tenant','shop','Shop','#b85a30','ONBOARDING','2026-01-01')").run()
+  const billing=createPaymentBillingService(db,provider)
+  const link=await billing.startCheckout('tenant','TEAM_3')
+  const anchor=new Date();anchor.setUTCDate(1);anchor.setUTCMonth(anchor.getUTCMonth()-1);anchor.setUTCHours(0,0,0,0)
+  setState({status:'PAID',paidAmount:7490,createdAt:anchor.toISOString()})
+  assert.equal(await billing.confirmOrder({tenantId:'tenant',intentId:link.intentId,orderId:1}),true)
+  const before=(db.prepare("SELECT current_period_end p FROM subscriptions WHERE tenant_id='tenant'").get() as {p:string}).p
+  const occurred=new Date(Date.now()-1000)
+  const insert=db.prepare("INSERT INTO abacatepay_subscription_events(id,subscription_id,event_type,payload_hash,occurred_at,received_at) VALUES(?,'subs_test','subscription.renewed','hash',?,?)")
+  insert.run('event-one',occurred.toISOString(),new Date().toISOString())
+  await billing.reconcileRecurringEvents()
+  const after=(db.prepare("SELECT current_period_end p FROM subscriptions WHERE tenant_id='tenant'").get() as {p:string}).p
+  assert.ok(after>before)
+  insert.run('manual-resend-new-id',occurred.toISOString(),new Date().toISOString())
+  await billing.reconcileRecurringEvents()
+  assert.equal((db.prepare("SELECT current_period_end p FROM subscriptions WHERE tenant_id='tenant'").get() as {p:string}).p,after)
+  await billing.cancelRecurring('tenant')
+  assert.equal((db.prepare("SELECT current_period_end p FROM subscriptions WHERE tenant_id='tenant'").get() as {p:string}).p,after)
+  assert.equal((db.prepare("SELECT status FROM subscriptions WHERE tenant_id='tenant'").get() as {status:string}).status,'ACTIVE')
  }finally{db.close()}
 })
 test('webhook integrity is checked against exact raw bytes, not reserialized JSON',()=>{

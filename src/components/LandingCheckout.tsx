@@ -1,3 +1,4 @@
+import { validTaxId } from '../../server/taxId'
 import { configuredPlatformHostname } from '../lib/runtime'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
@@ -32,7 +33,26 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
   const [legalConfig, setLegalConfig] = useState<CheckoutLegalConfig | null>(null)
   const [legalAccepted, setLegalAccepted] = useState(false)
   const [platformMarketingWhatsapp, setPlatformMarketingWhatsapp] = useState(false)
-  const [form, setForm] = useState({ ownerName: '', studioName: '', slug: '', email: '', phone: '', password: '' })
+  const [form, setForm] = useState({ ownerName: '', studioName: '', slug: '', email: '', phone: '', taxId:'',password: '' })
+  const slugRef=useRef<HTMLInputElement>(null)
+  const [slugCheck,setSlugCheck]=useState<{slug:string;state:'checking'|'available'|'taken'|'error';suggestions:string[]}>({slug:'',state:'checking',suggestions:[]})
+  const [slugRetry,setSlugRetry]=useState(0)
+  useEffect(()=>{
+    if(!open||step!==2)return
+    const slug=form.slug,controller=new AbortController()
+    setSlugCheck({slug,state:'checking',suggestions:[]})
+    const timer=setTimeout(()=>{
+      if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||slug.length<2)return
+      void api<{slug:string;available:boolean;suggestions:string[]}>(`/api/public/onboarding/slug-availability?slug=${encodeURIComponent(slug)}`,{signal:controller.signal}).then(result=>{
+        if(controller.signal.aborted)return
+        setSlugCheck(result.ok?{slug,state:result.data.available?'available':'taken',suggestions:result.data.suggestions}:{slug,state:'error',suggestions:[]})
+      })
+    },350)
+    return()=>{clearTimeout(timer);controller.abort()}
+  },[open,step,form.slug,slugRetry])
+  const validSlug=form.slug.length>=2&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)
+  const slugState=!validSlug?'invalid':slugCheck.slug===form.slug?slugCheck.state:'checking'
+  function focusSlug(){slugRef.current?.focus();slugRef.current?.scrollIntoView({block:'center',behavior:'smooth'})}
   useLayoutEffect(() => { if(bodyRef.current) bodyRef.current.scrollTop=0 }, [step,open])
 
   useEffect(() => {
@@ -92,6 +112,8 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
     if(referralToken && (quoteLoading || !referralQuote)){setError(quoteError || 'Aguarde a validação da indicação.');return}
     if (!checkoutAvailable || catalogLoading || !selected) { setError('A contratação está indisponível no momento. Nenhum pagamento foi iniciado.'); return }
     if (step === 1) { setStep(2); setError(''); return }
+    if(slugState!=='available'){focusSlug();return}
+    if(!validTaxId(form.taxId)){setError('Informe um CPF ou CNPJ válido para continuar.');return}
     if (!normalizeBrazilPhone(form.phone)) { setError('Informe um WhatsApp brasileiro válido, com DDD.'); return }
     if (!legalConfig) { setError('Os documentos legais ainda estão carregando. Tente novamente em instantes.'); return }
     if (!legalAccepted) { setError('Para contratar o NaRégua, confirme a leitura e o aceite dos Termos de Uso.'); return }
@@ -102,6 +124,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         method: 'POST',
         body: JSON.stringify({
           ...form,
+          recurringAccepted:legalAccepted,
           planCode: teamCode,
           ...(referralToken ? {referralToken,quoteFingerprint:referralQuote?.fingerprint} : {}),
           legal: {
@@ -114,6 +137,9 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         }),
       })
       if (!result.ok) {
+        if(result.error.code==='TENANT_SLUG_TAKEN'||result.error.code==='TENANT_SLUG_RESERVED'){
+          setSlugCheck({slug:form.slug,state:'taken',suggestions:[]});setSlugRetry(value=>value+1);focusSlug();return
+        }
         if (result.error.code === 'TEAM_CHECKOUT_RECOVERABLE') setRecoverySlug(form.slug)
         throw new Error(result.error.message)
       }
@@ -144,22 +170,23 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         {step === 1 ? <>
           <div className="checkout-choice-layout"><div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe" onKeyDown={event=>{const direction=['ArrowDown','ArrowRight'].includes(event.key)?1:['ArrowUp','ArrowLeft'].includes(event.key)?-1:0;if(!direction&&event.key!=='Home'&&event.key!=='End')return;event.preventDefault();const current=teamPlans.findIndex(plan=>plan.code===teamCode);const next=event.key==='Home'?0:event.key==='End'?teamPlans.length-1:(current+direction+teamPlans.length)%teamPlans.length;setTeamCode(teamPlans[next].code);event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()}}>{teamPlans.map(plan => <button type="button" role="radio" tabIndex={teamCode===plan.code?0:-1} aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
             <span>{plan.label}</span><strong>{money(plan.amountCents)}<small>/mês</small></strong><p>Até {plan.seats} profissionais · 1 mês</p><b>{teamCode === plan.code ? <Check size={14} /> : null}</b>
-          </button>)}</div><aside className="checkout-included"><h3>Tudo para a sua rotina.</h3><ul><li><Check size={16}/>Agenda e link de agendamento</li><li><Check size={16}/>Equipe e clientes</li><li><Check size={16}/>WhatsApp e financeiro</li><li><Check size={16}/>Mestre AI no painel</li></ul><p>Um mês de acesso.<br/>Renovação manual, sem cobrança automática.</p></aside></div>
+          </button>)}</div><aside className="checkout-included"><h3>Tudo para a sua rotina.</h3><ul><li><Check size={16}/>Agenda e link de agendamento</li><li><Check size={16}/>Equipe e clientes</li><li><Check size={16}/>WhatsApp e financeiro</li><li><Check size={16}/>Mestre AI no painel</li></ul><p>Assinatura mensal no cartão.<br/>Renova automaticamente. Você pode cancelar a renovação no painel.</p></aside></div>
           {referralToken ? <div className="checkout-cycle-note" role="status">{quoteLoading ? 'Validando indicação…' : quoteError ? quoteError : referralQuote ? referralQuote.discountPercent > 0 ? `${referralQuote.discountPercent}% de desconto na primeira assinatura: ${money(finalAmount)} agora. As próximas mensalidades seguem o valor da faixa escolhida.` : `Valor da primeira assinatura: ${money(finalAmount)}. Não há desconto aplicado a esta indicação.` : 'Indicação indisponível.'}{quoteError ? <button type="button" className="checkout-back" onClick={()=>setUseReferral(false)}>Continuar sem indicação e sem desconto</button> : null}</div> : null}
         </> : <div className="checkout-account-layout">
           <div className="landing-checkout-fields">
             <label>Seu nome<input value={form.ownerName} onChange={(event) => setForm({ ...form, ownerName: event.target.value })} autoComplete="name" required minLength={2} placeholder="Como podemos chamar você?" /></label>
-            <label>Nome do espaço<input value={form.studioName} onChange={(event) => updateStudioName(event.target.value)} autoComplete="organization" required minLength={2} placeholder="Ex.: Studio Mariana" /></label>
+            <label>Nome do espaço<input value={form.studioName} onChange={(event) => updateStudioName(event.target.value)} autoComplete="organization" required minLength={2} placeholder="Ex.: Barbearia Central" /></label>
             <label>E-mail<input type="email" inputMode="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} autoComplete="email" required placeholder="voce@email.com" /></label>
             <label>WhatsApp<input inputMode="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: formatBrazilPhoneInput(event.target.value) })} autoComplete="tel" required placeholder="(11) 99999-9999" aria-invalid={Boolean(form.phone && !normalizeBrazilPhone(form.phone))} /></label>
+            <label>CPF ou CNPJ<input inputMode="numeric" value={form.taxId} onChange={event=>setForm({...form,taxId:event.target.value.replace(/[^0-9./-]/g,'').slice(0,18)})} required maxLength={18} aria-invalid={Boolean(form.taxId&&!validTaxId(form.taxId))} placeholder="CPF ou CNPJ do responsável" /></label>
             <label>Crie uma senha<input type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} autoComplete="new-password" minLength={8} required placeholder="Crie uma senha" aria-describedby="checkout-password-requirements" /><PasswordChecklist id="checkout-password-requirements" password={form.password} /></label>
-            <details className="checkout-address-details"><summary>Personalizar endereço do espaço</summary><label>Seu endereço<div className="landing-slug-field"><input value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} required minLength={2} /><span>.{configuredPlatformHostname()}</span></div></label></details>
+            <div className={`checkout-slug-choice is-${slugState}`}><label htmlFor="checkout-workspace-slug">Endereço da sua barbearia</label><p>Escolha um endereço único para acessar seu espaço.</p><div className="landing-slug-field"><input ref={slugRef} id="checkout-workspace-slug" value={form.slug} onChange={(event) => setForm({ ...form, slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })} autoCapitalize="none" autoCorrect="off" spellCheck={false} required minLength={2} maxLength={63} pattern="[a-z0-9]+(-[a-z0-9]+)*" aria-invalid={slugState==='taken'||(slugState==='invalid'&&Boolean(form.slug))} aria-describedby="checkout-slug-status" /><span>.{configuredPlatformHostname()}</span></div><div id="checkout-slug-status" className="checkout-slug-status" role="status" aria-live="polite">{slugState==='invalid'?'Use pelo menos 2 letras ou números, com hífens apenas entre palavras.':slugState==='available'?<><Check size={15}/>Endereço disponível. Ele será seu ao concluir o cadastro.</>:slugState==='taken'?'Esse endereço já está em uso. Escolha outro ou use uma sugestão abaixo.':slugState==='error'?<>Não foi possível verificar agora. <button type="button" onClick={()=>setSlugRetry(value=>value+1)}>Tentar novamente</button></>:'Verificando disponibilidade…'}</div>{slugState==='taken'&&slugCheck.suggestions.length?<div className="checkout-slug-suggestions"><span>Sugestões disponíveis</span>{slugCheck.suggestions.map(slug=><button type="button" key={slug} onClick={()=>{setForm(current=>({...current,slug}));slugRef.current?.focus()}}>{slug}<ArrowRight size={13}/></button>)}</div>:null}</div>
           </div>
-          <aside className="checkout-order-card"><span>Seu pedido</span><div><strong>{selected?.label ?? 'Plano'}</strong><small>Um mês de acesso para a equipe</small></div><hr /><div className="checkout-order-total"><span>Total agora</span><strong>{selected ? money(finalAmount) : '—'}</strong></div><ul><li><ShieldCheck size={15} />Pagamento processado pela AbacatePay</li><li><Check size={15} />Sem cobrança automática silenciosa</li></ul></aside>
+          <aside className="checkout-order-card"><span>Seu pedido</span><div><strong>{selected?.label ?? 'Plano'}</strong><small>Um mês de acesso para a equipe</small></div><hr /><div className="checkout-order-total"><span>Total agora</span><strong>{selected ? money(finalAmount) : '—'}</strong></div><ul><li><ShieldCheck size={15} />Pagamento processado pela AbacatePay</li><li><Check size={15} />Renovação mensal automática no cartão</li></ul></aside>
           <div className="checkout-legal-stack">
             <label className={`checkout-legal-choice is-required ${legalAccepted ? 'is-checked' : ''}`}>
               <input type="checkbox" checked={legalAccepted} onChange={(event) => { setLegalAccepted(event.target.checked); setError('') }} required />
-              <span><strong>Li e aceito os <a href="/termos" target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>Termos de Uso</a></strong><small>Também declaro ciência da <a href="/privacidade" target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>Política de Privacidade</a>. Este aceite é necessário para contratar o serviço.</small></span>
+              <span><strong>Li e aceito os <a href="/termos" target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>Termos de Uso</a></strong><small>Também declaro ciência da <a href="/privacidade" target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>Política de Privacidade</a>. Autorizo a renovação mensal automática no cartão pelo valor da faixa escolhida, até cancelar no painel.</small></span>
             </label>
             <label className={`checkout-legal-choice ${platformMarketingWhatsapp ? 'is-checked' : ''}`}>
               <input type="checkbox" checked={platformMarketingWhatsapp} onChange={(event) => setPlatformMarketingWhatsapp(event.target.checked)} />
@@ -172,7 +199,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
         {recoverySlug ? <a href={`/acessar?workspace=${encodeURIComponent(recoverySlug)}`} className="checkout-back">Acessar meu espaço e tentar novamente</a> : null}
         <footer className="checkout-actions">
           {step === 2 ? <button type="button" className="checkout-back" onClick={() => setStep(1)} disabled={busy}>Voltar à etapa 1</button> : <span className="checkout-step-status">Etapa 1 de 2 · Equipe</span>}
-          <button type="submit" className="checkout-next" disabled={busy || quoteLoading || Boolean(referralToken && !referralQuote) || catalogLoading || !checkoutAvailable || !selected || (step === 2 && (!legalConfig || !legalAccepted))}>{catalogLoading ? 'Verificando disponibilidade…' : !checkoutAvailable ? 'Contratação indisponível' : busy ? 'Preparando pagamento…' : step === 1 ? <>Continuar com {selected?.label?.toLowerCase() ?? 'este plano'} <ArrowRight size={17} /></> : <>Ir para o pagamento seguro <ArrowRight size={17} /></>}</button>
+          <button type="submit" className="checkout-next" disabled={busy || quoteLoading || Boolean(referralToken && !referralQuote) || catalogLoading || !checkoutAvailable || !selected || (step === 2 && (!legalConfig || !legalAccepted || slugState!=='available'))}>{catalogLoading ? 'Verificando disponibilidade…' : !checkoutAvailable ? 'Contratação indisponível' : busy ? 'Preparando pagamento…' : step === 1 ? <>Continuar com {selected?.label?.toLowerCase() ?? 'este plano'} <ArrowRight size={17} /></> : <>Ir para o pagamento seguro <ArrowRight size={17} /></>}</button>
         </footer>
       </form>
     </section>

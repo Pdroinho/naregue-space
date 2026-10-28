@@ -7,7 +7,8 @@ import {
   orderedTeamPlans,
   type TeamPlan,
 } from '../teamPlans'
-import { notify } from '../lib/feedback'
+import { confirmAction,notify } from '../lib/feedback'
+import { validTaxId } from '../../server/taxId'
 type Order = {
   orderNsu: string
   amountCents: number
@@ -18,10 +19,14 @@ type Order = {
 type TeamCatalog = {
   plans: TeamPlan[]
   checkoutAvailable: boolean
+  billingIdentityComplete?:boolean
+  recurringStatus?:string|null
   activeProfessionals: number
   currentSubscription: null | {
     planCode: string | null
     currentPeriodEnd: string | null
+    recurring?:boolean
+    autoRenew?:boolean
   }
   quotes?: Record<string,{amountCents:number;discountPercent:number;source:string;debtRecoveryPercent?:number}>
   orders?: Order[]
@@ -29,6 +34,7 @@ type TeamCatalog = {
 const money = (cents: number) =>
   (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 export function BillingCenter({ locked = false }: { locked?: boolean }) {
+  const [taxId,setTaxId]=useState(''),[recurringAccepted,setRecurringAccepted]=useState(false)
   const [catalog, setCatalog] = useState<TeamCatalog | null>(null),
     [orders, setOrders] = useState<Order[]>([]),
     [loading, setLoading] = useState(true),
@@ -120,17 +126,19 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
   const tooSmall = Boolean(
       catalog && selected.seats < catalog.activeProfessionals,
     ),
-    active = Boolean(catalog?.currentSubscription)
+    active = Boolean(catalog?.currentSubscription)||catalog?.recurringStatus==='ACTIVE'
   const quote=catalog?.quotes?.[code]
   const finalAmount=quote?.amountCents ?? selected.amountCents
   async function startTeamCheckout() {
     if (busy || loading || !catalog?.checkoutAvailable || tooSmall || active)
       return
+    if(!recurringAccepted){setError('Confirme a renovação mensal automática antes de continuar.');return}
+    if(!catalog.billingIdentityComplete&&!validTaxId(taxId)){setError('Informe um CPF ou CNPJ válido para o pagamento.');return}
     setBusy(true)
     setError('')
     const res = await api<{ checkoutUrl: string; intentId: string }>(
       '/api/admin/subscription/team-checkout',
-      { method: 'POST', body: JSON.stringify({ planCode: code }) },
+      { method: 'POST', body: JSON.stringify({ planCode: code,recurringAccepted,...(taxId?{taxId}:{}) }) },
     )
     if (!res.ok) {
       setError(res.error.message)
@@ -143,6 +151,14 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
       res.data.intentId,
     )
     window.location.assign(res.data.checkoutUrl)
+  }
+  async function cancelRenewal(){
+    if(busy||!await confirmAction({title:'Cancelar renovação automática?',message:'Não haverá novas cobranças. Seu acesso continua até o fim do período já pago.',confirmLabel:'Cancelar renovação'}))return
+    setBusy(true)
+    const result=await api('/api/admin/subscription/cancel-renewal',{method:'POST',body:JSON.stringify({confirmed:true})})
+    setBusy(false)
+    if(!result.ok){setError(result.error.message);return}
+    notify('Renovação automática cancelada.','success');setRetry(value=>value+1)
   }
   return (
     <section
@@ -195,10 +211,10 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
             <strong>{money(finalAmount)}</strong>
             <span>por um mês</span>
           </div>
-          {quote?.debtRecoveryPercent ? <p role="status">{quote.debtRecoveryPercent}% dos créditos compensam benefícios de indicações estornadas. O restante entra no desconto mostrado; não há cobrança automática.</p> : null}
+          {quote?.debtRecoveryPercent ? <p role="status">{quote.debtRecoveryPercent}% dos créditos compensam benefícios de indicações estornadas. O restante entra no desconto mostrado; o desconto mostrado vale para a primeira mensalidade.</p> : null}
           {quote && quote.discountPercent > 0 ? <p role="status">{quote.discountPercent}% de desconto {quote.source === 'REFERRAL' ? 'pela indicação, na primeira assinatura' : 'com seus créditos de indicação'}. Valor normal da faixa: {money(selected.amountCents)}/mês. Créditos excedentes ficam para renovações futuras.</p> : null}
           <p>
-            {active ? 'Você já tem uma assinatura ativa.' : 'Pagamento único por um mês. Renovação manual, sem cobrança automática.'}
+            {active ? 'Você já tem uma assinatura ativa.' : 'Assinatura mensal com renovação automática no cartão. Cancele a renovação no painel.'}
           </p>
           {active ? (
             <p role="status">
@@ -214,6 +230,8 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
             </p>
           ) : null}
           {error ? <p role="alert">{error}</p> : null}
+          {active&&(catalog?.currentSubscription?.recurring||catalog?.recurringStatus==='ACTIVE')?<><p role="status">{catalog?.recurringStatus==='ACTIVE'?'Renovação mensal automática no cartão.':'Renovação automática cancelada. Seu período pago continua disponível.'}</p>{catalog?.recurringStatus==='ACTIVE'?<button type="button" className="btn btnSecondary" disabled={busy} onClick={()=>void cancelRenewal()}>Cancelar renovação automática</button>:null}</>:null}
+          {!active&&catalog?.checkoutAvailable?<div className="billing-recurring-consent">{!catalog.billingIdentityComplete?<label>CPF ou CNPJ<input inputMode="numeric" maxLength={18} value={taxId} onChange={event=>setTaxId(event.target.value.replace(/[^0-9./-]/g,''))} placeholder="Documento do responsável" /></label>:null}<label><input type="checkbox" checked={recurringAccepted} onChange={event=>setRecurringAccepted(event.target.checked)} />Autorizo a renovação mensal automática no cartão, até cancelar no painel.</label></div>:null}
           {!loading && !active && !catalog?.checkoutAvailable ? (
             <p role="status">
               Contratação temporariamente indisponível. Os planos e valores

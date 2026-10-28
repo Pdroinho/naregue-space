@@ -26,11 +26,20 @@ export function createAbacatepayWebhookRouter(db: Database.Database, runtime: Re
         !raw || !validAbacatepaySignature(raw, req.get('x-webhook-signature') ?? '')) {
         res.status(401).json({ received: false }); return
       }
-      const body = req.body as { id?: unknown; event?: unknown; devMode?: unknown; data?: { checkout?: { id?: unknown } } }
+      const body = req.body as { id?: unknown; event?: unknown; devMode?: unknown; data?: { checkout?: { id?: unknown };subscription?:{id?:unknown;updatedAt?:unknown} } }
       if (typeof body.id !== 'string' || body.id.length > 200 || body.devMode !== env.ABACATEPAY_DEV_MODE) {
         res.status(400).json({ received: false }); return
       }
       const event = typeof body.event === 'string' ? body.event : ''
+      if(['subscription.completed','subscription.renewed','subscription.cancelled','subscription.payment_failed','subscription.plan_changed'].includes(event)) {
+        const subscriptionId=body.data?.subscription?.id
+        if(typeof subscriptionId!=='string'||!subscriptionId.startsWith('subs_')||subscriptionId.length>200){res.status(400).json({received:false});return}
+        const hash=createHash('sha256').update(raw).digest('hex')
+        const existing=db.prepare('SELECT payload_hash AS hash FROM abacatepay_subscription_events WHERE id=?').get(body.id) as {hash:string}|undefined
+        if(existing&&existing.hash!==hash){res.status(409).json({received:false});return}
+        if(!existing)db.prepare('INSERT INTO abacatepay_subscription_events(id,subscription_id,event_type,payload_hash,occurred_at,received_at) VALUES(?,?,?,?,?,?)').run(body.id,subscriptionId,event,hash,typeof body.data?.subscription?.updatedAt==='string'?body.data.subscription.updatedAt:null,new Date().toISOString())
+        res.json({received:true});queueMicrotask(()=>{void runtime.processPending().catch(error=>logger.error('payments.subscription_worker_failed',{error}))});return
+      }
       const events: Record<string, string> = { 'checkout.completed': 'order_paid', 'checkout.refunded': 'order_refund', 'checkout.disputed': 'order_chargeback_in_treatment', 'checkout.lost': 'order_chargeback_in_treatment' }
       if (!events[event]) { res.json({ received: true, ignored: true }); return }
       const checkoutId = body.data?.checkout?.id

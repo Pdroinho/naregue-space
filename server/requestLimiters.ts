@@ -33,6 +33,7 @@ export function createRequestLimiters({ db, preauthCookieName, createLimiter }: 
       },
     }),
     publicCheckoutLimiter: limiter({ windowMs: 15 * 60_000, max: 8, keyPrefix: 'public:checkout' }),
+    publicSlugLimiter: limiter({ windowMs: 60_000, max: 60, keyPrefix: 'public:slug' }),
     publicCheckoutEmailLimiter: limiter({
       windowMs: 60 * 60_000,
       max: 4,

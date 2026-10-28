@@ -1,5 +1,6 @@
 import { createPaymentReferralService, referralQuoteFingerprint, type TeamQuote } from './paymentReferralService.js'
-import { PaymentRequestError, type PaymentLinkInput } from './payment.js'
+import { PaymentRequestError, type PaymentLinkInput, type RecurringState } from './payment.js'
+import { decryptSecret } from './secretCrypto.js'
 import { randomUUID } from 'node:crypto'
 import type Database from 'better-sqlite3'
 import { nextBillingPeriodEnd } from './plans.js'
@@ -9,6 +10,10 @@ import { teamPlanByCode, type TeamPlanCode } from './teamPlans.js'
 
 type Link = { linkId: number; checkoutUrl: string }
 type Provider = {
+  isRecurring?:(id:number)=>boolean
+  recurringState?:(id:number)=>Promise<RecurringState|null>
+  recurringStateById?:(id:string)=>Promise<RecurringState|null>
+  cancelRecurring?:(id:number)=>Promise<RecurringState>
   createPaymentLink: (input: PaymentLinkInput) => Promise<Link>
   verifyPaymentLinkOrder: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<boolean>
   inspectPaymentLinkOrder?: (input: { linkId: number; orderId: number; expectedAmountCents: number }) => Promise<'PAID' | 'REVERSED' | 'UNKNOWN'>
@@ -28,6 +33,13 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
   async function startCheckout(tenantId: string, code: TeamPlanCode, referralToken?: string, quoteFingerprint?: string) {
     const plan = teamPlanByCode(code)
     if (!plan) throw badRequest('Faixa inválida.', 'INVALID_TEAM_PLAN')
+    if(provider.recurringState) {
+      const renewing=db.prepare("SELECT c.id FROM abacatepay_checkouts c JOIN subscriptions s ON s.external_id='payment:'||c.id WHERE s.tenant_id=? AND c.frequency='SUBSCRIPTION' AND c.subscription_status='ACTIVE'").get(tenantId) as {id:number}|undefined
+      if(renewing) {
+        const state=await provider.recurringState(renewing.id)
+        if(!state||state.status==='ACTIVE')throw badRequest('Já existe uma assinatura com renovação automática. Confira o pagamento ou cancele a renovação antes de contratar novamente.','ACTIVE_RECURRING_SUBSCRIPTION')
+      }
+    }
     const existing = db.transaction(() => {
       const tenant = db.prepare('SELECT name, status FROM tenants WHERE id = ?').get(tenantId) as { name: string; status: string } | undefined
       if (!tenant) throw new Error('Espaço não encontrado.')
@@ -55,9 +67,10 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     if (existing.intent.status === 'PENDING') return { intentId: existing.intent.id, checkoutUrl: existing.intent.checkoutUrl! }
 
     try {
-      const owner = db.prepare("SELECT billing_name AS name,email,phone AS cellphone FROM users WHERE tenant_id=? AND role='ADMIN' ORDER BY created_at,id LIMIT 1").get(tenantId) as { name: string | null; email: string; cellphone: string | null } | undefined
+      const owner = db.prepare("SELECT billing_name AS name,billing_tax_id_enc AS taxId,email,phone AS cellphone FROM users WHERE tenant_id=? AND role='ADMIN' ORDER BY created_at,id LIMIT 1").get(tenantId) as { name: string | null; taxId:string|null; email: string; cellphone: string | null } | undefined
       const link = await provider.createPaymentLink({ name: existing.name, productName: `NaRégua · ${plan.label}`, catalogKey: `team:${plan.code}`, amountCents: existing.intent.amountCents, description: `NaRégua · ${plan.label} · um mês`, checkoutIntentId: existing.intent.id,
-        ...(owner ? { customer: { email: owner.email, ...(owner.name ? { name: owner.name } : {}), ...(owner.cellphone ? { cellphone: owner.cellphone } : {}) } } : {}),
+        cycle:'MONTHLY',renewalAmountCents:existing.intent.grossAmountCents,
+        ...(owner ? { customer: { email: owner.email, ...(owner.name ? { name: owner.name } : {}), ...(owner.cellphone ? { cellphone: owner.cellphone } : {}), ...(owner.taxId?{taxId:decryptSecret(owner.taxId,`billing:${tenantId}`)}:{}) } } : {}),
       })
       const updated = db.prepare(`UPDATE payment_checkout_intents SET payment_link_id = ?, checkout_url = ?, status = 'PENDING'
         WHERE id = ? AND tenant_id = ? AND status = 'CREATING'`).run(link.linkId, link.checkoutUrl, existing.intent.id, tenantId)
@@ -83,13 +96,16 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
       linkId: intent.paymentLinkId, orderId: input.orderId, expectedAmountCents: intent.amountCents,
     })
     if (!confirmed) return false
+    const recurring=provider.isRecurring?.(intent.paymentLinkId)?await provider.recurringState?.(intent.paymentLinkId):null
+    if(provider.isRecurring?.(intent.paymentLinkId)&&!recurring)return false
     return db.transaction(() => {
       const current = load(input.tenantId, input.intentId)
       if (!current || current.status !== 'PENDING' || current.paymentLinkId !== intent.paymentLinkId) return current?.status === 'PAID' && current.orderId === input.orderId
       const now = new Date().toISOString()
       const active = db.prepare(`SELECT 1 FROM subscriptions WHERE tenant_id = ? AND status = 'ACTIVE' AND current_period_end > ? LIMIT 1`).get(input.tenantId, now)
       if (active) throw new Error('Assinatura ativa detectada; conciliação manual necessária antes de aplicar o pagamento.')
-      const periodEnd = nextBillingPeriodEnd(null, 1, new Date(now))
+      const periodEnd = nextBillingPeriodEnd(null, 1, new Date(recurring?.createdAt??now))
+      if(recurring)db.prepare('UPDATE abacatepay_checkouts SET period_end=? WHERE id=?').run(periodEnd,intent.paymentLinkId)
       const updated = db.prepare(`UPDATE payment_checkout_intents SET status = 'PAID', order_id = ?, paid_at = ?
         WHERE tenant_id = ? AND id = ? AND status = 'PENDING'`).run(input.orderId, now, input.tenantId, input.intentId)
       if (updated.changes !== 1) return false
@@ -114,6 +130,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     })
     if (state === 'PAID') return intent.status === 'PAID' || confirmOrder(input)
     if (state !== 'REVERSED') return false
+    if(provider.isRecurring?.(intent.paymentLinkId))await provider.cancelRecurring?.(intent.paymentLinkId)
     return db.transaction(() => {
       const latest = load(input.tenantId, input.intentId)
       if (!latest || !['PENDING', 'PAID'].includes(latest.status) ||
@@ -147,6 +164,54 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     }
   }
 
+  async function reconcileRecurringEvents() {
+    if(!provider.recurringStateById)return
+    const events=db.prepare("SELECT id,subscription_id AS subscriptionId,event_type AS eventType,occurred_at AS occurredAt,received_at AS receivedAt FROM abacatepay_subscription_events WHERE status='PENDING' ORDER BY received_at LIMIT 30").all() as Array<{id:string;subscriptionId:string;eventType:string;occurredAt:string|null;receivedAt:string}>
+    for(const event of events) {
+      try {
+        const state=await provider.recurringStateById(event.subscriptionId)
+        if(!state){db.prepare("UPDATE abacatepay_subscription_events SET status='IGNORED',processed_at=? WHERE id=?").run(new Date().toISOString(),event.id);continue}
+        const intent=db.prepare("SELECT id,tenant_id AS tenantId,status FROM payment_checkout_intents WHERE payment_link_id=?").get(state.localId) as {id:string;tenantId:string;status:string}|undefined
+        if(!intent)continue
+        if(intent.status==='PENDING')await confirmOrder({tenantId:intent.tenantId,intentId:intent.id,orderId:state.localId})
+        db.transaction(()=>{
+          const current=load(intent.tenantId,intent.id)
+          if(current?.status!=='PAID')return
+          if(event.eventType==='subscription.renewed'&&state.status==='ACTIVE') {
+            // A provider resend with a new event ID must never grant an extra month.
+            // Use the subscription's original calendar anchor and the paid cycle date.
+            if(!event.occurredAt){db.prepare("UPDATE abacatepay_subscription_events SET status='NEEDS_REVIEW',processed_at=? WHERE id=?").run(new Date().toISOString(),event.id);return}
+            const occurred=new Date(event.occurredAt),anchor=new Date(state.createdAt)
+            if(!Number.isFinite(occurred.getTime())||occurred.getTime()>Date.now()+300_000||occurred<anchor)throw new Error('Invalid paid cycle date')
+            let months=(occurred.getUTCFullYear()-anchor.getUTCFullYear())*12+occurred.getUTCMonth()-anchor.getUTCMonth()
+            if(months<1)months=0
+            let cycleStart=months?new Date(nextBillingPeriodEnd(null,months,anchor)):anchor
+            if(cycleStart>occurred&&months>0){months--;cycleStart=months?new Date(nextBillingPeriodEnd(null,months,anchor)):anchor}
+            const periodEnd=nextBillingPeriodEnd(null,months+1,anchor)
+            const now=new Date().toISOString()
+            db.prepare("UPDATE subscriptions SET current_period_end=?,updated_at=? WHERE tenant_id=? AND external_id=? AND current_period_end<?").run(periodEnd,now,intent.tenantId,`payment:${state.localId}`,periodEnd)
+            db.prepare('UPDATE abacatepay_checkouts SET period_end=CASE WHEN period_end<? THEN ? ELSE period_end END,last_renewed_cycle=? WHERE id=?').run(periodEnd,periodEnd,cycleStart.toISOString(),state.localId)
+            db.prepare("UPDATE tenants SET status='ACTIVE',suspension_reason=NULL WHERE id=? AND status='SUSPENDED' AND suspension_reason='PAYMENT'").run(intent.tenantId)
+          }
+          // Cancellation/payment failure stops renewal, never discards already paid access.
+          db.prepare("UPDATE abacatepay_subscription_events SET status='APPLIED',processed_at=? WHERE id=?").run(new Date().toISOString(),event.id)
+        }).immediate()
+      }catch{/* Durable pending event is retried; an unverified event never grants access. */}
+    }
+    if(provider.recurringState){
+      const rows=db.prepare("SELECT c.id FROM abacatepay_checkouts c JOIN payment_checkout_intents i ON i.payment_link_id=c.id WHERE c.frequency='SUBSCRIPTION' AND i.status='PAID' ORDER BY c.updated_at LIMIT 20").all() as {id:number}[]
+      for(const row of rows)try{await provider.recurringState(row.id)}catch{/* API outages do not revoke paid access. */}
+    }
+  }
+
+  async function cancelRecurring(tenantId:string) {
+    if(!provider.cancelRecurring)throw badRequest('Assinatura recorrente indisponível.')
+    const row=db.prepare("SELECT i.payment_link_id AS linkId FROM payment_checkout_intents i JOIN subscriptions s ON s.tenant_id=i.tenant_id AND s.external_id='payment:'||i.payment_link_id JOIN abacatepay_checkouts c ON c.id=i.payment_link_id WHERE i.tenant_id=? AND c.frequency='SUBSCRIPTION' AND i.status='PAID'").get(tenantId) as {linkId:number}|undefined
+    if(!row)throw badRequest('Nenhuma renovação automática encontrada.')
+    await provider.cancelRecurring(row.linkId)
+    return {cancelled:true}
+  }
+
   async function reconcilePendingIntents() {
     if (!provider.listPaymentLinkOrders) return
     const intents = db.prepare(`SELECT id, tenant_id as tenantId, payment_link_id as paymentLinkId
@@ -172,5 +237,5 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
     return referrals.quote(tenantId,plan.amountCents).result
   }
   function publicQuote(code: TeamPlanCode, token?: string) {const quote=referrals.quote(null,teamPlanByCode(code)!.amountCents,token).result;return {...quote,fingerprint:referralQuoteFingerprint(quote,token)}}
-  return { creditPreview: (tenantId:string) => referrals.creditPreview(tenantId), quoteForTenant, publicQuote, validateReferral: referrals.validateReferral, startCheckout, confirmOrder, reconcileOrder, reconcilePendingIntents, reconcilePaidIntents }
+  return { creditPreview: (tenantId:string) => referrals.creditPreview(tenantId), quoteForTenant, publicQuote, validateReferral: referrals.validateReferral, startCheckout, confirmOrder, reconcileOrder, reconcilePendingIntents, reconcilePaidIntents,reconcileRecurringEvents,cancelRecurring }
 }

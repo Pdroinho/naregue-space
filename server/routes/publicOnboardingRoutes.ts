@@ -7,6 +7,8 @@ import { badRequest } from '../http.js'
 import { currentLegalBundleHash, PRIVACY_VERSION, TERMS_VERSION } from '../legal.js'
 import { nextBillingPeriodEnd, type BillingCycle, type BillingPlan } from '../plans.js'
 import { hashPassword } from '../security.js'
+import { encryptSecret } from '../secretCrypto.js'
+import { validTaxId } from '../taxId.js'
 import type { createPaymentBillingService } from '../paymentBillingService.js'
 
 type CheckoutQuote = {
@@ -32,6 +34,7 @@ type PublicOnboardingRouterOptions = {
   db: Database.Database
   publicCheckoutLimiter: RequestHandler
   publicCheckoutEmailLimiter: RequestHandler
+  publicSlugLimiter?: RequestHandler
   billingPlanByCycle: Map<BillingCycle, BillingPlan>
   assertTenantSlugIsAvailable: (slug: string) => void
   subscriptionCheckoutQuote: (plan: BillingPlan, discountPercent: number, firstPurchase: boolean) => CheckoutQuote
@@ -59,6 +62,19 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
     paymentEnabled = false,
   } = options
   const router = Router()
+
+  router.get('/onboarding/slug-availability', options.publicSlugLimiter ?? publicCheckoutLimiter, (req,res,next) => {
+    try {
+      const slug=z.string().trim().toLowerCase().min(2).max(63).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).parse(req.query.slug)
+      const available=(candidate:string)=>{
+        try { assertTenantSlugIsAvailable(candidate) } catch { return false }
+        return !db.prepare('SELECT 1 FROM tenants WHERE slug=? LIMIT 1').get(candidate)
+      }
+      const free=available(slug)
+      const suggestions=free?[]:[`${slug.slice(0,52)}-barbearia`,`${slug.slice(0,55)}-studio`,...[2,3,4,5].map(n=>`${slug.slice(0,60)}-${n}`)].filter(available).slice(0,3)
+      res.setHeader('Cache-Control','no-store');res.json({slug,available:free,suggestions})
+    }catch(error){next(error)}
+  })
 
   router.get('/onboarding/team-quote', publicCheckoutLimiter, (req,res,next) => {
     try {
@@ -92,6 +108,8 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
         slug: z.string().trim().toLowerCase().min(2).max(63).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
         email: z.string().email().transform(value => value.toLowerCase()),
         phone: z.string().min(8).max(40),
+        taxId:z.string().max(18).refine(validTaxId).transform(value=>value.replace(/\D/g,'')),
+        recurringAccepted:z.literal(true),
         password: z.string().min(8).max(128),
         planCode: z.enum(['TEAM_3', 'TEAM_6', 'TEAM_15']),
         legal: z.object({
@@ -116,6 +134,7 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
       const phone = normalizeUserE164Phone(body.phone)
       if (body.referralToken) {paymentBilling.validateReferral(body.referralToken,{email:body.email,phone});const quote=paymentBilling.publicQuote(body.planCode,body.referralToken);if(body.quoteFingerprint !== quote.fingerprint)throw badRequest('Revise o valor da indicação antes de continuar.','REFERRAL_QUOTE_CHANGED')}
       db.transaction(() => {
+        if(db.prepare('SELECT 1 FROM tenants WHERE slug=? LIMIT 1').get(body.slug))throw badRequest('Esse endereço já está em uso.','TENANT_SLUG_TAKEN')
         db.prepare("INSERT INTO tenants (id, slug, name, primary_color, logo_url, status, created_at) VALUES (?, ?, ?, '#b85a30', NULL, 'ONBOARDING', ?)")
           .run(tenantId, body.slug, body.studioName, now)
         db.prepare("INSERT INTO tenant_settings (tenant_id, secondary_color, timezone, currency, created_at, updated_at) VALUES (?, '#2d2028', 'America/Sao_Paulo', 'BRL', ?, ?)")
@@ -133,7 +152,7 @@ export function createPublicOnboardingRouter(options: PublicOnboardingRouterOpti
         recordPlatformMarketingChoice({ userId, tenantId, granted: body.platformMarketingWhatsapp, source: 'PUBLIC_CHECKOUT' })
       })()
       try {
-        db.prepare('UPDATE users SET billing_name=? WHERE id=? AND tenant_id=?').run(body.ownerName, userId, tenantId)
+        db.prepare('UPDATE users SET billing_name=?,billing_tax_id_enc=? WHERE id=? AND tenant_id=?').run(body.ownerName,encryptSecret(body.taxId,`billing:${tenantId}`), userId, tenantId)
         const checkout = await paymentBilling.startCheckout(tenantId, body.planCode,body.referralToken,body.quoteFingerprint)
         return res.json({ activated: false, url: checkout.checkoutUrl, workspaceSlug: body.slug,
           intentId: checkout.intentId, amountCents: paymentBilling.quoteForTenant(tenantId,body.planCode).amountCents })

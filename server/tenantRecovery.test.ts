@@ -114,7 +114,7 @@ test('checkout failure, ADMIN MFA, restricted billing, reversal and a new verifi
   const tenant = () => db.prepare('SELECT id, status, suspension_reason FROM tenants WHERE slug = ?').get('studio') as { id: string; status: string; suspension_reason: string | null }
   try {
     const signup = await request('/api/public/onboarding/team-checkout', 'POST', {
-      ownerName: 'Ana', studioName: 'Studio QA', slug: 'studio', email: 'admin@example.com', phone: '+5571999999999', password: 'senha-segura', planCode: 'TEAM_3',
+      taxId:'39053344705',recurringAccepted:true,ownerName: 'Ana', studioName: 'Studio QA', slug: 'studio', email: 'admin@example.com', phone: '+5571999999999', password: 'senha-segura', planCode: 'TEAM_3',
       legal: { accepted: true, termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION, bundleHash: currentLegalBundleHash() },
     }, 'example.com')
     assert.equal(signup.status, 503)
@@ -143,7 +143,7 @@ test('checkout failure, ADMIN MFA, restricted billing, reversal and a new verifi
     db.prepare("INSERT OR REPLACE INTO platform_settings (key,value,updated_at) VALUES ('test_mode', 'true', ?)").run(new Date().toISOString())
     assert.equal((await request('/api/admin/private')).status, 401)
     failLink = false
-    const checkoutResponse = await request('/api/admin/subscription/team-checkout', 'POST', { planCode: 'TEAM_3' })
+    const checkoutResponse = await request('/api/admin/subscription/team-checkout', 'POST', { planCode: 'TEAM_3',recurringAccepted:true })
     assert.equal(checkoutResponse.status, 200)
     const first = await checkoutResponse.json() as { intentId: string }
     assert.equal(await billing.confirmOrder({ tenantId: tenant().id, intentId: first.intentId, orderId: 1 }), false)
@@ -160,7 +160,7 @@ test('checkout failure, ADMIN MFA, restricted billing, reversal and a new verifi
     assert.equal(subscription().status, 'CANCELLED')
     assert.equal((await request('/api/public/services')).status, 404)
     assert.equal((await request('/api/admin/private')).status, 401)
-    const second = await (await request('/api/admin/subscription/team-checkout', 'POST', { planCode: 'TEAM_3' })).json() as { intentId: string }
+    const second = await (await request('/api/admin/subscription/team-checkout', 'POST', { planCode: 'TEAM_3',recurringAccepted:true })).json() as { intentId: string }
     state = 'PAID'
     assert.equal(await billing.confirmOrder({ tenantId: tenant().id, intentId: second.intentId, orderId: 2 }), true)
     assert.equal(tenant().status, 'ACTIVE')

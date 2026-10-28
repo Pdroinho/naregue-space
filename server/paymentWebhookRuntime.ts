@@ -13,6 +13,7 @@ type BillingService = {
   reconcileOrder?: (input: { tenantId: string; intentId: string; orderId: number }) => Promise<boolean>
   reconcilePendingIntents?: () => Promise<void>
   reconcilePaidIntents?: () => Promise<void>
+  reconcileRecurringEvents?: () => Promise<void>
 }
 
 export function createPaymentWebhookRuntime(db: Database.Database, billing: BillingService, credits?: {reconcile:(input:{tenantId:string;intentId:string;orderId:number})=>Promise<boolean>;reconcileRecent:()=>Promise<void>}) {
@@ -64,6 +65,7 @@ export function createPaymentWebhookRuntime(db: Database.Database, billing: Bill
       }
       if (billing.reconcilePendingIntents) await billing.reconcilePendingIntents()
       if (billing.reconcilePaidIntents) await billing.reconcilePaidIntents()
+      if (billing.reconcileRecurringEvents) await billing.reconcileRecurringEvents()
       if (credits) await credits.reconcileRecent()
     } finally { running = false }
   }

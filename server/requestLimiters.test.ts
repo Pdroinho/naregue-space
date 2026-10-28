@@ -22,11 +22,11 @@ function captureOptions() {
 
 test('factory registra todos os limites, janelas e persistência esperados', () => {
   const { db, limiters, options, byPrefix } = captureOptions()
-  assert.equal(options.length, 21)
-  assert.equal(Object.keys(limiters).length, 21)
+  assert.equal(options.length, 22)
+  assert.equal(Object.keys(limiters).length, 22)
   assert.deepEqual([...byPrefix.keys()], [
     'api', 'webhooks', 'webhooks:infinitepay', 'auth:login', 'auth:whatsapp-otp:send',
-    'public:checkout', 'public:checkout:email', 'auth:password', 'auth:login:user', 'dev:bootstrap',
+    'public:checkout', 'public:slug', 'public:checkout:email', 'auth:password', 'auth:login:user', 'dev:bootstrap',
     'referrals:mutation', 'onboarding:assistant', 'admin:assistant', 'dev:backup:export', 'admin:domain:verify',
     'admin:whatsapp:send', 'public:booking:create', 'public:booking:phone', 'client:access:request',
     'client:access:phone', 'client:access:verify',

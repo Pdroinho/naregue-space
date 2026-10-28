@@ -20,7 +20,7 @@ test('webhook requires secret + exact signature, persists event once, and record
   const server=app.listen(0,'127.0.0.1');await once(server,'listening')
   const origin=`http://127.0.0.1:${(server.address() as {port:number}).port}`
   async function send(eventId:string,event:string,secret=env.ABACATEPAY_WEBHOOK_SECRET,signatureValid=true) {
-    const body=JSON.stringify({id:eventId,event,apiVersion:2,devMode:true,data:{checkout:{id:'bill_test'}}})
+    const body=JSON.stringify({id:eventId,event,apiVersion:2,devMode:true,data:event.startsWith('subscription.')?{subscription:{id:'subs_test',updatedAt:'2026-10-28T12:00:00.000Z'}}:{checkout:{id:'bill_test'}}})
     const signature=createHmac('sha256',ABACATEPAY_PUBLIC_KEY).update(body).digest('base64')
     return fetch(`${origin}/abacatepay?webhookSecret=${secret}`,{method:'POST',headers:{'content-type':'application/json','x-webhook-signature':signatureValid?signature:'wrong'},body})
   }
@@ -33,5 +33,10 @@ test('webhook requires secret + exact signature, persists event once, and record
     assert.equal((await send('one','checkout.refunded')).status,409)
     assert.equal((await send('two','checkout.refunded')).status,200)
     assert.equal((db.prepare('SELECT reversal_event e FROM abacatepay_checkouts').get() as {e:string}).e,'checkout.refunded')
+    assert.equal((await send('subscription-one','subscription.renewed','wrong')).status,401)
+    assert.equal((await send('subscription-one','subscription.renewed')).status,200)
+    assert.equal((await send('subscription-one','subscription.renewed')).status,200)
+    assert.equal((db.prepare('SELECT count(*) n FROM abacatepay_subscription_events').get() as {n:number}).n,1)
+    assert.equal((await send('subscription-one','subscription.cancelled')).status,409)
   }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));db.close()}
 })

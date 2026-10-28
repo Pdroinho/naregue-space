@@ -1237,4 +1237,24 @@ export function migrate(db = getDb()) {
     );
   `))
 
+  apply(117, () => db.exec(`
+    ALTER TABLE users ADD COLUMN billing_tax_id_enc TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN frequency TEXT NOT NULL DEFAULT 'ONE_TIME';
+    ALTER TABLE abacatepay_checkouts ADD COLUMN customer_id TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN subscription_id TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN renewal_product_id TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN renewal_amount_cents INTEGER;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN subscription_status TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN provider_created_at TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN period_end TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN last_renewed_cycle TEXT;
+    ALTER TABLE abacatepay_checkouts ADD COLUMN plan_sync_required INTEGER NOT NULL DEFAULT 0;
+    CREATE UNIQUE INDEX idx_abacatepay_subscription_id ON abacatepay_checkouts(subscription_id);
+    CREATE TABLE abacatepay_subscription_events (
+      id TEXT PRIMARY KEY, subscription_id TEXT NOT NULL, event_type TEXT NOT NULL,
+      payload_hash TEXT NOT NULL, occurred_at TEXT, received_at TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'PENDING', processed_at TEXT
+    );
+  `))
+
 }

@@ -528,7 +528,7 @@ test('HTTP signup validates quote and identity; real webhook runtime unlocks exa
     ).json()) as { quote: { amountCents: number; fingerprint: string } }
     assert.equal(quote.quote.amountCents, 6366)
     const body = {
-      ownerName: 'Cliente de teste',
+      taxId:'39053344705',recurringAccepted:true,ownerName: 'Cliente de teste',
       studioName: 'Novo espaço',
       slug: 'http-invited',
       email: 'http-invited@example.com',

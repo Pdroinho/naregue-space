@@ -118,6 +118,7 @@ export function registerPlatformRoutes(app: express.Express, options: PlatformRo
     db,
     publicCheckoutLimiter: limiters.publicCheckoutLimiter,
     publicCheckoutEmailLimiter: limiters.publicCheckoutEmailLimiter,
+    publicSlugLimiter: limiters.publicSlugLimiter,
     billingPlanByCycle: commercial.billingPlanByCycle,
     assertTenantSlugIsAvailable: tenantRouting.assertTenantSlugIsAvailable,
     subscriptionCheckoutQuote: commercial.subscriptionCheckoutQuote,

@@ -67,7 +67,7 @@ test('checkout público preserva ativação por cortesia e rollback quando o pro
   const baseUrl = `http://127.0.0.1:${address.port}`
   const legal = { accepted: true, termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION, bundleHash: currentLegalBundleHash() }
   const checkoutBody = {
-    ownerName: 'Ana Silva', studioName: 'Studio Ana', email: 'ana@example.com', phone: '(71) 99999-9999',
+    taxId:'39053344705',recurringAccepted:true,ownerName: 'Ana Silva', studioName: 'Studio Ana', email: 'ana@example.com', phone: '(71) 99999-9999',
     password: 'senha-segura', cycle: 'ANNUAL', legal, platformMarketingWhatsapp: false,
   }
 
@@ -141,7 +141,7 @@ test('checkout público de equipe vincula espaço, valor e ativação apenas ao 
   assert.ok(address && typeof address === 'object')
   const url = `http://127.0.0.1:${address.port}/api/public/onboarding/`
   const body = {
-    ownerName: 'Ana Silva', studioName: 'Studio Equipe', slug: 'studio-equipe', email: 'equipe@example.com',
+    taxId:'39053344705',recurringAccepted:true,ownerName: 'Ana Silva', studioName: 'Studio Equipe', slug: 'studio-equipe', email: 'equipe@example.com',
     phone: '(71) 99999-9999', password: 'senha-segura', planCode: 'TEAM_6',
     legal: { accepted: true, termsVersion: TERMS_VERSION, privacyVersion: PRIVACY_VERSION, bundleHash: currentLegalBundleHash() },
     platformMarketingWhatsapp: false,
@@ -163,8 +163,15 @@ test('checkout público de equipe vincula espaço, valor e ativação apenas ao 
     assert.equal(checkout.url, 'https://sandbox.payment.com.br/pagar/913')
     assert.equal(checkout.workspaceSlug, body.slug)
     assert.equal(checkout.amountCents, 9_990)
+    const occupied=await fetch(url+'slug-availability?slug='+body.slug)
+    const availability=await occupied.json() as {available:boolean;suggestions:string[]}
+    assert.equal(availability.available,false)
+    assert.equal(availability.suggestions.length,3)
+    assert.ok(!availability.suggestions.includes(body.slug))
+    const suggested=await fetch(url+'slug-availability?slug='+availability.suggestions[0])
+    assert.equal((await suggested.json() as {available:boolean}).available,true)
     assert.deepEqual(createdAmounts, [9_990])
-    assert.deepEqual(checkoutCustomers,[{name:body.ownerName,email:body.email,cellphone:'+5571999999999'}])
+    assert.deepEqual(checkoutCustomers,[{name:body.ownerName,email:body.email,cellphone:'+5571999999999',taxId:'39053344705'}])
     assert.equal(acceptanceCount, 1)
     const tenant = db.prepare('SELECT id, status FROM tenants WHERE slug = ?').get(body.slug) as { id: string; status: string }
     assert.equal(tenant.status, 'ONBOARDING')

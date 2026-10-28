@@ -4,6 +4,10 @@ As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tag
 
 ## Não lançado
 
+- Novas contratações por equipe usam assinatura mensal automática no cartão, com eventos de assinatura e cancelamento pelo painel. Períodos anteriores são preservados.
+- CPF/CNPJ permite aproveitar os dados pessoais no checkout hospedado; documento validado e persistido com criptografia por tenant.
+- Endereço do espaço sempre visível, disponibilidade em tempo de preenchimento, sugestões e recuperação de conflito junto ao campo.
+
 - Checkout AbacatePay reutiliza produtos por plano/pacote e preço; nomes de compradores deixam de virar produtos.
 - Nome, e-mail e telefone seguem para pré-preenchimento via cliente do provedor quando a chave permite `CUSTOMER:CREATE`; HTTP 403 preserva o fluxo hospedado.
 - Migração 116 preserva o nome de cobrança e os identificadores de catálogo/clientes. Planos existentes e renovação manual permanecem preservados.

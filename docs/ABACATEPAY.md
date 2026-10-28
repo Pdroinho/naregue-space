@@ -45,7 +45,7 @@ Testar conta dev e depois uma compra live controlada: checkout de cada faixa, in
 
 Se houver timeout após envio ao provedor, não repetir a cobrança cegamente. A intenção pode ficar em `CREATING`; conferir a referência no painel e na tabela de checkouts, documentar a resolução e conciliar. Não transformar um timeout em pagamento recusado nem liberar assinatura por captura de tela.
 
-Os planos continuam de renovação manual por mês, como na referência. Assinaturas antigas preservam o período já pago; não se abre outra cobrança de migração enquanto estiverem ativas sem uma política comercial definida. Pedidos InfinitePay antigos continuam conciliáveis; nenhuma nova contratação usa Appmax ou InfinitePay.
+Até a migração 116, os planos eram de renovação manual. Os novos checkouts a partir da migração 117 usam assinatura mensal automática no cartão. Assinaturas antigas preservam o período já pago; não se abre outra cobrança de migração enquanto estiverem ativas sem uma política comercial definida. Pedidos InfinitePay antigos continuam conciliáveis; nenhuma nova contratação usa Appmax ou InfinitePay.
 
 ## Checkout: dados e catálogo compartilhado (28/10/2026)
 
@@ -66,3 +66,19 @@ Reutilizar produtos é diferente de ativar recorrência. O comportamento atual c
 - Segredo: o mesmo `ABACATEPAY_WEBHOOK_SECRET` privado do servidor, enviado diretamente à API, sem exposição no Git.
 
 A consulta inicial não encontrou webhook nesse endpoint; a criação pela API retornou sucesso e confirmou endpoint/eventos. O endpoint HTTPS foi verificado com uma notificação sintética de saúde, sem efeito em pagamentos: assinatura inválida retornou 401 e assinatura válida retornou 200 com `ignored:true`. Isso verifica alcance e autenticação da aplicação, mas ainda não comprova entrega de evento real pela AbacatePay. Essa confirmação requer concluir um pagamento sandbox e verificar a entrega e a conciliação. Não cadastrar outro webhook idêntico pelo painel.
+
+## Assinatura mensal e cadastro revisado (migração 117)
+
+Os novos planos usam produto `cycle: MONTHLY`, `POST /subscriptions/create` e método `CARD`. Pacotes de mensagens continuam avulsos. Assinaturas e checkouts avulsos antigos preservam sua conciliação e o período pago; não se cria autorização recorrente retroativa.
+
+Na verificação real do sandbox, `customerId` sem CPF/CNPJ não bastou: a página hospedada devolveu todos os dados pessoais vazios. Com documento válido, os mesmos dados foram aproveitados e a página avançou direto ao endereço. O cadastro passa a pedir CPF/CNPJ, validado no cliente e servidor; o valor persistido fica criptografado com AES-GCM e contexto do tenant em `users.billing_tax_id_enc`. Não fica em logs, URLs ou metadados. A confirmação do cadastro informa e registra o aceite de renovação mensal.
+
+O produto mensal normal é compartilhado por faixa/preço. Se a primeira mensalidade tiver desconto, usa uma variante mensal pelo valor exato e agenda a troca para o produto normal após a ativação; essa troca só deve valer para o ciclo seguinte, como no contrato da API. Uma falha nessa chamada continua pendente para nova conciliação, sem repetir cobrança. Não alterar produtos de outros pedidos.
+
+A concessão inicial exige checkout pago no valor exato e assinatura do mesmo checkout/cliente/ambiente. O worker busca assinaturas por `checkoutId`, preserva os IDs `subs_...` como strings e processa uma caixa de eventos durável para `subscription.completed`, `subscription.renewed`, `subscription.cancelled`, `subscription.payment_failed` e `subscription.plan_changed`. Renovação verificada usa a âncora mensal da assinatura e a data do ciclo no evento; reenviar com outro ID não amplia o mesmo ciclo novamente. Evento de renovação sem data de ciclo confiável fica `NEEDS_REVIEW`, em vez de conceder acesso sem evidência. A API de assinaturas ativa, sozinha, não comprova pagamento de um novo ciclo. Homologar o payload da primeira renovação real antes de habilitar live.
+
+Cancelamento pelo painel chama a API, confirma o estado e impede cobranças futuras, preservando o acesso já pago. A existência de uma renovação ativa impede contratar outra assinatura mesmo quando o acesso local expirou. Falhas de API não revogam um período já pago. Estorno/disputa suspende apenas o pedido correspondente e cancela sua recorrência.
+
+O endereço do espaço fica sempre visível no cadastro. `GET /api/public/onboarding/slug-availability` tem limite próprio, resposta sem cache e sugestões disponíveis. O cliente consulta com debounce, cancela respostas antigas e impede avançar até a confirmação. O servidor verifica novamente na criação; essa consulta não reserva o endereço.
+
+Validação local: `npm run check` aprovado, 275 testes principais, 22 de migração, 16 de segurança e 35 de WhatsApp; desktop 9/9, mobile Chromium 8/8 e Firefox 8/8. O ensaio separado na AbacatePay criou uma assinatura sandbox `ACTIVE` com produto mensal compartilhado. A renovação futura é coberta por testes de conciliação e replay, sem alegar que um mês real já transcorreu.
