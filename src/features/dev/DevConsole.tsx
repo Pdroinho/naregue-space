@@ -927,7 +927,6 @@ export function Dev() {
                                 <h1 style={{margin: 0, fontSize: '2rem', fontWeight: 800}}>Painel Developer</h1>
                                 <p style={{margin: '8px 0 0', opacity: 0.8}}>Gerencie todos os espaços e assinaturas.</p>
                             </div>
-                            <span className="empty-section-mark" aria-hidden="true">LD</span>
                         </div>
                     </div>
 

@@ -587,7 +587,8 @@ body:has(.modal-overlay) .animate-entry {
 .destructive-dialog h2 { margin: 7px 0 8px; }
 .destructive-dialog p { color: var(--ink-soft); line-height: 1.55; }
 .danger-note { color: var(--danger-strong) !important; font-size: .78rem; }
-.welcome-banner { background: linear-gradient(135deg, #2b2228, #4a2a3c 62%, #7a1d49) !important; color: #fff !important; }
+.welcome-banner { background: #082a39; color: #fff; box-shadow: none; }
+.welcome-banner::after { content: none; }
 .dashboard-welcome { position: relative; min-height: 210px; display: grid; grid-template-columns: minmax(0,1fr); align-items: stretch; overflow: hidden; padding: 0 !important; background: linear-gradient(120deg,#2b2228,#641a3d 68%) !important; }
 .dashboard-welcome::after { display: none !important; }
 .dashboard-welcome__copy { position: relative; z-index: 2; width: min(64%, 820px); display: grid; align-content: center; padding: clamp(25px,4vw,38px); }
