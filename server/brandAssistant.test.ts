@@ -8,6 +8,7 @@ process.env.DATABASE_PATH = path.join(directory, 'test.db')
 process.env.NODE_ENV = 'test'
 process.env.OPENROUTER_API_KEY = 'qa-fake-key-not-a-real-credential'
 process.env.OPENROUTER_MODEL = 'qa/principal-vision'
+process.env.OPENROUTER_VISION_MODEL = 'qa/image-capable'
 process.env.OPENROUTER_SETUP_MODEL = 'qa/legacy-separate-model'
 process.env.ASSISTANT_SETUP_USE_PRIMARY_MODEL = 'true'
 const { generateBrandSetupSuggestions, assistantProvider } = await import('./assistant.js')
@@ -24,7 +25,7 @@ test('brand analysis inherits configured principal model and constrains logo out
   try {
     assert.equal(assistantProvider.setupModel,'qa/principal-vision')
     const answer = await generateBrandSetupSuggestions({businessName:'Espaço',preferences:'Elegante',logoDataUrl:'data:image/png;base64,AAAA'})
-    assert.equal(request.model,'qa/principal-vision')
+    assert.equal(request.model,'qa/image-capable')
     assert.equal(request.max_tokens,850)
     assert.ok(JSON.stringify(request.messages).includes('SYMBOL_NAME'))
     assert.ok(JSON.stringify(request.messages).includes('"detail":"high"'))

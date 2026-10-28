@@ -159,6 +159,7 @@ export function clearTenantTheme() {
     '--accent2',
     '--accent3',
     '--primary-on-dark',
+    '--primary-on-light',
     '--primary-on-dark-soft',
     '--ring',
     ...TENANT_SURFACE_KEYS,
@@ -255,6 +256,7 @@ export function applyPrimaryColor(hexColor: string) {
   root.style.setProperty('--primary-500', primary)
   root.style.setProperty('--primary-600', primary600)
   root.style.setProperty('--primary-700', primary700)
+  root.style.setProperty('--primary-on-light', primary700)
   root.style.setProperty('--primary-800', primary800)
   root.style.setProperty('--primary-900', primary900)
   root.style.setProperty('--primary-900-rgb', primary900RgbStr)

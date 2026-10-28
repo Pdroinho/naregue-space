@@ -5,6 +5,7 @@ import { Router, type RequestHandler } from 'express'
 import { z } from 'zod'
 import { requireRole } from '../auth.js'
 import { badRequest } from '../http.js'
+import { extractLogoPalettes } from '../logoPalette.js'
 
 type BrandSuggestionInput = {
   businessName: string
@@ -86,15 +87,17 @@ export function createAdminOnboardingRouter({
         preferences: z.string().trim().max(280).default(''),
         logoDataUrl: z.string().max(450_000).refine((value) => /^data:image\/(?:png|jpeg|webp);base64,/i.test(value), 'Logo inválida').nullable().optional(),
       }).parse(req.body ?? {})
-      const fallback = curatedBrandPalettes(body.preferences)
-      if (!assistantEnabled || !assistantProvider.apiKey) return res.json({ palettes: fallback, source: 'CURATED' })
+      const imagePalettes=await extractLogoPalettes(body.logoDataUrl)
+      const fallback = imagePalettes ?? curatedBrandPalettes(body.preferences)
+      const fallbackSource=imagePalettes?'IMAGE':'CURATED'
+      if (!assistantEnabled || !assistantProvider.apiKey) return res.json({ palettes: fallback, source: fallbackSource })
 
       const timestamp = now().toISOString()
       const reserved = db.prepare(`
         UPDATE tenant_onboarding SET ai_attempts = ai_attempts + 1, updated_at = ?
         WHERE tenant_id = ? AND status = 'PENDING' AND ai_attempts < 3
       `).run(timestamp, tenantId)
-      if (reserved.changes !== 1) return res.json({ palettes: fallback, source: 'CURATED', limitReached: true })
+      if (reserved.changes !== 1) return res.json({ palettes: fallback, source: fallbackSource, limitReached: true })
       try {
         const answer = await generateBrandSetupSuggestions(body)
         db.prepare(`
@@ -110,8 +113,9 @@ export function createAdminOnboardingRouter({
         const logo = logoSuggestionSchema.safeParse(answer.logoPresentation)
         return res.json({ palettes: answer.palettes, logoPresentation: logo.success ? logo.data : undefined, source: 'VISION' })
       } catch (error) {
+        db.prepare("UPDATE tenant_onboarding SET ai_attempts=MAX(0,ai_attempts-1) WHERE tenant_id=? AND status='PENDING'").run(tenantId)
         console.warn('[Onboarding visual]', error instanceof Error ? error.message : error)
-        return res.json({ palettes: fallback, source: 'CURATED', fallback: true })
+        return res.json({ palettes: fallback, source: fallbackSource, fallback: true })
       }
     } catch (err) {
       next(err)

@@ -1,0 +1,54 @@
+/* The setup belongs to the same barber atelier as the public identity. */
+.workspace-setup.atelier-setup{height:min(680px,calc(100dvh - 48px));font-family:Manrope,'Segoe UI',sans-serif;--brand-action:#b85a30;--brand-action-hover:#934526;--brand-soft:#f8eee3;--focus-color:#b85a3033;--ink-strong:#082a39;--ink-soft:#526770;color:#082a39;background:#fffdf8;border:1px solid #ded6c9;box-shadow:0 30px 85px #00192333}
+.atelier-setup .workspace-setup-aside{padding:32px;background:#f0dfcd;color:#082a39}
+.atelier-setup .workspace-setup-aside::after{display:none}
+.workspace-setup-wordmark{width:150px;height:auto;display:block;margin-bottom:42px}
+.atelier-setup .workspace-setup-aside h2{font:750 1.9rem/1.18 Manrope,'Segoe UI',sans-serif;letter-spacing:-.035em;color:#082a39;margin:0 0 16px}
+.atelier-setup .workspace-setup-aside p{font-size:.83rem;line-height:1.7;color:#395460;max-width:26ch}
+.atelier-setup .workspace-setup-progress{margin:28px 0 100px;gap:12px}
+.atelier-setup .workspace-setup-progress li{color:#526770;font-size:.8rem;gap:10px}
+.atelier-setup .workspace-setup-progress li>span{border-color:#082a3933;background:transparent;color:#395460;border-radius:8px;width:27px;height:27px}
+.atelier-setup .workspace-setup-progress li.is-current{color:#082a39}
+.atelier-setup .workspace-setup-progress li.is-current>span{background:#082a39;border-color:#082a39;color:#fffdf8}
+.atelier-setup .workspace-setup-progress li.is-done{color:#395460}
+.atelier-setup .workspace-setup-progress li.is-done>span{background:#fffdf8;color:#082a39;border-color:#082a3933}
+.workspace-setup-chair{position:absolute;right:-10px;bottom:24px;width:140px;height:200px;object-fit:contain;pointer-events:none;transform:rotate(-8deg)}
+.atelier-setup .workspace-setup-later{font-size:.74rem;color:#395460;border-bottom-color:#39546055;max-width:170px}
+.atelier-setup .workspace-setup-aside>.workspace-back{position:relative;z-index:1;background:none;color:#934526;border:0;box-shadow:none;padding:8px 0;min-height:32px;align-self:flex-start;font-size:.75rem}
+.atelier-setup .workspace-setup-main{padding:42px 40px 0;background:#fffdf8}
+.atelier-setup .workspace-setup-step>h3{font:750 clamp(1.65rem,2.5vw,2.15rem)/1.2 Manrope,'Segoe UI',sans-serif;letter-spacing:-.035em;margin:0 0 16px;text-wrap:balance}
+.atelier-setup .workspace-setup-step>p{color:#526770;font-size:.9rem;line-height:1.75;margin-bottom:28px;max-width:55ch}
+.atelier-setup .workspace-mode-grid{grid-template-columns:1fr;gap:14px}
+.atelier-setup .workspace-mode-grid>button{display:grid;grid-template-columns:26px minmax(0,1fr) 22px;align-items:center;gap:18px;min-height:112px;padding:23px 22px;background:#fffdf8;color:#082a39;border:1px solid #cbd0ca;border-radius:12px;box-shadow:none;transform:none}
+.atelier-setup .workspace-mode-grid>button.is-selected{background:#f8eee3;border-color:#b85a30;box-shadow:inset 3px 0 #b85a30}
+.atelier-setup .workspace-mode-grid>button:hover{background:#f8f2e9;transform:none;box-shadow:none}
+.atelier-setup .workspace-mode-grid strong{font-size:.95rem;line-height:1.4}
+.atelier-setup .workspace-mode-grid small{color:#526770;font-size:.8rem;line-height:1.65}
+.workspace-mode-check{width:22px;height:22px;display:grid;place-items:center;border:1px solid #a4aeaa;border-radius:50%;color:#fffdf8}
+.is-selected>.workspace-mode-check{background:#b85a30;border-color:#b85a30}
+.atelier-setup .workspace-next{background:#b85a30;color:#fffdf8;box-shadow:none;border-radius:10px}
+.atelier-setup .workspace-next:hover{background:#934526}
+.atelier-setup .workspace-setup-actions{background:#fffdf8;border-color:#082a391a;min-height:78px}
+.atelier-setup .workspace-setup-step{animation:none;scrollbar-width:thin;scrollbar-color:#bfa28d #f5eee4}
+.atelier-setup :is(button,input,textarea):focus-visible{outline:2px solid #934526;outline-offset:4px}
+@media(max-width:767px){
+ .workspace-setup.atelier-setup{height:100dvh;max-height:100dvh;width:100%;border:0;border-radius:0;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+ .atelier-setup .workspace-setup-aside{display:grid;grid-template-columns:1fr auto;gap:14px;padding:18px 20px;background:#f0dfcd}
+ .workspace-setup-wordmark{width:122px;margin:0;grid-column:1}
+ .atelier-setup .workspace-setup-aside>div,.workspace-setup-chair{display:none}
+ .atelier-setup .workspace-setup-progress{display:flex;grid-column:1/-1;grid-row:2;gap:8px;margin:0}
+ .atelier-setup .workspace-setup-progress li{height:auto;flex:1;border-radius:0;background:none;display:flex;gap:6px;font-size:.65rem;color:#526770}
+ .atelier-setup .workspace-setup-progress li>span{display:grid;width:22px;height:22px;flex-shrink:0;font-size:.6rem;border-radius:6px}
+ .atelier-setup .workspace-setup-progress li b{display:none}
+ .atelier-setup .workspace-setup-progress li.is-current b{display:block}
+ .atelier-setup .workspace-setup-progress li:is(.is-current,.is-done){background:none}
+ .atelier-setup .workspace-setup-later{grid-column:2;grid-row:1;position:static;margin:0;font-size:.65rem;max-width:120px}
+ .atelier-setup .workspace-setup-aside>.workspace-back{display:none}
+ .atelier-setup .workspace-setup-main{padding:28px 20px 0;min-height:0}
+ .atelier-setup .workspace-setup-step>h3{font-size:1.75rem}
+ .atelier-setup .workspace-setup-step>p{font-size:.85rem;margin-bottom:24px}
+ .atelier-setup .workspace-mode-grid>button{grid-template-columns:22px minmax(0,1fr) 20px;padding:20px 16px;gap:12px;min-height:124px}
+ .atelier-setup .workspace-mode-grid strong{font-size:.87rem}
+ .atelier-setup .workspace-mode-grid small{font-size:.75rem}
+ .atelier-setup .workspace-setup-actions{padding-block:16px;min-height:78px}
+}

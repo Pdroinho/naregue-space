@@ -189,6 +189,7 @@ test('onboarding ADMIN preserva fallback, IA, transação, skip e isolamento', a
     }).then(response => response.json()) as { source: string; fallback: boolean; palettes: Array<{ name: string }> }
     assert.equal(fallback.source, 'CURATED')
     assert.equal(fallback.fallback, true)
+    assert.equal((db.prepare('SELECT ai_attempts count FROM tenant_onboarding WHERE tenant_id=?').get(tenantOne) as {count:number}).count,1,'Failed image analysis must not consume the retry allowance')
     assert.deepEqual(fallback.palettes.map(palette => palette.name), ['Cobre e petróleo', 'Ofício clássico', 'Petróleo essencial'])
     assert.equal(generatorCalls, 2)
 

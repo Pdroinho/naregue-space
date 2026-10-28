@@ -10,6 +10,7 @@ import type { TenantPublic } from '../types'
 import { ArrowRight, Check, Palette, Sparkles, Upload } from './Icons'
 import { ProductSelect } from './ProductSelect'
 import { ProductTime } from './ProductTime'
+import './workspace-setup-atelier.css'
 
 type SetupMode = 'ASSISTED' | 'MANUAL'
 type PaletteOption = { name: string; primary: string; secondary: string; background: string; rationale: string }
@@ -60,7 +61,7 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
   ])
   const [busy, setBusy] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
-  const [analysisSource, setAnalysisSource] = useState<'VISION' | 'CURATED' | null>(null)
+  const [analysisSource, setAnalysisSource] = useState<'VISION' | 'IMAGE' | 'CURATED' | null>(null)
   const [error, setError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -105,7 +106,7 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
     setAnalyzing(true)
     setError('')
     try {
-      const result = await api<{ palettes: PaletteOption[]; source: 'VISION' | 'CURATED'; logoPresentation?: {layout:'SYMBOL_NAME'|'FULL'; size:'S'|'M'|'L'; rationale:string} }>('/api/admin/onboarding/brand-suggestions', {
+      const result = await api<{ palettes: PaletteOption[]; source: 'VISION' | 'IMAGE' | 'CURATED'; logoPresentation?: {layout:'SYMBOL_NAME'|'FULL'; size:'S'|'M'|'L'; rationale:string} }>('/api/admin/onboarding/brand-suggestions', {
         method: 'POST',
         timeoutMs: 30_000,
         body: JSON.stringify({ businessName, preferences, logoDataUrl: selectedLogo.startsWith('data:image/') ? selectedLogo : null }),
@@ -188,7 +189,7 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
   return createPortal(
     <div className="workspace-setup-layer" data-blocking-overlay="true">
       <section
-        className="workspace-setup"
+        className="workspace-setup atelier-setup"
         role="dialog"
         aria-modal="true"
         aria-labelledby="workspace-setup-title"
@@ -199,40 +200,38 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
         } as CSSProperties}
       >
         <aside className="workspace-setup-aside">
-          <div className="workspace-setup-mark"><Sparkles size={20} weight="duotone" /></div>
+          <img className="workspace-setup-wordmark" src="/brand/logo-wordmark-approved-web.png" alt="NaRégua" width="160" height="40"/>
           <div>
-            <span className="workspace-setup-eyebrow">Seu espaço começa aqui</span>
-            <h2 id="workspace-setup-title">Seu espaço, do seu jeito.</h2>
-            <p>Quatro escolhas rápidas deixam sua agenda pronta para começar.</p>
+            <h2 id="workspace-setup-title">Vamos preparar<br/>sua barbearia.</h2>
+            <p>Sua marca, seus horários e os serviços que você oferece.</p>
           </div>
           <ol className="workspace-setup-progress" aria-label="Progresso da configuração">
             {['Caminho', 'Sua marca', 'Sua agenda', 'Seus serviços'].map((label, index) => (
-              <li key={label} className={index === step ? 'is-current' : index < step ? 'is-done' : ''}>
+              <li key={label} aria-current={index===step?'step':undefined} className={index === step ? 'is-current' : index < step ? 'is-done' : ''}>
                 <span>{index < step ? <Check size={13} /> : index + 1}</span><b>{label}</b>
               </li>
             ))}
           </ol>
+          <img className="workspace-setup-chair" src="/landing/art-v2/chair.webp" alt="" aria-hidden="true" width="140" height="200"/>
           <button type="button" className="workspace-setup-later" onClick={skip} disabled={busy || analyzing || logoBusy}>Prefiro configurar depois</button>
           <button type="button" className="workspace-back" disabled={busy || analyzing || logoBusy} onClick={() => { setVisible(false); navigate('/admin?view=support') }}>Preciso de ajuda</button>
         </aside>
 
         <div className="workspace-setup-main">
           {step === 0 ? <div className="workspace-setup-step">
-            <span className="workspace-setup-kicker">1 de 4 · escolha o caminho</span>
             <h3>Como quer começar?</h3>
-            <p>Receba sugestões do Mestre AI ou escolha cada detalhe manualmente.</p>
+            <p>Escolha como configurar o visual da sua barbearia. Nas próximas etapas, vamos definir horários e serviços.</p>
             <div className="workspace-mode-grid">
-              <button type="button" autoFocus className={mode === 'ASSISTED' ? 'is-selected' : ''} onClick={() => setMode('ASSISTED')}>
-                <Sparkles size={24} weight="duotone" /><span><strong>Com ajuda do Mestre AI</strong><small>Envie sua logo ou descreva seu estilo. Você escolhe entre sugestões prontas.</small></span><i>Recomendado</i>
+              <button type="button" autoFocus aria-pressed={mode==='ASSISTED'} className={mode === 'ASSISTED' ? 'is-selected' : ''} onClick={() => setMode('ASSISTED')}>
+                <Sparkles size={22} /><span><strong>Com ajuda do Mestre AI</strong><small>Envie sua logo ou descreva seu estilo para receber sugestões de cores.</small></span><b className="workspace-mode-check" aria-hidden="true">{mode==='ASSISTED'?<Check size={14}/>:null}</b>
               </button>
-              <button type="button" className={mode === 'MANUAL' ? 'is-selected' : ''} onClick={() => setMode('MANUAL')}>
-                <Palette size={24} /><span><strong>Quero escolher sozinha</strong><small>Use paletas prontas e ajuste tudo manualmente, sem análise visual.</small></span>
+              <button type="button" aria-pressed={mode==='MANUAL'} className={mode === 'MANUAL' ? 'is-selected' : ''} onClick={() => setMode('MANUAL')}>
+                <Palette size={22} /><span><strong>Configurar por conta própria</strong><small>Escolha uma paleta e ajuste a apresentação da sua marca manualmente.</small></span><b className="workspace-mode-check" aria-hidden="true">{mode==='MANUAL'?<Check size={14}/>:null}</b>
               </button>
             </div>
           </div> : null}
 
           {step === 1 ? <div className="workspace-setup-step">
-            <span className="workspace-setup-kicker">2 de 4 · identidade</span>
             <h3>{mode === 'ASSISTED' ? 'Vamos partir da sua marca.' : 'Escolha a direção da sua marca.'}</h3>
             <div className="workspace-brand-grid">
               <div className="workspace-logo-upload">
@@ -257,11 +256,10 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
               </button>)}
             </div>
           <div className="workspace-brand-review"><BrandPresentationControls brand={{name:businessName,logoUrl,logoLayout,logoSize}} onLayout={setLogoLayout} onSize={setLogoSize} disabled={analyzing || logoBusy} />{logoAdvice ? <p className="form-help">Sugestão do Mestre AI: {logoAdvice}</p> : null}</div>
-            {analysisSource ? <p className="workspace-analysis-note">{analysisSource === 'VISION' ? 'Sugestões criadas a partir da sua identidade visual. Você continua no controle da escolha.' : 'Sugestões seguras da curadoria NaRégua.'}</p> : null}
+            {analysisSource ? <p className="workspace-analysis-note" role="status">{analysisSource === 'VISION' ? 'Sugestões criadas a partir da sua identidade visual. Você continua no controle da escolha.' : analysisSource==='IMAGE' ? 'Cores extraídas da sua logo. A análise por IA não foi utilizada nesta sugestão.' : 'Paletas prontas do NaRégua. Não foi possível identificar cores na imagem.'}</p> : null}
           </div> : null}
 
           {step === 2 ? <div className="workspace-setup-step">
-            <span className="workspace-setup-kicker">3 de 4 · disponibilidade</span>
             <h3>Quando você costuma atender?</h3>
             <p>Essa é só a base inicial. Depois você pode criar intervalos, folgas e horários diferentes por dia.</p>
             <div className="workspace-days">
@@ -272,7 +270,6 @@ export function WorkspaceSetup({ tenant, onComplete }: { tenant: TenantPublic | 
           </div> : null}
 
           {step === 3 ? <div className="workspace-setup-step">
-            <span className="workspace-setup-kicker">4 de 4 · catálogo inicial</span>
             <h3>Quais serviços já podem entrar na agenda?</h3>
             <p>Comece com os principais. Fotos e descrições podem ser adicionadas depois.</p>
             <div className="workspace-services-list">
