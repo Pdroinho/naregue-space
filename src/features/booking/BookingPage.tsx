@@ -377,7 +377,7 @@ export function BookingPage(props: { tenant?: TenantPublic; tenantSlug?: string;
       {!confirmedAppointment ? <div className="booking30-body" data-step={step}>
         <section className="booking30-workspace">
           <div className="booking30-heading">
-            <h1 ref={stageHeadingRef} tabIndex={-1}><span className="booking30-title-desktop">{step === 1 ? 'Qual cuidado você quer hoje?' : step === 2 ? 'Com quem e quando você prefere?' : step === 3 ? 'Escolha o seu horário.' : 'Últimos detalhes.'}</span><span className="booking30-title-mobile">{step === 1 ? 'Um momento só seu.' : step === 2 ? 'Com quem e quando?' : step === 3 ? 'Encontre seu horário.' : 'Vamos confirmar?'}</span></h1>
+            <h1 ref={stageHeadingRef} tabIndex={-1}><span className="booking30-title-desktop">{step === 1 ? 'Qual serviço você quer agendar?' : step === 2 ? 'Com quem e quando você prefere?' : step === 3 ? 'Escolha o seu horário.' : 'Últimos detalhes.'}</span><span className="booking30-title-mobile">{step === 1 ? 'Escolha seu serviço.' : step === 2 ? 'Com quem e quando?' : step === 3 ? 'Encontre seu horário.' : 'Vamos confirmar?'}</span></h1>
             <p>{step === 1 ? 'Escolha o atendimento e veja os horários disponíveis.' : step === 2 ? 'Escolha um profissional ou encontre qualquer horário livre.' : step === 3 ? 'Estes horários estão livres agora.' : 'Seu nome e WhatsApp bastam para reservar.'}</p>
           </div>
 
