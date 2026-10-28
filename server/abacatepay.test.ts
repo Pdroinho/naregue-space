@@ -13,6 +13,7 @@ function fixture() {
   const calls: {url:string;body?:Record<string,unknown>}[] = []
   let externalId = '', status = 'PENDING', paidAmount: number | null = null, amount = 7490, mode = true
   let subscriptionStatus='ACTIVE'
+  let listStatus:string|undefined
   let createdAt=new Date().toISOString(),customerId:string|null=null
   const fetchFn = (async (url: string | URL | Request, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) : undefined
@@ -20,7 +21,7 @@ function fixture() {
     assert.equal(new Headers(init?.headers).get('authorization'),'Bearer test-key')
     if (String(url).endsWith('/customers/create')) return Response.json({success:true,data:{id:'cust_test',devMode:mode}})
     if (String(url).endsWith('/products/create')) return Response.json({success:true,data:{id:'prod_test'}})
-    if (String(url).includes('/subscriptions/list'))return Response.json({success:true,data:status==='PENDING'?[]:[{id:'subs_test',checkoutId:'bill_test',customerId,status:subscriptionStatus,devMode:mode,amount,createdAt}]})
+    if (String(url).includes('/subscriptions/list'))return Response.json({success:true,data:status==='PENDING'?[]:[{id:'subs_test',checkoutId:'bill_test',customerId,status:listStatus??subscriptionStatus,devMode:mode,amount,createdAt}]})
     if (String(url).includes('/subscriptions/get'))return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',customerId,status:subscriptionStatus,devMode:mode,amount,createdAt}})
     if (String(url).endsWith('/subscriptions/cancel')){subscriptionStatus='CANCELLED';return Response.json({success:true,data:{id:'subs_test',checkoutId:'bill_test',devMode:mode,status:subscriptionStatus}})}
     if (String(url).endsWith('/checkouts/create')||String(url).endsWith('/subscriptions/create')){externalId = body.externalId;customerId=body.customerId??null}
@@ -28,9 +29,10 @@ function fixture() {
     return Response.json({success:true,data:{id:'bill_test',externalId,url:'https://app.abacatepay.com/pay/bill_test',status,devMode:mode,amount,paidAmount}})
   }) as typeof fetch
   const provider = createPaymentClient({db,apiKey:'test-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})
-  return {db,provider,calls,setState:(value:{status?:string;paidAmount?:number;amount?:number;mode?:boolean;createdAt?:string})=>{
+  return {db,provider,calls,setState:(value:{status?:string;paidAmount?:number;amount?:number;mode?:boolean;createdAt?:string;listStatus?:string})=>{
     status=value.status??status; paidAmount=value.paidAmount??paidAmount;amount=value.amount??amount;mode=value.mode??mode
     createdAt=value.createdAt??createdAt
+    listStatus=value.listStatus??listStatus
   }}
 }
 test('AbacatePay v2 creates product + one-time checkout with cents and persistent provider IDs', async()=>{
@@ -148,6 +150,8 @@ test('monthly checkout uses recurring product and subscription API; cancellation
   setState({status:'PAID',paidAmount:7490})
   assert.equal((await provider.recurringState(link.linkId))?.status,'ACTIVE')
   assert.equal((await provider.cancelRecurring(link.linkId)).status,'CANCELLED')
+  setState({listStatus:'ACTIVE'})
+  assert.equal((await provider.recurringState(link.linkId))?.status,'CANCELLED','stale list must not reactivate a cancelled subscription')
   assert.equal(calls.filter(c=>c.url.endsWith('/subscriptions/cancel')).length,1)
   await provider.cancelRecurring(link.linkId)
   assert.equal(calls.filter(c=>c.url.endsWith('/subscriptions/cancel')).length,1)

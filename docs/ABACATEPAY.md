@@ -55,7 +55,7 @@ A chave precisa de `CUSTOMER:CREATE`. A chave sandbox instalada foi validada com
 
 Produtos recebem nomes comerciais do NaRégua, não o nome de cada comprador. A chave de reutilização considera plano/pacote, valor em centavos, moeda e ambiente/credencial. Preços com desconto geram variantes reutilizáveis; o preço de um produto compartilhado nunca é alterado para atender outro pedido. O mesmo vale para pacotes de mensagens. Reservas persistentes impedem criação concorrente duplicada; um timeout de produto deixa a reserva para revisão pela referência externa, sem repetir a criação cegamente. Nenhum produto antigo foi excluído ou modificado e os pagamentos anteriores continuam conciliáveis.
 
-Reutilizar produtos é diferente de ativar recorrência. O comportamento atual continua sendo um mês com renovação manual. Uma assinatura automática exige produto com ciclo, checkout de assinatura, conciliação dos eventos `subscription.*`, cancelamento e tratamento de falhas de renovação; não basta mudar o nome do produto. A escolha comercial de migrar os novos planos permanece pendente de confirmação.
+Reutilizar produtos é diferente de ativar recorrência. O comportamento atual continua sendo um mês com renovação manual. Uma assinatura automática exige produto com ciclo, checkout de assinatura, conciliação dos eventos `subscription.*`, cancelamento e tratamento de falhas de renovação; não basta mudar o nome do produto. Esse comportamento foi substituído pela migração 117 descrita abaixo: o usuário solicitou assinatura mensal automática para novas contratações.
 
 ## Webhook sandbox cadastrado (28/10/2026)
 
@@ -82,3 +82,11 @@ Cancelamento pelo painel chama a API, confirma o estado e impede cobranças futu
 O endereço do espaço fica sempre visível no cadastro. `GET /api/public/onboarding/slug-availability` tem limite próprio, resposta sem cache e sugestões disponíveis. O cliente consulta com debounce, cancela respostas antigas e impede avançar até a confirmação. O servidor verifica novamente na criação; essa consulta não reserva o endereço.
 
 Validação local: `npm run check` aprovado, 275 testes principais, 22 de migração, 16 de segurança e 35 de WhatsApp; desktop 9/9, mobile Chromium 8/8 e Firefox 8/8. O ensaio separado na AbacatePay criou uma assinatura sandbox `ACTIVE` com produto mensal compartilhado. A renovação futura é coberta por testes de conciliação e replay, sem alegar que um mês real já transcorreu.
+
+## Ensaio completo no site publicado (28/10/2026)
+
+O ensaio no navegador usou exclusivamente dados fictícios e pagamento simulado. O cadastro mostrou endereço ocupado, exibiu sugestões livres e permitiu escolher outro. A AbacatePay aproveitou os dados pessoais completos e avançou direto ao endereço. O checkout exibiu mensalidade recorrente e, após a simulação, criou assinatura `ACTIVE`, voltou ao login do espaço correto e concedeu um período no NaRégua.
+
+A entrega real do webhook sandbox `subscription.completed` ficou persistida como `APPLIED`. O cancelamento da assinatura de teste também gerou `subscription.cancelled` aplicado, sem alterar o fim do período pago. A listagem de assinaturas do provedor mostrou estado antigo após o cancelamento; por isso, o adaptador usa a consulta individual e a resposta confirmada da operação de cancelamento. O webhook cadastrado foi substituído por uma única configuração com os quatro eventos de checkout e os cinco eventos de assinatura tratados.
+
+A renovação da assinatura de teste foi cancelada. O espaço QA foi removido com escopo estrito e registro de auditoria; nenhuma conta de usuário real foi removida. Os produtos compartilhados e os registros de conciliação foram preservados. Nenhum pagamento real foi realizado. Código publicado: `9ba2dbb`; documentação e regressões posteriores não alteram a aplicação.
