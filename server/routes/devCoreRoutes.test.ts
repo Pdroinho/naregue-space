@@ -82,13 +82,23 @@ test('router DEV core preserva proteção, configurações e ciclo de tenants', 
     const disabled = await fetch(`${baseUrl}/api/dev/tenants/${created.tenant.id}`, { method: 'DELETE', headers: devHeaders })
     assert.deepEqual(await disabled.json(), { ok: true, mode: 'disabled' })
 
+    db.prepare("UPDATE tenants SET status='ACTIVE' WHERE id=?").run(created.tenant.id)
+    db.prepare("INSERT INTO tenants(id,slug,name,status) VALUES('other-tenant','other-space','Outro espaço','ACTIVE')").run()
+    const refused=await fetch(`${baseUrl}/api/dev/tenants/${created.tenant.id}/permanent-delete`,{method:'POST',headers:devHeaders,body:JSON.stringify({confirmation:'EXCLUIR outro',acknowledgeBackup:true})})
+    assert.equal(refused.status,400)
+    assert.ok(db.prepare('SELECT id FROM tenants WHERE id=?').get(created.tenant.id))
+
     const removed = await fetch(`${baseUrl}/api/dev/tenants/${created.tenant.id}/permanent-delete`, {
       method: 'POST', headers: devHeaders,
       body: JSON.stringify({ confirmation: 'EXCLUIR studio-teste', acknowledgeBackup: true }),
     })
     assert.equal(removed.status, 200)
     assert.equal((await removed.json() as { mode: string }).mode, 'permanent')
-    assert.equal((db.prepare('SELECT COUNT(*) as count FROM tenants').get() as { count: number }).count, 0)
+    assert.equal((db.prepare('SELECT COUNT(*) as count FROM tenants').get() as { count: number }).count, 1)
+    assert.ok(db.prepare("SELECT id FROM tenants WHERE id='other-tenant'").get())
+    assert.equal(db.prepare('SELECT id FROM tenants WHERE id=?').get(created.tenant.id),undefined)
+    assert.equal((db.prepare('SELECT COUNT(*) count FROM users WHERE tenant_id=?').get(created.tenant.id) as {count:number}).count,0)
+    assert.equal((db.prepare('SELECT COUNT(*) count FROM business_hours WHERE tenant_id=?').get(created.tenant.id) as {count:number}).count,0)
     assert.equal((db.prepare('SELECT COUNT(*) as count FROM tenant_deletion_audit').get() as { count: number }).count, 1)
   } finally {
     await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()))

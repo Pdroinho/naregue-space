@@ -1513,7 +1513,7 @@ function TenantEditModal({
                 <div style={{padding: '1.25rem 2rem', background: 'var(--bg-subtle)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', gap: 12}}>
                     <div className="tenant-danger-actions">
                       <button type="button" className="btn" onClick={() => setShowConfirmDelete(true)} disabled={loading || saving || deleting} style={{borderColor: 'rgba(239,68,68,0.35)', color: 'var(--danger)'}}>Desativar</button>
-                      {form.status === 'DISABLED' ? <button type="button" className="btn btn-danger-quiet" onClick={() => setShowPermanentDelete(true)} disabled={loading || saving || deleting}>Excluir definitivamente</button> : null}
+                      <button type="button" className="btn btn-danger-quiet" onClick={() => {setPermanentConfirmation('');setShowPermanentDelete(true)}} disabled={loading || saving || deleting}>Excluir definitivamente</button>
                     </div>
                     <div style={{display: 'flex', gap: 10}}>
                         <button type="button" className="btn" data-modal-close onClick={onClose} disabled={saving || deleting}>Cancelar</button>

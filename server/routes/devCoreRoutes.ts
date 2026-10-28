@@ -439,13 +439,13 @@ export function createDevCoreRouter(options: DevCoreRouterOptions) {
       const body = z.object({ confirmation: z.string().trim().min(1), acknowledgeBackup: z.literal(true) }).parse(req.body)
       const tenant = db.prepare(`SELECT id, slug, name, status FROM tenants WHERE id = ?`).get(tenantId) as { id: string; slug: string; name: string; status: string } | undefined
       if (!tenant) return next(notFound('Tenant não encontrado', 'TENANT_NOT_FOUND'))
-      if (tenant.status !== 'DISABLED') return next(badRequest('Desative o espaço antes da exclusão definitiva.', 'TENANT_MUST_BE_DISABLED'))
       const expected = `EXCLUIR ${tenant.slug}`
       if (body.confirmation !== expected) return next(badRequest(`Digite exatamente: ${expected}`, 'INVALID_CONFIRMATION'))
       const requestedBy = req.sessionUser?.id
       if (!requestedBy) return next(unauthorized())
       const now = new Date().toISOString()
       db.transaction(() => {
+        revokeSessionsForTenant(db, tenant.id)
         db.prepare(`INSERT INTO tenant_deletion_audit (id, tenant_id, tenant_slug, tenant_name, requested_by_user_id, confirmation_text, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`)
           .run(randomUUID(), tenant.id, tenant.slug, tenant.name, requestedBy, body.confirmation, now)
         db.prepare(`DELETE FROM tenants WHERE id = ?`).run(tenant.id)
