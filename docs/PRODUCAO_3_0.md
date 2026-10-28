@@ -2,7 +2,9 @@
 
 ## Estado da entrega
 
-O trabalho é local. A produção existente em `oracle_tunado`, `/opt/lashdesigner/app`, continua rodando a versão anterior até um deploy deliberado. Não copie `.env`, banco ou volumes de desenvolvimento para o servidor.
+A versão 3.0 foi publicada deliberadamente na VPS. Na preparação da release GitHub, a base de código em produção é `79d4a3c`; mudanças posteriores dessa preparação documentam a entrega e adicionam CI. O push para o GitHub não publica no servidor. Não copie `.env`, banco ou volumes de desenvolvimento para produção.
+
+O checkout publicado está em sandbox por autorização do responsável enquanto a conta de pagamentos aguarda aprovação. Consulte `ABACATEPAY.md` antes de habilitar cobranças reais. Relatórios, credenciais e arquivos operacionais privados não fazem parte do Git.
 
 ## Antes do deploy
 

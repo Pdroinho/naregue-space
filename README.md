@@ -1,6 +1,8 @@
-# NaRégua 3.0
+# NaRégua 3.0.0
 
 Gestão para barbearias, com a evolução funcional da referência 5.14.2 e a identidade original do NaRégua.
+
+Código consolidado em `main`, com release identificada pela tag anotada **`v3.0.0`**. Consulte o [changelog](CHANGELOG.md) e as [notas da release](docs/RELEASE_3.0.0.md). A publicação no GitHub não executa deploy automático.
 
 ## O que está integrado
 
@@ -14,6 +16,7 @@ Node 22 e npm 10 ou superior. Use `.env.example` como referência; nunca version
 
 ```bash
 npm ci
+cp .env.example .env
 npm run dev
 npm run check
 npm run test:ui
@@ -22,12 +25,27 @@ npm run test:booking-ui
 
 Os testes de servidor usam ambiente e bancos isolados. Os testes de navegador usam APIs controladas; não fazem cobranças nem enviam WhatsApp. Para instalar Chromium: `npx playwright install chromium`.
 
+A landing do celular possui implementação e assets próprios; o desktop mantém sua composição. Para validar as duas:
+
+```bash
+npx playwright install chromium firefox
+npm run build
+node scripts/check-landing-ui.mjs --desktop-only
+node scripts/check-mobile-landing.mjs
+node scripts/check-mobile-landing.mjs --firefox
+```
+
+`npm run preflight` exige configuração operacional e deve ser executado no ambiente preparado para deploy. Ele não usa as mesmas premissas dos testes isolados.
+
 ## Estrutura e paridade
 
 - `ARCHITECTURE.md`: módulos, dados, acesso e limites.
 - `docs/PARIDADE_5_14_2.md`: matriz de funcionalidades integradas e diferenças deliberadas.
 - `docs/ABACATEPAY.md`: configuração, segurança e homologação da cobrança.
 - `docs/PRODUCAO_3_0.md`: publicação, migração, backup e rollback.
+- `VALIDATION.md`: comandos e evidências de verificação.
+- `SECURITY.md`: regras para credenciais, varredura de segredos e relato privado de falhas.
+- `.github/workflows/ci.yml`: verificações automáticas de qualidade, landing e histórico Git.
 
 ## Produção
 

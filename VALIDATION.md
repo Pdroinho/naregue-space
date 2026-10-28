@@ -1,4 +1,24 @@
-# Validação — NaRégua 2.2.2
+# Validação — NaRégua 3.0.0
+
+## Entrega consolidada de 28/10/2026
+
+`npm run check` passou com 268 testes principais, 22 de migração, 16 de segurança e 35 de WhatsApp, além de TypeScript, ESLint, auditoria de release e build. Os bancos dos testes são isolados e não usam dados de produção.
+
+Verificações da landing:
+
+```bash
+npx playwright install chromium firefox
+npm run build
+node scripts/check-landing-ui.mjs --desktop-only
+node scripts/check-mobile-landing.mjs
+node scripts/check-mobile-landing.mjs --firefox
+```
+
+Desktop: 9/9 verificações. Mobile: 8/8 em Chromium e 8/8 em Firefox, incluindo troca de orientação sem perder os campos do cadastro, catálogo, indicação e checkout sandbox. Não houve criação de pedidos reais ou envio de mensagens nos testes.
+
+Gitleaks inspeciona todo o histórico Git com valores redigidos. A auditoria de publicação e os relatórios de ferramentas permanecem locais em `.validation/`, fora do repositório. Nenhuma verificação automatizada comprova aumento de conversão ou substitui Safari e aparelhos físicos.
+
+As seções de versões 2.x abaixo documentam a base histórica; não limitam as mudanças de runtime feitas na 3.0.
 
 O gate oficial continua sendo:
 

@@ -1,0 +1,9 @@
+# Audited historical false positives only; never ignore entire test/config directories.
+# Documentation placeholders and credentials used exclusively by isolated test fixtures.
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:.env.example:generic-api-key:95
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:docs/ABACATEPAY.md:generic-api-key:13
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:server/routes/devEvolutionRoutes.test.ts:generic-api-key:57
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:server/routes/adminWhatsappSettingsRoutes.test.ts:generic-api-key:156
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:server/routes/adminWhatsappSettingsRoutes.test.ts:generic-api-key:192
+fbe91f8c2e0737cd4567221cfec938c491a34a5e:server/routes/passwordRecoveryRoutes.test.ts:generic-api-key:66
+e0c5e1bb5a7177a929dcddf45de3421497031ff7:.env.example:generic-api-key:18

@@ -26,3 +26,15 @@ Thumbs.db
 *.zip
 .impeccable/review/
 .playwright-mcp/
+
+# Private runtime files and local credentials
+/media/
+/uploads/
+/secrets/
+/credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+.envrc
+!.envrc.example

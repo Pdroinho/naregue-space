@@ -1,0 +1,10 @@
+title = "NaRegua secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "abacatepay-api-key"
+description = "AbacatePay development or production API key"
+regex = '''\babc_(?:dev|prod)_[A-Za-z0-9]{16,}\b'''
+keywords = ["abc_dev_", "abc_prod_"]
