@@ -53,6 +53,7 @@
 .checkout-included>p{font-size:.75rem;line-height:1.8;color:#c6d5d9;border-top:1px solid #ffffff29;padding-top:20px;margin:24px 0 0}
 .checkout-renewed .checkout-cycle-note{padding:0;margin:0;border:0;font-size:.8rem;line-height:1.6;color:#395460}
 .checkout-renewed .landing-checkout-error{border:1px solid #d8c5ae;background:#f4ede3;color:#6b4729;padding:13px 16px;border-radius:10px;font-size:.8rem;line-height:1.6}
+.checkout-sandbox-notice{display:grid;gap:6px;padding:14px 16px;background:#fff0d7;border:1px solid #d8b77d;border-radius:10px;color:#68451f;font-size:.8rem;line-height:1.6}
 .checkout-renewed .checkout-actions{position:static;margin:0;padding:20px 0 0;background:none;backdrop-filter:none;border-top:1px solid #082a391a;gap:16px}
 .checkout-renewed .checkout-step-status{font-size:.78rem;color:#526770}
 .checkout-renewed .checkout-next{min-width:220px;background:#b85a30;color:#fffdf8;border-radius:10px;font-size:.85rem;box-shadow:none}

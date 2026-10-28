@@ -42,7 +42,7 @@ export function createPaymentClient({ db, apiKey, devMode, appBaseUrl, fetchFn =
   }
   async function createPaymentLink(input: { name: string; amountCents: number; description: string }) {
     if (!Number.isSafeInteger(input.amountCents) || input.amountCents < 100) throw new PaymentRequestError('Valor de cobrança inválido.', 400)
-    const externalId = `naregua-${randomUUID()}`, now = new Date().toISOString()
+    const externalId = `naregua-${devMode ? 'sandbox-' : ''}${randomUUID()}`, now = new Date().toISOString()
     const result = db.prepare('INSERT INTO abacatepay_checkouts(external_id,amount_cents,created_at,updated_at) VALUES(?,?,?,?)')
       .run(externalId, input.amountCents, now, now)
     const localId = Number(result.lastInsertRowid)

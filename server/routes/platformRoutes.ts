@@ -125,7 +125,7 @@ export function createPublicBillingCatalogRouter(_billingPlans: readonly Billing
 
   // Billing catalog values always come from the server to avoid commercial drift.
   router.get('/billing/plans', (_req, res) => {
-    res.json({ plans: [], teamPlans: TEAM_PLANS, teamCheckoutEnabled: true, checkoutAvailable, checkoutProvider: 'ABACATEPAY', methods: checkoutAvailable ? ['PIX', 'CARD'] : [] })
+    res.json({ plans: [], teamPlans: TEAM_PLANS, teamCheckoutEnabled: true, checkoutAvailable, checkoutSandbox: checkoutAvailable && env.ABACATEPAY_DEV_MODE, checkoutProvider: 'ABACATEPAY', methods: checkoutAvailable ? ['PIX', 'CARD'] : [] })
   })
 
   return router

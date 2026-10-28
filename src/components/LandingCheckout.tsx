@@ -21,6 +21,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
   const [quoteError,setQuoteError] = useState('')
   const [teamPlans, setTeamPlans] = useState<readonly TeamPlan[]>(PUBLIC_TEAM_PLANS)
   const [checkoutAvailable, setCheckoutAvailable] = useState(false)
+  const [checkoutSandbox, setCheckoutSandbox] = useState(false)
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [teamCode, setTeamCode] = useState<TeamPlan['code']>(initialTeamPlan)
   const [step, setStep] = useState<1 | 2>(1)
@@ -47,14 +48,16 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
       setLegalConfig(result.data)
     })
     setCheckoutAvailable(false)
+    setCheckoutSandbox(false)
     setCatalogLoading(true)
     let current = true
     const controller = new AbortController()
-    api<{teamPlans?:unknown;checkoutAvailable?:boolean}>('/api/public/billing/plans',{signal:controller.signal}).then(result => {
+    api<{teamPlans?:unknown;checkoutAvailable?:boolean;checkoutSandbox?:boolean}>('/api/public/billing/plans',{signal:controller.signal}).then(result => {
       if(!current)return
       setCatalogLoading(false)
       if(result.ok && validTeamPlans(result.data.teamPlans)) {
         setTeamPlans(orderedTeamPlans(result.data.teamPlans));setCheckoutAvailable(result.data.checkoutAvailable===true)
+        setCheckoutSandbox(result.data.checkoutSandbox===true)
         if(result.data.checkoutAvailable!==true)setError('A contratação está temporariamente indisponível. Tente novamente em instantes.')
       } else setError('Não foi possível confirmar a disponibilidade da contratação. Os planos atuais continuam exibidos; tente novamente em instantes.')
     })
@@ -135,6 +138,7 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
       </header>
 
       <form className="landing-checkout-body" onSubmit={submit}>
+        {checkoutSandbox ? <div className="checkout-sandbox-notice" role="status"><strong>Modo de teste</strong><span>Nenhum valor real será cobrado. Este fluxo simula a contratação enquanto a conta de pagamentos está em aprovação.</span></div> : null}
         {step === 1 ? <>
           <div className="checkout-choice-layout"><div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe" onKeyDown={event=>{const direction=['ArrowDown','ArrowRight'].includes(event.key)?1:['ArrowUp','ArrowLeft'].includes(event.key)?-1:0;if(!direction&&event.key!=='Home'&&event.key!=='End')return;event.preventDefault();const current=teamPlans.findIndex(plan=>plan.code===teamCode);const next=event.key==='Home'?0:event.key==='End'?teamPlans.length-1:(current+direction+teamPlans.length)%teamPlans.length;setTeamCode(teamPlans[next].code);event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()}}>{teamPlans.map(plan => <button type="button" role="radio" tabIndex={teamCode===plan.code?0:-1} aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
             <span>{plan.label}</span><strong>{money(plan.amountCents)}<small>/mês</small></strong><p>Até {plan.seats} profissionais · 1 mês</p><b>{teamCode === plan.code ? <Check size={14} /> : null}</b>

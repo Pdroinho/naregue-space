@@ -18,6 +18,7 @@ function fixture() {
     assert.equal(new Headers(init?.headers).get('authorization'),'Bearer test-key')
     if (String(url).endsWith('/products/create')) return Response.json({success:true,data:{id:'prod_test'}})
     if (String(url).endsWith('/checkouts/create')) externalId = body.externalId
+    if (String(url).endsWith('/checkouts/create')) assert.match(externalId,/^naregua-sandbox-/)
     return Response.json({success:true,data:{id:'bill_test',externalId,url:'https://app.abacatepay.com/pay/bill_test',status,devMode:mode,amount,paidAmount}})
   }) as typeof fetch
   const provider = createPaymentClient({db,apiKey:'test-key',devMode:true,appBaseUrl:'https://naregua.space',fetchFn})

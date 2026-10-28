@@ -56,6 +56,7 @@ const envSchema = z.object({
   ABACATEPAY_WEBHOOK_SECRET: z.string().min(32).optional(),
   ABACATEPAY_CHECKOUT_ENABLED: envBoolean(false),
   ABACATEPAY_DEV_MODE: envBoolean(true),
+  ABACATEPAY_ALLOW_SANDBOX_IN_PRODUCTION: envBoolean(false),
   APP_BASE_URL: z.string().url().optional(),
   SUBSCRIPTION_PRICE_CENTS: z.coerce.number().int().positive().default(59880),
   PLAN_MONTHLY_CENTS: z.coerce.number().int().positive().default(5990),
@@ -122,8 +123,11 @@ export const env: Env = (() => {
   if (parsed.ABACATEPAY_CHECKOUT_ENABLED && (!parsed.ABACATEPAY_API_KEY || !parsed.ABACATEPAY_WEBHOOK_SECRET)) {
     throw new Error('AbacatePay habilitado exige API key e segredo do webhook.')
   }
-  if (parsed.NODE_ENV === 'production' && parsed.ABACATEPAY_CHECKOUT_ENABLED && parsed.ABACATEPAY_DEV_MODE) {
-    throw new Error('AbacatePay em produ??o exige ABACATEPAY_DEV_MODE=false e chave live homologada.')
+  if (parsed.NODE_ENV === 'production' && parsed.ABACATEPAY_CHECKOUT_ENABLED && parsed.ABACATEPAY_DEV_MODE && !parsed.ABACATEPAY_ALLOW_SANDBOX_IN_PRODUCTION) {
+    throw new Error('Sandbox no site publicado exige autorização explícita em ABACATEPAY_ALLOW_SANDBOX_IN_PRODUCTION.')
+  }
+  if (parsed.ABACATEPAY_CHECKOUT_ENABLED && parsed.ABACATEPAY_API_KEY?.startsWith('abc_dev_') && !parsed.ABACATEPAY_DEV_MODE) {
+    throw new Error('Chave AbacatePay de desenvolvimento exige ABACATEPAY_DEV_MODE=true.')
   }
   const encryptionKeyCandidate = (parsed.APP_ENCRYPTION_KEY ?? '').trim()
   const encryptionKey = (() => {

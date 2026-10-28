@@ -48,3 +48,6 @@ The new 12-case entry revision passed in Chromium and Firefox with no visual fin
 Art-v2 captures in `.validation/lp-renewal` and `.validation/lp-renewal-firefox` cover desktop and mobile. Chromium and Firefox each passed 10/10 checks from 320 to 1440px with no visual findings. Build, typecheck and lint passed. Specific checks preserve the official logo, warm campaign accent and complete financial illustration. The independent finish review found no remaining material blockers after fixing the mobile finance crop. This is implementation review, not user aesthetic approval or a global accessibility audit. Safari and physical devices were not tested.
 
 Current record: `docs/LP_DIRECAO_ARTISTICA_2026-10-27.md`. Screenshot-era and rejected art-v1 verdicts do not establish approval of art-v2. `public/landing/renewal` captures remain historical input references.
+## Checkout sandbox autorizado - 28 October 2026
+
+Enquanto o KYC estiver pendente, o sandbox será ativado no site publicado mediante flag explícita do servidor. O indicador público `checkoutSandbox` mostra nas duas etapas de `LandingCheckout` o aviso de modo de teste e de que nenhum valor real será cobrado. Credenciais ficam no ambiente privado; configuração e limitações estão em `docs/ABACATEPAY.md`.
