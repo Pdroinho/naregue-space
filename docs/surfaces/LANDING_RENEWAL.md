@@ -8,7 +8,7 @@ The user rejected the sober composition, blurred enlarged UI captures, CSS phone
 
 THESIS: barbershop talent meets organization in a digital atelier, with human gestures and tools as protagonists.
 
-OWN-WORLD: fine ink crosshatching and restrained watercolor hands, vintage barber chair and appointment notebook; petroleum, copper and ivory with peach accents; original art and clearly identified conceptual UI. Green, citrus, marble and resin are explicitly rejected. Preserve Manrope, Hugeicons and the official brand.
+OWN-WORLD: fine ink crosshatching and restrained watercolor hands, vintage barber chair and appointment notebook; petroleum, copper and ivory with peach accents; original art and conceptual UI described in image alternatives. Green, citrus, marble and resin are explicitly rejected. Preserve Manrope, Hugeicons and the official brand.
 
 STORY: framed light-copper opening with hands/tools, faithful conceptual mockup, illustrated barber chair, physically rendered booking phone, visual management, a hand writing in an appointment notebook, compact plan selection and a hands/chair campaign close with full petroleum footer.
 
@@ -22,9 +22,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - Plans and prices come from the existing catalog. Checkout, referral and subscription return are preserved; access uses `/acessar`.
 - Do not invent metrics, savings, testimonials or customer counts.
-- Agenda, team, finance and phone images are generated conceptual illustrations, not actual screenshots or exact product specifications. Visible captions identify fictional data and illustrative UI; the message demonstration sends nothing.
+- Agenda, team, finance and phone images are generated conceptual illustrations, not actual screenshots or exact product specifications. Image alternatives preserve the conceptual/fictitious nature. On 28 October 2026 the user explicitly revoked visible demo captions and white logo bars; the message demonstration sends nothing.
 - Seven current WebPs live in `public/landing/art-v2`. Hands, chair, conversation and phone have native alpha; agenda, team and finance are opaque. Exact prompts are in `docs/assets/landing-art-v2-prompts.json`; provenance is documented in LANDING_ASSETS.md.
-- Actual product screenshots and the official PNG were input references for the generated product illustrations. The exact official PNG also remains an HTML overlay on desktop mockups. The results remain conceptual illustrations, not actual screenshots.
+- Actual product screenshots and the official PNG were input references for the generated product illustrations. The former HTML ProductBrand overlay was removed at the user's request; CSS crops the top 12.1% of desktop plates to remove their white logo bars without editing the seven WebPs. The results remain conceptual illustrations, not actual screenshots.
 - The artistic direction applies only to the public landing, without changing operational panel identity, density or rules.
 
 ## Implemented expression
@@ -37,7 +37,13 @@ The agenda/team/management selector changes conceptual mockups. The booking stor
 
 Navigation contracts after 32px scrolling, becomes a menu below 900px and closes with Escape, returning focus. Skip link, visible focus, keyboard controls and native FAQ remain available. Fine-pointer hands follow a requestAnimationFrame spring (stiffness 220, damping 24); the loop stops at rest. Coarse pointers and reduced motion bypass it. Reduced motion also removes reveals, transitions and smooth scrolling while retaining content and controls.
 
+## Public entry revision - 28 October 2026
+
+The hero demo now meets the end of its colored opening block, without a caption strip. The financial illustration sits inside a native CSS notebook frame. `/acessar` now uses cream, copper and the existing chair artwork with a focused access form, replacing its dashboard treatment. The plan modal uses selectable plan rows and an included-features aside, strong Manrope typography and normal scrolling without grid shrink. Arrow keys, Home and End navigate plan choices. Implementation: `LandingExperience.tsx`, `landing-art-direction.css`, `landing-entry.css`, `LandingPage.tsx` and `LandingCheckout.tsx`. The seven image origins and operational panel system remain unchanged.
+
 ## Current evidence and review
+
+The new 12-case entry revision checks are in progress; prior results below predate this caption, framing, access and plan-modal revision.
 
 Art-v2 captures in `.validation/lp-renewal` and `.validation/lp-renewal-firefox` cover desktop and mobile. Chromium and Firefox each passed 10/10 checks from 320 to 1440px with no visual findings. Build, typecheck and lint passed. Specific checks preserve the official logo, warm campaign accent and complete financial illustration. The independent finish review found no remaining material blockers after fixing the mobile finance crop. This is implementation review, not user aesthetic approval or a global accessibility audit. Safari and physical devices were not tested.
 

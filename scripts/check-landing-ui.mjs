@@ -10,7 +10,7 @@ mkdirSync(dir,{recursive:true})
 const plans=[{code:'TEAM_3',seats:3,minProfessionals:1,label:'1 a 3 profissionais',amountCents:7490},{code:'TEAM_6',seats:6,minProfessionals:4,label:'4 a 6 profissionais',amountCents:9990},{code:'TEAM_15',seats:15,minProfessionals:7,label:'7 a 15 profissionais',amountCents:14900}]
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.woff2':'font/woff2','.jpg':'image/jpeg'}
 const browser=await(process.argv.includes('--firefox')?firefox:chromium).launch()
-let catalogFails=false,count=0
+let catalogFails=false,catalogAvailable=false,count=0
 const reports=[],requests=[]
 async function settle(page){await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(async image=>{image.loading='eager';try{await image.decode()}catch{/* Broken images are reported by inspection. */}}));for(const a of document.getAnimations())if(a.effect?.getTiming().iterations!==Infinity)a.finish()})}
 try{
@@ -21,7 +21,7 @@ try{
   if(url.hostname!=='naregua.space')return route.abort()
   if(url.pathname.startsWith('/api/')){
    requests.push(url.pathname+url.search);assert.equal(route.request().method(),'GET','LP checks must never create orders or users')
-   const body=url.pathname.includes('/billing/plans')?(catalogFails?{message:'Falha de catálogo para teste'}:{teamPlans:plans,checkoutAvailable:false}):url.pathname.includes('/auth/me')?{user:null}:url.pathname.includes('/public/legal')?{documents:{termsVersion:'qa',privacyVersion:'qa',updatedAt:'2026-10-27',bundleHash:'qa'}}:url.pathname.includes('/team-quote')?{quote:{amountCents:14900,discountPercent:0,fingerprint:'qa'}}:{}
+   const body=url.pathname.includes('/billing/plans')?(catalogFails?{message:'Falha de catálogo para teste'}:{teamPlans:plans,checkoutAvailable:catalogAvailable}):url.pathname.includes('/auth/me')?{user:null}:url.pathname.includes('/public/legal')?{documents:{termsVersion:'qa',privacyVersion:'qa',updatedAt:'2026-10-27',bundleHash:'qa'}}:url.pathname.includes('/team-quote')?{quote:{amountCents:14900,discountPercent:0,fingerprint:'qa'}}:{}
    return route.fulfill({status:catalogFails&&url.pathname.includes('/billing/plans')?503:200,contentType:'application/json',body:JSON.stringify(body)})
   }
   const file=path.resolve(root,'.'+decodeURIComponent(url.pathname));assert.ok(file===root||file.startsWith(root+path.sep))
@@ -35,10 +35,11 @@ try{
   assert.equal(initial.overflow,false);assert.equal(await page.getByRole('heading',{level:1}).count(),1)
   assert.equal(await page.locator('.lp-screen-images img.is-active').evaluate(el=>el.complete&&el.naturalWidth>0),true)
   assert.equal(await page.locator('.lp-hero-art img').count(),2)
-  assert.equal(await page.locator('.lp-product-brand img').first().getAttribute('src'),'/brand/logo-wordmark-approved-web.png')
+  assert.equal(await page.locator('.lp-product-brand,.lp-demo-caption,.lp-workspace-image figcaption').count(),0,'Flat demonstrations must have no duplicate masthead or caption')
+  assert.equal(await page.locator('.lp-laptop-lid').count(),1)
   assert.equal(await page.locator('.lp-finance-mockup>img').evaluate(el=>window.getComputedStyle(el).objectFit),'contain','Financial illustration must preserve all columns')
   assert.equal(await page.locator('.nr-lp').evaluate(el=>window.getComputedStyle(el).getPropertyValue('--lp-highlight').trim()),'#efd3be','Campaign accent must retain the approved warm palette')
-  assert.equal(await page.locator('.lp-demo-caption').getByText('Ilustração conceitual',{exact:false}).count(),1)
+  const dock=await page.evaluate(()=>({opening:document.querySelector('.lp-opening').getBoundingClientRect().bottom,screen:document.querySelector('.lp-screen-shell').getBoundingClientRect().bottom}));assert.ok(Math.abs(dock.opening-dock.screen)<2,'Hero interface must dock to its lower edge')
   await page.screenshot({path:`${dir}/hero-${width}.png`,animations:'disabled'})
   if(width===1440||width===390){await page.screenshot({path:`${dir}/full-${width}.png`,fullPage:true,animations:'disabled'});for(const section of ['intro','workspace','ai','pricing-wrap','close','footer']){const target=page.locator(`.lp-${section}`);await target.scrollIntoViewIfNeeded();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await settle(page);await target.screenshot({path:`${dir}/${section}-${width}.png`,animations:'disabled'})}await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))}
   if(width===1440){await page.mouse.move(200,300);await page.waitForFunction(()=>Math.abs(parseFloat(document.querySelector('.nr-lp').style.getPropertyValue('--art-x')))>1);assert.ok((await page.locator('#preco').boundingBox()).height<850,'Desktop pricing should fit a compact section')}
@@ -76,11 +77,14 @@ try{
   const final=await inspectPanel(page);reports.push({width,state:'interactive',...final});assert.equal(final.overflow,false)
   console.log(`PASS ${width}px: illustrated assets, hero selection, keyboard, team price, referral checkout, demo, FAQ and menu`);count++
  }
+ catalogAvailable=true
+ for(const width of [1440,390]){await page.setViewportSize({width,height:1000});await page.goto('https://naregua.space/');await page.locator('.lp-plan-result button').click();const dialog=page.getByRole('dialog');await dialog.getByRole('radio').first().focus();await page.keyboard.press('ArrowRight');assert.equal(await dialog.getByRole('radio').nth(1).getAttribute('aria-checked'),'true');await dialog.getByRole('button',{name:'Continuar com',exact:false}).click();await dialog.getByText('Vamos criar seu espaço.',{exact:true}).waitFor();await settle(page);reports.push({width,state:'checkout-account',...await inspectPanel(page)});await page.screenshot({path:`${dir}/checkout-account-${width}.png`,animations:'disabled'});await dialog.getByRole('button',{name:'Voltar à etapa 1',exact:true}).click();assert.equal(await dialog.getByRole('radio').nth(1).getAttribute('aria-checked'),'true');await dialog.getByRole('button',{name:'Fechar compra',exact:true}).click();count++;console.log(`PASS ${width}px: plan keyboard selection and account step without creating records`)}
+ catalogAvailable=false
  catalogFails=true;await page.goto('https://naregua.space/');await page.getByRole('alert').filter({hasText:'Não foi possível atualizar'}).waitFor();assert.equal(await page.locator('.lp-plan-result button').isDisabled(),true)
  catalogFails=false;await page.getByRole('button',{name:'Atualizar planos',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('.lp-plan-result button')?.disabled);count++;console.log('PASS catalogue error is explicit and retry recovers')
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('https://naregua.space/');await page.locator('.lp-hero h1').waitFor();await settle(page);await page.getByRole('slider',{name:'Quantos profissionais atendem aí?',exact:true}).fill('15');assert.equal(await page.locator('.lp-digit-strip').first().evaluate(el=>window.getComputedStyle(el).transitionDuration),'0s');count++;console.log('PASS reduced motion retains content and interactive prices without animation')
  await page.goto('https://naregua.space/?checkout=return&workspace=central');await page.locator('.lp-return').waitFor();assert.equal(await page.getByText('Pagamento recebido.',{exact:false}).count(),0);assert.ok((await page.locator('.lp-return a').getAttribute('href')).includes('central.naregua.space/login'));count++;console.log('PASS checkout return keeps workspace access without claiming an unverified payment')
- await page.goto('https://naregua.space/acessar');await page.locator('#workspace-slug').fill('endereço inválido');await page.getByRole('button',{name:'Acessar meu espaço',exact:false}).click();await page.locator('.landing-access-error').waitFor();assert.equal(await page.locator('form input').count(),1);count++;console.log('PASS existing workspace access form and validation preserved')
+ await page.goto('https://naregua.space/acessar');await page.locator('#workspace-slug').fill('endereço inválido');await page.getByRole('button',{name:'Acessar meu espaço',exact:false}).click();await page.locator('.landing-access-error').waitFor();assert.equal(await page.locator('form input').count(),1);for(const width of [1440,390,320]){await page.setViewportSize({width,height:900});await settle(page);const accessReport=await inspectPanel(page);reports.push({width,state:'access',...accessReport});await page.screenshot({path:`${dir}/access-${width}.png`,animations:'disabled'})}count++;console.log('PASS workspace access redesign and validation preserved')
  assert.deepEqual(errors,[])
  writeFileSync(`${dir}/report${process.argv.includes('--firefox')?'-firefox':''}.json`,JSON.stringify(reports,null,2))
  const findings=reports.filter(r=>r.contrast.length||r.unnamed.length||r.lowContrastIcons.length||r.brokenImages.length||r.overflow)

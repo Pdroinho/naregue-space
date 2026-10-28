@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { api } from '../../api'
 import { PUBLIC_TEAM_PLANS, validTeamPlans, orderedTeamPlans, type TeamPlan } from '../../teamPlans'
-import { ArrowRight, Calendar, Check, ChevronDown, Menu, MessageSquare, Scissors, ShieldCheck, Sparkles, Users, Wallet, X } from '../../components/Icons'
+import { ArrowRight, Calendar, Check, ChevronDown, Menu, MessageSquare, Scissors, Sparkles, Users, Wallet, X } from '../../components/Icons'
 import { ProductSelect } from '../../components/ProductSelect'
 import { LandingCheckout } from '../../components/LandingCheckout'
 import { workspaceLoginUrl } from './landingLinks'
@@ -27,7 +27,6 @@ const faqs = [
   ['Como funciona a assinatura?','Você escolhe a faixa da sua equipe e consulta o valor mensal antes de contratar. O pagamento usa a AbacatePay. A contratação depende da disponibilidade informada no checkout; a renovação é manual, sem cobrança automática.'],
 ] as const
 const money=(cents:number)=>(cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-function ProductBrand(){return <div className="lp-product-brand" aria-hidden="true"><img src="/brand/logo-wordmark-approved-web.png" alt="" width="158" height="36"/></div>}
 function track(location:string){
   window.dispatchEvent(new CustomEvent('naregua:cta',{detail:{location}}))
   const analytics=window as Window & {dataLayer?:Array<Record<string,unknown>>}
@@ -117,8 +116,7 @@ export function LandingExperience(){
      </div>
      <div className="lp-preview-wrap">
       <div className="lp-preview-controls" role="group" aria-label="Demonstração do produto">{areas.map(a=><button type="button" key={a.id} aria-pressed={area===a.id} onClick={()=>setArea(a.id)}>{a.id==='calendar'?<Calendar size={17}/>:a.id==='team'?<Users size={17}/>:<Wallet size={17}/>}<span>{a.label}</span></button>)}</div>
-      <div className="lp-screen-shell"><div className="lp-screen-top"><div><i/><i/><i/></div><span>Seu espaço. Sua rotina.</span><ShieldCheck size={15}/></div><div className="lp-screen-images"><ProductBrand/>{areas.map((a,index)=><img key={a.id} src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1172" height="850" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/>)}</div></div>
-      <p className="lp-demo-caption">Ilustração conceitual do produto. Dados fictícios; o painel pode variar.</p>
+      <div className="lp-screen-shell"><div className="lp-screen-images">{areas.map((a,index)=><img key={a.id} src={a.image} alt={a.alt} aria-hidden={area!==a.id} className={area===a.id?'is-active':''} width="1586" height="992" fetchPriority={index===0?'high':'auto'} loading={index===0?'eager':'lazy'}/>)}</div></div>
      </div>
     </section>
   </div>
@@ -146,7 +144,7 @@ export function LandingExperience(){
   </section>
   <section className="lp-workspace lp-container" id="produto" data-lp-reveal>
    <div className="lp-workspace-copy"><h2>Abra o painel.<br/>Entenda a barbearia.</h2><p>O que está agendado, quem atende, quais clientes voltam e o que foi registrado no financeiro. Cada informação no seu lugar.</p><ul><li><Check size={18}/> Disponibilidade e serviços por profissional</li><li><Check size={18}/> Histórico e contexto dos clientes</li><li><Check size={18}/> Receitas, despesas e metas do espaço</li></ul><a className="lp-text-link" href="#preco">Encontrar o plano da minha equipe <ArrowRight size={18}/></a></div>
-   <figure className="lp-workspace-image"><div className="lp-finance-mockup"><ProductBrand/><img src="/landing/art-v2/finance.webp" alt="Mockup conceitual de entradas, saídas e saldo, com valores fictícios" width="1536" height="1024" loading="lazy"/></div><figcaption>Ilustração conceitual. Valores e interface de exemplo.</figcaption></figure>
+   <figure className="lp-workspace-image lp-laptop" aria-label="Demonstração ilustrativa do financeiro em um notebook"><div className="lp-laptop-lid"><i className="lp-laptop-camera" aria-hidden="true"/><div className="lp-finance-mockup"><img src="/landing/art-v2/finance.webp" alt="Demonstração do financeiro com valores fictícios" width="1586" height="992" loading="lazy"/></div></div><div className="lp-laptop-base" aria-hidden="true"><i/></div></figure>
   </section>
   <section className="lp-ai lp-container" id="mestre" data-lp-reveal><div className="lp-ai-art"><img src="/landing/art-v2/conversation.webp" alt="Ilustração a tinta e aquarela de uma mão escrevendo na agenda da barbearia" width="1400" height="672" loading="lazy"/></div><div className="lp-ai-copy"><img className="lp-ai-brand" src="/brand/logo-symbol-approved-web.png" alt="Mestre AI" width="42" height="42"/><h2>Uma pergunta.<br/>Um próximo passo.</h2><p>O Mestre AI ajuda você a explorar os dados da barbearia, da agenda ao financeiro. Pergunte com as suas palavras e leve contexto para suas decisões.</p><div className="lp-ai-prompts"><span>Como está minha agenda esta semana?</span><span>O que entrou e saiu neste mês?</span><span>Me ajude a responder este cliente.</span><small>Exemplos de perguntas. Assistente opcional, com disponibilidade e uso informados no painel.</small></div></div></section>
   <section className="lp-pricing-wrap" id="preco">

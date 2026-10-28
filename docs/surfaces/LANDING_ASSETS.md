@@ -7,7 +7,7 @@ The current landing uses seven original images generated with the built-in `imag
 | File | Use and nature | Transparency |
 |---|---|---|
 | hands.webp | Ink-and-watercolor barber hands holding scissors and comb; reused as left/right crops in hero and close | Native alpha |
-| chair.webp | Ink-and-watercolor vintage barber chair; introduction and close | Native alpha |
+| chair.webp | Ink-and-watercolor vintage barber chair; introduction, close and public access | Native alpha |
 | conversation.webp | Hand writing on an appointment card and notebook; Mestre AI section | Native alpha |
 | agenda.webp | Conceptual agenda mockup based on the actual product interface | Opaque |
 | team.webp | Conceptual team mockup based on the actual product interface | Opaque |
@@ -16,9 +16,9 @@ The current landing uses seven original images generated with the built-in `imag
 
 Exact generation prompts, paths, tool and requested transparency are recorded in `docs/assets/landing-art-v2-prompts.json`. The four alpha assets are generated cutouts rather than opaque paper rectangles. The three desktop mockups are deliberately opaque product panels.
 
-Actual NaRégua product screenshots and the actual official logo PNG were input references for product-image generation. They constrain the existing interface, petroleum panels, ivory text, copper actions and Portuguese labels. These remain generated conceptual illustrations, not actual screenshots or promises of exact interface equivalence. The exact official `/brand/logo-wordmark-approved-web.png` is additionally rendered by the HTML `ProductBrand` overlay above the desktop mockups, preserving the real graphic independently of generated lettering. Official header and footer assets remain native images.
+Actual NaRégua product screenshots and the actual official logo PNG were input references for product-image generation. They constrain the existing interface, petroleum panels, ivory text, copper actions and Portuguese labels. These remain generated conceptual illustrations, not actual screenshots or promises of exact interface equivalence. The user explicitly removed white logo bars and the HTML `ProductBrand` overlay on 28 October 2026. CSS crops the top 12.1% of desktop mockups; all seven WebPs and their recorded generation origins remain unchanged. Official header and footer assets remain native images.
 
-Visible captions identify conceptual illustration and fictional data. The phone complements functional HTML demonstration controls without creating a real booking; the message demonstration sends nothing. No asset proves commercial outcomes. AbacatePay guided composition, artistic hands and interaction; its imagery was a style reference, not incorporated campaign artwork. The art-v2 prompts explicitly reject its green palette and avocado subject.
+The user explicitly revoked visible demo captions on 28 October 2026; image alternatives retain the conceptual and fictitious-data descriptions. The hero demo meets the end of the opening block, and finance is presented in a native CSS notebook frame. The phone complements functional HTML demonstration controls without creating a real booking; the message demonstration sends nothing. No asset proves commercial outcomes. AbacatePay guided composition, artistic hands and interaction; its imagery was a style reference, not incorporated campaign artwork. The art-v2 prompts explicitly reject its green palette and avocado subject.
 
 ## Historical assets - not displayed on the current landing
 

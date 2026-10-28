@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-28T01:55:38.129627+00:00",
+  "generatedAt": "2026-10-28T11:54:16.382863+00:00",
   "title": "Design System: NaRégua",
   "extensions": {
     "colorMeta": {
@@ -229,7 +229,8 @@
     "keyCharacteristics": [
       "Cream reading surfaces and petroleum structure.",
       "Manrope interface with local Hugeicons Stroke Rounded.",
-      "Copper actions and realistic photography in operations; ivory, peach and ink-and-watercolor campaign art on the public landing."
+      "Copper actions and realistic photography in operations; ivory, peach and ink-and-watercolor campaign art on the public landing.",
+      "Public entry uses cream/copper access with chair artwork and a scrollable plan-row dialog; hero plates have no visible captions or white logo bars and finance uses a CSS notebook frame."
     ],
     "rules": [
       {
@@ -245,7 +246,7 @@
     ],
     "donts": [
       "Don't let tenant accents recolor neutral surfaces or semantic states.",
-      "Don't invent testimonials or product metrics. Label public fictional UI as conceptual illustration with fictitious data; never present it as an actual screenshot.",
+      "Don't invent testimonials or product metrics. Preserve conceptual/fictitious image alternatives; visible demo captions were explicitly removed by the user. Never present generated UI as actual screenshots.",
       "Don't introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds.",
       "Don't use green, citrus, marble or resin in the public campaign; preserve petroleum, copper, ivory and restrained peach accents."
     ]

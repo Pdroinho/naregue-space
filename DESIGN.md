@@ -205,11 +205,15 @@ Sidebar rows combine local rounded-stroke icons and labels. Active navigation us
 
 ### Public Landing Artwork
 
-Seven generated WebPs in `public/landing/art-v2` are current: hands, chair, conversation and phone have native alpha; agenda, team and finance are opaque. Product mockups use actual NaRégua screenshots and the official PNG as generation references, while remaining visibly labeled conceptual illustrations with fictitious data. The exact official PNG is also an HTML overlay on desktop mockups. Preserve that overlay rather than trusting generated typography or logos. Exact prompts live in `docs/assets/landing-art-v2-prompts.json`. Marble, resin, citrus and green campaign art are rejected.
+Seven generated WebPs in `public/landing/art-v2` are current: hands, chair, conversation and phone have native alpha; agenda, team and finance are opaque. Product mockups use actual NaRégua screenshots and the official PNG as generation references, while remaining conceptual illustrations with fictitious data described in image alternatives. On 28 October 2026 the user explicitly removed visible demo captions and white logo bars. Desktop plates now crop their top 12.1% in CSS, without changing the WebPs; there is no ProductBrand overlay. Exact prompts live in `docs/assets/landing-art-v2-prompts.json`. Marble, resin, citrus and green campaign art are rejected.
 
 ### Public Landing Controls
 
 Public copper pill buttons use the prefixed component token, a 52px minimum height and 700 weight; the hero button reaches 56px. Hover darkens copper and lifts 2px; active returns to rest. The public header is an 80px floating pill, contracts on scroll and exposes a button-controlled menu below 900px; Escape closes it and returns focus. Visible focus is a 3px copper outline with 5px offset. The title selector and pressed-state preview controls share the same demonstration selection. The team range chooses actual catalog bands; rolling digits are visual only, with a complete accessible currency label. Native details/summary supplies the FAQ. The existing checkout remains the transaction surface, and /acessar is the explicit access route.
+
+### Public Access and Plan Dialog
+
+The hero demo meets the bottom of the opening block; finance is housed in a native CSS notebook frame. `/acessar` uses a cream/copper composition with the existing chair illustration and a focused access form. The plan dialog uses selectable plan rows and an included-features aside, strong Manrope hierarchy and normal scrolling without grid shrink. Arrow keys, Home and End navigate plan selection. `landing-entry.css`, `LandingPage.tsx` and `LandingCheckout.tsx` own these public entry treatments; operational dashboards retain their system.
 
 ### Mestre AI
 
@@ -224,7 +228,7 @@ Use the established Mestre AI name, existing mark and Manrope wordmark. Assistan
 
 ### Don't:
 - **Don't** let tenant accents recolor neutral surfaces or semantic states.
-- **Don't** invent testimonials or product metrics. Label public fictional UI as conceptual illustration with fictitious data; never present it as an actual screenshot.
+- **Don't** invent testimonials or product metrics. Preserve conceptual/fictitious descriptions in image alternatives; the user revoked visible demo captions. Never present generated images as actual screenshots.
 - **Don't** introduce decorative gradients into operational screens; the public campaign may use commissioned abstract artwork and material backgrounds.
 
 Existing drift is not normative: decorative date/section kickers and small faint metadata remain in inherited screens; generic faint table headers/placeholders and muted chips are not certified as contrast-compliant by their presence here. Legacy feature names, fallback wine values and Space Mono declarations do not authorize a new identity. This document does not repair that broader backlog. The earlier operational review disposition remains limited to its five resolved fixes; it is not a global accessibility audit. The prior art revision received a whole-page ship recommendation and Chromium/Firefox 10/10 checks; those results are historical and do not certify the current art-v2 replacement. Current validation evidence belongs in docs/surfaces/LANDING_RENEWAL.md.

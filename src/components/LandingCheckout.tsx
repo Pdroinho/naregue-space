@@ -6,6 +6,7 @@ import { api } from '../api'
 import { formatBrazilPhoneInput, normalizeBrazilPhone } from '../phone'
 import { ArrowRight, Check, ShieldCheck, X } from './Icons'
 import { PasswordChecklist } from './PasswordChecklist'
+import '../features/marketing/landing-entry.css'
 
 type CheckoutLegalConfig = { documents: { termsVersion: string; privacyVersion: string; updatedAt: string; bundleHash: string } }
 
@@ -126,20 +127,19 @@ export function LandingCheckout({ open, onClose, referralToken: providedReferral
 
   if (!open || typeof document === 'undefined') return null
   return createPortal(<div className="landing-checkout-layer" data-blocking-overlay="true" onClick={busy ? undefined : onClose}>
-    <section className="landing-checkout-panel" role="dialog" aria-modal="true" aria-labelledby="landing-checkout-title" onClick={(event) => event.stopPropagation()}>
+    <section className="landing-checkout-panel checkout-renewed" role="dialog" aria-modal="true" aria-labelledby="landing-checkout-title" onClick={(event) => event.stopPropagation()}>
       <div className="checkout-progress" aria-label={`Etapa ${step} de 2`}><i className="is-active" /><i className={step === 2 ? 'is-active' : ''} /></div>
       <header className="landing-checkout-header">
-        <div><h2 id="landing-checkout-title">{step === 1 ? 'Um plano para o tamanho da sua equipe.' : 'Só o essencial. Sua marca vem depois do pagamento.'}</h2><p>{step === 1 ? 'O valor é mensal por espaço, conforme o número de profissionais.' : 'No setup inicial você envia logo, escolhe cores, horários e serviços.'}</p></div>
+        <div><h2 id="landing-checkout-title">{step === 1 ? 'Qual é o tamanho da sua equipe?' : 'Vamos criar seu espaço.'}</h2><p>{step === 1 ? 'Os mesmos recursos em todas as faixas. Uma mensalidade para a barbearia.' : 'Preencha seus dados para continuar ao pagamento. Depois, você personaliza sua barbearia.'}</p></div>
         <button type="button" className="landing-checkout-close" data-modal-close onClick={onClose} aria-label="Fechar compra" disabled={busy}><X size={19} /></button>
       </header>
 
       <form className="landing-checkout-body" onSubmit={submit}>
         {step === 1 ? <>
-          <div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe">{teamPlans.map(plan => <button type="button" role="radio" aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
+          <div className="checkout-choice-layout"><div className="checkout-plan-grid is-team" role="radiogroup" aria-label="Tamanho da equipe" onKeyDown={event=>{const direction=['ArrowDown','ArrowRight'].includes(event.key)?1:['ArrowUp','ArrowLeft'].includes(event.key)?-1:0;if(!direction&&event.key!=='Home'&&event.key!=='End')return;event.preventDefault();const current=teamPlans.findIndex(plan=>plan.code===teamCode);const next=event.key==='Home'?0:event.key==='End'?teamPlans.length-1:(current+direction+teamPlans.length)%teamPlans.length;setTeamCode(teamPlans[next].code);event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus()}}>{teamPlans.map(plan => <button type="button" role="radio" tabIndex={teamCode===plan.code?0:-1} aria-checked={teamCode === plan.code} className={teamCode === plan.code ? 'is-selected' : ''} key={plan.code} onClick={() => setTeamCode(plan.code)}>
             <span>{plan.label}</span><strong>{money(plan.amountCents)}<small>/mês</small></strong><p>Até {plan.seats} profissionais · 1 mês</p><b>{teamCode === plan.code ? <Check size={14} /> : null}</b>
-          </button>)}</div>
+          </button>)}</div><aside className="checkout-included"><h3>Tudo para a sua rotina.</h3><ul><li><Check size={16}/>Agenda e link de agendamento</li><li><Check size={16}/>Equipe e clientes</li><li><Check size={16}/>WhatsApp e financeiro</li><li><Check size={16}/>Mestre AI no painel</li></ul><p>Um mês de acesso.<br/>Renovação manual, sem cobrança automática.</p></aside></div>
           {referralToken ? <div className="checkout-cycle-note" role="status">{quoteLoading ? 'Validando indicação…' : quoteError ? quoteError : referralQuote ? referralQuote.discountPercent > 0 ? `${referralQuote.discountPercent}% de desconto na primeira assinatura: ${money(finalAmount)} agora. As próximas mensalidades seguem o valor da faixa escolhida.` : `Valor da primeira assinatura: ${money(finalAmount)}. Não há desconto aplicado a esta indicação.` : 'Indicação indisponível.'}{quoteError ? <button type="button" className="checkout-back" onClick={()=>setUseReferral(false)}>Continuar sem indicação e sem desconto</button> : null}</div> : null}
-          <div className="checkout-cycle-note"><span>Incluído em qualquer plano</span><div><i><Check size={13} />Agenda e clientes</i><i><Check size={13} />Financeiro</i><i><Check size={13} />Mestre AI</i><i><Check size={13} />Setup guiado</i></div></div>
         </> : <div className="checkout-account-layout">
           <div className="landing-checkout-fields">
             <label>Seu nome<input value={form.ownerName} onChange={(event) => setForm({ ...form, ownerName: event.target.value })} autoComplete="name" required minLength={2} placeholder="Como podemos chamar você?" /></label>

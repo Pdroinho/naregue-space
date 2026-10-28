@@ -1,0 +1,87 @@
+/* Public access and plan selection share the established campaign typography. */
+.access-renewed,.landing-checkout-panel.checkout-renewed{font-family:Manrope,'Segoe UI',sans-serif;color:#082a39;--sales-ink:#082a39;--sales-body:#395460;--sales-muted:#526770;--sales-copper:#b85a30;--sales-copper-dark:#934526;--sales-paper:#fffdf8}
+.access-renewed.landing-access-page{background:#f5efe6;padding:40px 24px}
+.access-renewed .landing-access-background{display:none}
+.access-renewed .landing-access-card{width:min(1080px,100%);min-height:660px;grid-template-columns:1fr 1fr;border:1px solid #ded6c9;border-radius:28px;background:#fffdf8;box-shadow:0 24px 70px #082a3910}
+.access-renewed .landing-access-aside{position:relative;display:flex;flex-direction:column;padding:38px;overflow:hidden;background:linear-gradient(145deg,#f8eee3,#eac9ac);color:#082a39}
+.access-renewed .landing-access-aside>a{position:relative;z-index:2;align-self:flex-start}
+.access-renewed .landing-access-aside>a img{width:145px;height:auto}
+.access-renewed .landing-access-aside>div{position:relative;z-index:2;align-self:flex-start;padding:0;margin-top:45px;max-width:none}
+.access-renewed .landing-access-aside h2{font-family:inherit;font-size:clamp(2.1rem,3.2vw,2.9rem);font-weight:750;line-height:1.13;letter-spacing:-.04em;margin:0}
+.access-renewed .landing-access-aside>img{position:absolute;right:12px;bottom:-90px;width:62%;height:410px;object-fit:contain;border:0;border-radius:0;transform:rotate(-9deg);filter:drop-shadow(0 20px 20px #082a3920)}
+.access-renewed .landing-access-content{padding:48px;min-width:0}
+.access-renewed .landing-access-content h1{font-family:inherit;font-size:clamp(2.1rem,3vw,2.8rem);line-height:1.15;font-weight:750;letter-spacing:-.04em;margin:0 0 20px}
+.access-renewed .landing-access-content>p{font-size:.94rem;color:#395460;line-height:1.75}
+.access-renewed .landing-access-content form{margin-top:32px;gap:10px}
+.access-renewed .landing-access-content form>label{font-size:.85rem;color:#082a39}
+.access-renewed .landing-access-slug{margin:0;min-height:56px;border-radius:12px;border-color:#c9cec9;background:#fffdf8}
+.access-renewed .landing-access-slug input{font:inherit;font-size:.95rem;box-shadow:none;border:0;border-radius:0;height:54px}
+.access-renewed .landing-access-slug span{font-size:.78rem;color:#526770;white-space:nowrap}
+.access-example{font-size:.74rem;color:#526770;line-height:1.65}
+.access-renewed .landing-access-submit{margin-top:12px;background:#b85a30;color:#fffdf8;box-shadow:none;border-radius:12px;min-height:52px;font-size:.9rem}
+.access-renewed .landing-access-submit:hover{background:#934526}
+.access-renewed .landing-access-error{font-size:.8rem;line-height:1.6}
+.access-renewed .landing-access-help{border:0;border-radius:0;background:none;padding:0;margin-top:24px;color:#526770;font-size:.78rem;line-height:1.6}
+.access-renewed .landing-access-help svg{flex-shrink:0;color:#526770}
+.access-home{display:block;width:fit-content;margin-top:24px;color:#934526;font-size:.8rem;text-decoration:none}
+.access-renewed .landing-access-aside>img{background:transparent;box-shadow:none}
+.access-renewed .landing-access-support{display:block;width:fit-content;font-size:.8rem;line-height:1.6;margin-top:18px}
+.landing-checkout-panel.checkout-renewed{width:min(900px,100%);border:1px solid #ded6c9;border-radius:24px;max-height:90dvh;box-shadow:0 30px 90px #00192340}
+.checkout-renewed .checkout-progress{background:#e9e1d6}
+.checkout-renewed .checkout-progress i.is-active{background:#b85a30}
+.checkout-renewed .landing-checkout-header{padding:28px 32px 24px;gap:24px;align-items:flex-start;border-bottom:1px solid #082a391a}
+.checkout-renewed .landing-checkout-header h2{font:750 clamp(1.5rem,3vw,2rem)/1.2 Manrope,'Segoe UI',sans-serif;letter-spacing:-.035em;max-width:620px;margin:0;color:#082a39}
+.checkout-renewed .landing-checkout-header p{font-size:.85rem;line-height:1.7;color:#526770;margin:12px 0 0}
+.checkout-renewed .landing-checkout-close{flex:0 0 38px;min-width:38px;height:38px;color:#082a39;background:#fffdf8;border:1px solid #082a3929;border-radius:50%}
+.checkout-renewed .landing-checkout-body{display:flex;flex-direction:column;padding:28px 32px;gap:24px;overflow-y:auto;overscroll-behavior:contain;scrollbar-color:#bfa28d #f4efe6;scrollbar-width:thin}
+.checkout-renewed .landing-checkout-body>*{flex-shrink:0}
+.checkout-choice-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px}
+.checkout-renewed .checkout-plan-grid.is-team{grid-template-columns:1fr;gap:10px}
+.checkout-renewed .checkout-plan-grid>button{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:8px 12px;min-height:104px;padding:20px 18px 20px 52px;background:#fffdf8;border:1px solid #cdd1cc;border-radius:14px;color:#082a39;text-align:left}
+.checkout-renewed .checkout-plan-grid>button>span{flex-direction:row;align-items:flex-start;justify-content:flex-start;text-align:left;font-size:.86rem;font-weight:750;grid-column:1/-1;color:#082a39}
+.checkout-renewed .checkout-plan-grid>button>strong{font:750 1.5rem/1.2 Manrope,'Segoe UI',sans-serif;grid-column:1;align-self:start;letter-spacing:-.035em}
+.checkout-renewed .checkout-plan-grid>button>strong small{font:500 .72rem Manrope,'Segoe UI',sans-serif;color:#526770;margin-left:5px}
+.checkout-renewed .checkout-plan-grid>button>p{grid-column:2;grid-row:2;align-self:center;font-size:.7rem;color:#526770}
+.checkout-renewed .checkout-plan-grid>button>b{left:17px;right:auto;top:22px;bottom:auto;width:22px;height:22px;border:1px solid #a2aca9;color:#fffdf8}
+.checkout-renewed .checkout-plan-grid>button.is-selected{background:#f9eee3;border-color:#b85a30;box-shadow:inset 0 0 0 1px #b85a30}
+.checkout-renewed .checkout-plan-grid>button.is-selected>b{background:#b85a30;border-color:#b85a30}
+.checkout-included{padding:22px;background:#082a39;color:#fffdf8;border-radius:14px}
+.checkout-included h3{font-size:1.15rem;line-height:1.4;margin:0 0 24px;font-weight:750}
+.checkout-included ul{list-style:none;padding:0;margin:0;display:grid;gap:19px}
+.checkout-included li{display:flex;gap:9px;align-items:flex-start;font-size:.8rem;line-height:1.5}
+.checkout-included li svg{color:#edb08d;flex-shrink:0}
+.checkout-included>p{font-size:.75rem;line-height:1.8;color:#c6d5d9;border-top:1px solid #ffffff29;padding-top:20px;margin:24px 0 0}
+.checkout-renewed .checkout-cycle-note{padding:0;margin:0;border:0;font-size:.8rem;line-height:1.6;color:#395460}
+.checkout-renewed .landing-checkout-error{border:1px solid #d8c5ae;background:#f4ede3;color:#6b4729;padding:13px 16px;border-radius:10px;font-size:.8rem;line-height:1.6}
+.checkout-renewed .checkout-actions{position:static;margin:0;padding:20px 0 0;background:none;backdrop-filter:none;border-top:1px solid #082a391a;gap:16px}
+.checkout-renewed .checkout-step-status{font-size:.78rem;color:#526770}
+.checkout-renewed .checkout-next{min-width:220px;background:#b85a30;color:#fffdf8;border-radius:10px;font-size:.85rem;box-shadow:none}
+.checkout-renewed .checkout-next:disabled{opacity:1;background:#e8ded1;color:#635c53;box-shadow:none}
+.checkout-renewed .landing-checkout-fields label{font-size:.8rem;color:#082a39;line-height:1.5}
+.checkout-renewed .landing-checkout-fields input{font-family:inherit;font-size:.9rem;color:#082a39}
+.checkout-renewed .checkout-order-card{background:#f5eee4;color:#082a39;border-color:#ded6c9}
+.checkout-renewed :is(button,a,input):focus-visible,.access-renewed :is(button,a,input):focus-visible{outline:2px solid #934526;outline-offset:4px}
+@media(max-width:700px){
+ .access-renewed.landing-access-page{padding:20px 16px;align-items:center}
+ .access-renewed .landing-access-card{display:block;min-height:0;border-radius:22px}
+ .access-renewed .landing-access-aside{display:none}
+ .access-renewed .landing-access-content{padding:30px 24px}
+ .access-renewed .landing-access-mobile-brand{display:block;margin-bottom:45px}
+ .access-renewed .landing-access-mobile-brand img{width:140px;height:auto}
+ .access-renewed .landing-access-content h1{font-size:2.1rem}
+ .access-renewed .landing-access-slug input{width:100px;font-size:.85rem;padding-inline:10px}
+ .access-renewed .landing-access-slug span{font-size:.7rem;padding-right:9px}
+ .checkout-renewed .landing-checkout-header{padding:24px 20px 20px;gap:12px}
+ .checkout-renewed .landing-checkout-body{padding:20px;gap:20px}
+ .checkout-choice-layout{grid-template-columns:1fr;gap:20px}
+ .checkout-included{padding:20px}
+ .checkout-included h3{margin-bottom:16px}
+ .checkout-included ul{grid-template-columns:1fr 1fr;gap:14px}
+ .checkout-included li{font-size:.74rem}
+ .checkout-included>p{margin-top:18px;padding-top:16px}
+ .checkout-renewed .checkout-actions{grid-template-columns:1fr}
+ .checkout-renewed .checkout-next{width:100%;min-width:0;min-height:50px}
+ .checkout-renewed .checkout-plan-grid>button>p{font-size:.65rem}
+ .landing-checkout-panel.checkout-renewed{border-radius:22px 22px 0 0;max-height:calc(100dvh - 10px)}
+}
+@media(prefers-reduced-motion:no-preference){.checkout-renewed .checkout-plan-grid>button,.access-renewed .landing-access-submit{transition:background .18s ease-out,border-color .18s ease-out}}

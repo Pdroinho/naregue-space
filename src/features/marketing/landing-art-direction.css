@@ -107,9 +107,6 @@
 @media(prefers-reduced-motion:reduce){.nr-lp-art .lp-hero-art img{transform:none;will-change:auto}.nr-lp-art .lp-phone,.nr-lp-art .lp-story-stage:has(.lp-message-demo.is-active) .lp-phone{transform:none}.nr-lp-art .lp-close-art img{transition:none}}
 @media(max-width:640px){.nr-lp-art .lp-opening{background:var(--lp-paper)}.nr-lp-art .lp-preview-wrap{margin-top:205px}.lp-hero-art img{width:260px}.lp-hand-scissors{left:-58px;top:425px;transform:rotate(-10deg)}.lp-hand-comb{right:-62px;top:440px;transform:rotate(12deg)}}
 @media(max-width:360px){.lp-hero-art img{width:230px}.lp-hand-scissors{left:-62px;top:465px}.lp-hand-comb{right:-67px;top:470px}}
-/* Exact official logo remains a native image above every conceptual UI plate. */
-.lp-product-brand{position:absolute;inset:0 0 auto;height:12%;min-height:34px;z-index:4;display:flex;align-items:center;padding:10px 24px;background:#fffdf8;pointer-events:none}
-.nr-lp-art .lp-product-brand img{position:static!important;opacity:1!important;transform:none!important;width:160px!important;max-width:40%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;border-radius:0!important;box-shadow:none!important}
 .lp-finance-mockup{position:relative;overflow:hidden;border-radius:14px}
 .nr-lp-art .lp-footer-top nav>strong{color:#edb08d}
 .nr-lp-art .lp-tier-options button[aria-pressed=true]{background:var(--lp-copper);border-color:var(--lp-copper);color:var(--lp-paper)}
@@ -122,3 +119,15 @@
 /* A warm copper field frames the opening independently from the ivory page. */
 .nr-lp-art .lp-opening{width:calc(100% - 48px);max-width:1392px;margin:24px auto 0;border-radius:48px;background:radial-gradient(ellipse at 50% 96%,rgba(184,90,48,.2),transparent 65%),linear-gradient(145deg,#f8eee3 0%,#f2dcc8 55%,#edc9ac 100%);box-shadow:inset 0 0 0 1px rgba(184,90,48,.06)}
 @media(max-width:640px){.nr-lp-art .lp-opening{width:calc(100% - 20px);margin-top:10px;border-radius:28px}}
+/* Crop the generated mastheads; only the product interface remains visible. */
+.nr-lp-art .lp-preview-wrap{margin-bottom:0;padding-bottom:0}
+.nr-lp-art .lp-screen-images{aspect-ratio:1.82;border-radius:18px 18px 0 0;overflow:hidden}
+.nr-lp-art .lp-screen-images>img{width:100%;height:auto;max-width:none;top:0;left:0;object-fit:contain;transform:translateY(-12.1%)!important}
+.nr-lp-art .lp-workspace-image.lp-laptop{padding:18px 0 34px;overflow:visible;background:none;border:0;box-shadow:none;transform:rotate(-3deg);isolation:isolate}
+.lp-laptop-lid{position:relative;margin-inline:5%;padding:18px 12px 12px;background:linear-gradient(135deg,#d9d8d3,#8f9698 35%,#cdd0cd 65%,#e1dfd9);border:1px solid #929b9c;border-radius:19px 19px 5px 5px;box-shadow:0 24px 38px #082a3921}
+.lp-laptop-camera{position:absolute;width:4px;height:4px;border-radius:50%;background:#233941;top:7px;left:calc(50% - 2px)}
+.nr-lp-art .lp-laptop .lp-finance-mockup{position:relative;aspect-ratio:1.82;overflow:hidden;border-radius:5px;background:#082a39}
+.nr-lp-art .lp-workspace-image .lp-finance-mockup>img{position:absolute;top:0;left:0;width:100%;height:auto;aspect-ratio:auto;object-fit:contain;transform:translateY(-12.1%);border-radius:0;box-shadow:none}
+.lp-laptop-base{position:relative;height:15px;background:linear-gradient(#f0eee8,#bec3c2 38%,#7c878a);border:1px solid #a0a8a9;border-radius:2px 2px 50% 50%/2px 2px 12px 12px;box-shadow:0 19px 25px #082a3926}
+.lp-laptop-base>i{position:absolute;left:42%;width:16%;height:5px;top:-1px;background:#9da7a8;border-radius:0 0 7px 7px}
+@media(max-width:640px){.nr-lp-art .lp-screen-images{aspect-ratio:1.82}.nr-lp-art .lp-workspace-image.lp-laptop{margin-inline:-8px;padding-bottom:20px;transform:rotate(-2deg)}.lp-laptop-lid{padding:12px 7px 7px;border-radius:12px 12px 3px 3px}.lp-laptop-camera{top:4px;width:3px;height:3px}.lp-laptop-base{height:10px}.lp-laptop-base>i{height:3px}}

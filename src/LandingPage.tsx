@@ -3,6 +3,7 @@ import { ArrowRight, ShieldCheck } from './components/Icons'
 import { workspaceLoginUrl } from './features/marketing/landingLinks'
 import './landing.css'
 import './naregua-landing.css'
+import './features/marketing/landing-entry.css'
 export { LandingExperience as LandingPage } from './features/marketing/LandingExperience'
 
 function BrandWordmark({ inverse = false }: { inverse?: boolean }) {
@@ -36,26 +37,27 @@ export function WorkspaceAccessPage() {
     window.location.assign(workspaceLoginUrl(normalized))
   }
 
-  return <main className="landing-access-page">
+  return <main className="landing-access-page access-renewed">
     <div className="landing-access-background" />
     <section className="landing-access-card">
       <aside className="landing-access-aside">
-        <a href="/" aria-label="Voltar para NaRégua"><BrandWordmark inverse /></a>
-        <div><span>Sua barbearia continua aqui</span><h2>Agenda, clientes e caixa no mesmo lugar.</h2><p>Entre no endereço exclusivo da sua marca para continuar.</p></div>
-        <img src="/landing/product/real/dashboard.webp" alt="Visão real do painel NaRégua" />
+        <a href="/" aria-label="Voltar para NaRégua"><BrandWordmark /></a>
+        <div><h2>Seu espaço.<br/>Sua rotina.<br/>Tudo na régua.</h2></div>
+        <img src="/landing/art-v2/chair.webp" alt="Cadeira de barbeiro ilustrada em petróleo e cobre" />
       </aside>
       <div className="landing-access-content">
         <a href="/" className="landing-access-mobile-brand"><BrandWordmark /></a>
-        <span className="landing-kicker">Área da barbearia</span>
-        <h1>Entre na sua operação.</h1>
-        <p>Informe o endereço curto que você escolheu ao criar sua conta.</p>
+        <h1>Bom ter você<br/>de volta.</h1>
+        <p>Qual é o endereço da sua barbearia? Vamos levar você até o seu painel.</p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="workspace-slug">Seu endereço</label>
-          <div className="landing-access-slug"><input id="workspace-slug" value={slug} onChange={(event) => { setSlug(event.target.value); setError('') }} placeholder="central-barber" autoComplete="organization" autoFocus /><span>.{workspaceDomain}</span></div>
-          {error ? <div className="landing-access-error">{error}</div> : null}
+          <div className="landing-access-slug"><input id="workspace-slug" value={slug} onChange={(event) => { setSlug(event.target.value); setError('') }} placeholder="central-barber" autoComplete="organization" autoCapitalize="none" spellCheck={false} aria-invalid={Boolean(error)} aria-describedby={error ? 'access-error' : 'access-example'} autoFocus /><span>.{workspaceDomain}</span></div>
+          <small id="access-example" className="access-example">Use o nome que aparece antes de .{workspaceDomain}</small>
+          {error ? <div id="access-error" role="alert" className="landing-access-error">{error}</div> : null}
           <button className="landing-access-submit" type="submit">Acessar meu espaço <ArrowRight size={16} /></button>
         </form>
-        <div className="landing-access-help"><ShieldCheck size={18} /><span><strong>Ambiente exclusivo e seguro</strong><small>Cada negócio acessa seus dados em um endereço separado.</small></span></div>
+        <div className="landing-access-help"><ShieldCheck size={18} /><span>Você vai entrar com seu e-mail e senha na próxima tela.</span></div>
+        <a href="/" className="access-home">← Voltar ao site</a>
         {supportUrl ? <a className="landing-access-support" href={supportUrl}>Esqueci meu endereço — falar com o suporte</a> : null}
       </div>
     </section>
