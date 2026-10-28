@@ -8,7 +8,7 @@ import {
   type TeamPlan,
 } from '../teamPlans'
 import { confirmAction,notify } from '../lib/feedback'
-import { validTaxId } from '../../server/taxId'
+import { formatTaxId,validTaxId } from '../../server/taxId'
 type Order = {
   orderNsu: string
   amountCents: number
@@ -231,7 +231,7 @@ export function BillingCenter({ locked = false }: { locked?: boolean }) {
           ) : null}
           {error ? <p role="alert">{error}</p> : null}
           {active&&(catalog?.currentSubscription?.recurring||catalog?.recurringStatus==='ACTIVE')?<><p role="status">{catalog?.recurringStatus==='ACTIVE'?'Renovação mensal automática no cartão.':'Renovação automática cancelada. Seu período pago continua disponível.'}</p>{catalog?.recurringStatus==='ACTIVE'?<button type="button" className="btn btnSecondary" disabled={busy} onClick={()=>void cancelRenewal()}>Cancelar renovação automática</button>:null}</>:null}
-          {!active&&catalog?.checkoutAvailable?<div className="billing-recurring-consent">{!catalog.billingIdentityComplete?<label>CPF ou CNPJ<input inputMode="numeric" maxLength={18} value={taxId} onChange={event=>setTaxId(event.target.value.replace(/[^0-9./-]/g,''))} placeholder="Documento do responsável" /></label>:null}<label><input type="checkbox" checked={recurringAccepted} onChange={event=>setRecurringAccepted(event.target.checked)} />Autorizo a renovação mensal automática no cartão, até cancelar no painel.</label></div>:null}
+          {!active&&catalog?.checkoutAvailable?<div className="billing-recurring-consent">{!catalog.billingIdentityComplete?<label>CPF ou CNPJ<input inputMode="numeric" maxLength={18} value={taxId} onChange={event=>setTaxId(formatTaxId(event.target.value))} placeholder="Documento do responsável" /></label>:null}<label><input type="checkbox" checked={recurringAccepted} onChange={event=>setRecurringAccepted(event.target.checked)} />Autorizo a renovação mensal automática no cartão, até cancelar no painel.</label></div>:null}
           {!loading && !active && !catalog?.checkoutAvailable ? (
             <p role="status">
               Contratação temporariamente indisponível. Os planos e valores
