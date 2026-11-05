@@ -1,5 +1,11 @@
 # AbacatePay no NaRégua
 
+## Documentos públicos — 05/11/2026
+
+Termos e Privacidade usam a versão `2026-11-05-v2`, com novo hash do conjunto. Aceites anteriores mantêm seus snapshots; não são reescritos. O conteúdo descreve AbacatePay, compartilhamento dos dados de cobrança, renovação no cartão, cancelamento sem perda do período pago e solicitação de reembolso, incluindo arrependimento quando aplicável. Referência: art. 49 do CDC (https://www2.camara.leg.br/legin/fed/lei/1990/lei-8078-11-setembro-1990-365086-normaatualizada-pl.html).
+
+Os contatos públicos continuam vindo de `LEGAL_CONTACT_EMAIL` e `PRIVACY_CONTACT_EMAIL`. Trocar o domínio exige confirmar caixas ativas; DNS ou existência do domínio não comprovam recebimento de mensagens. A aprovação cadastral e a habilitação dos meios de pagamento pela AbacatePay são independentes desta atualização.
+
 ## Retorno do checkout — correção de 28/10/2026
 
 O retorno dos novos checkouts de equipe passa por `/api/public/onboarding/checkout-return?intent=UUID`. O servidor localiza a intenção, consulta o pagamento pelo adaptador e redireciona somente ao login do tenant persistido, com `welcome=1`. Nenhum parâmetro do navegador concede acesso; confirmação exige valor, identidade e ambiente corretos na API. Falha/pendência continua sendo conciliada pelo worker. Após login autenticado, o onboarding pendente segue o fluxo normal. O painel dev atualiza os tenants ao receber foco e a cada 30 segundos para não manter status anterior à conciliação.

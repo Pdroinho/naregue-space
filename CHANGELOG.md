@@ -4,6 +4,8 @@ As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tag
 
 ## Não lançado
 
+- Termos e Privacidade v2: AbacatePay, dados de cobrança, renovação, cancelamento e solicitação de reembolso; comprovantes de aceites anteriores preservados.
+
 - Novas contratações por equipe usam assinatura mensal automática no cartão, com eventos de assinatura e cancelamento pelo painel. Períodos anteriores são preservados.
 - CPF/CNPJ permite aproveitar os dados pessoais no checkout hospedado; documento validado e persistido com criptografia por tenant.
 - Endereço do espaço sempre visível, disponibilidade em tempo de preenchimento, sugestões e recuperação de conflito junto ao campo.

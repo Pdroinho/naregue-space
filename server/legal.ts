@@ -3,8 +3,8 @@ import type { Request } from 'express'
 import { env } from './env.js'
 import { secretHmac } from './secretCrypto.js'
 
-export const TERMS_VERSION = '2026-08-14-v1'
-export const PRIVACY_VERSION = '2026-08-14-v1'
+export const TERMS_VERSION = '2026-11-05-v2'
+export const PRIVACY_VERSION = '2026-11-05-v2'
 export const LEGAL_BUNDLE_VERSION = `${TERMS_VERSION}|${PRIVACY_VERSION}`
 export const PLATFORM_MARKETING_WHATSAPP_VERSION = 'lashdesigner-marketing-whatsapp-v1'
 export const PLATFORM_MARKETING_WHATSAPP_TEXT = 'Quero receber novidades, recursos e ofertas do NaRégua pelo WhatsApp.'
@@ -26,7 +26,7 @@ function termsSections(providerName: string): LegalSection[] {
       'A Política de Privacidade integra estes Termos para fins de transparência sobre tratamento de dados. O aceite dos Termos não transforma tratamentos opcionais, como marketing, em consentimento: autorizações promocionais permanecem separadas e facultativas.',
     ]},
     { id: 'conta', title: '2. Conta, acesso e segurança', paragraphs: [
-      'A conto profissional é pessoal e deve conter informações verdadeiras e atualizadas. A titular é responsável por manter senha, WhatsApp de segurança e dispositivos sob seu controle, não compartilhar códigos de autenticação e comunicar imediatamente qualquer suspeita de acesso indevido.',
+      'A conta profissional é pessoal e deve conter informações verdadeiras e atualizadas. A pessoa titular é responsável por manter senha, WhatsApp de segurança e dispositivos sob seu controle, não compartilhar códigos de autenticação e comunicar imediatamente qualquer suspeita de acesso indevido.',
       'O NaRégua pode exigir verificações adicionais, revogar sessões, bloquear acessos suspeitos ou adotar medidas emergenciais quando houver risco de fraude, comprometimento de credenciais, abuso, violação destes Termos ou ameaça à segurança da plataforma ou de terceiros.',
     ]},
     { id: 'servico', title: '3. Serviço, evolução do produto e disponibilidade', paragraphs: [
@@ -36,19 +36,22 @@ function termsSections(providerName: string): LegalSection[] {
     ]},
     { id: 'terceiros', title: '4. Integrações e serviços de terceiros', paragraphs: [
       'Determinadas funções dependem de terceiros, incluindo processamento de pagamentos, infraestrutura, provedores de WhatsApp, APIs de inteligência artificial e serviços de rede. Esses serviços possuem disponibilidade, regras, políticas e limites próprios. Uma alteração, suspensão ou bloqueio imposto por terceiro pode afetar determinada funcionalidade mesmo quando o restante do NaRégua continuar disponível.',
-      'O uso de WhatsApp deve respeitar as políticas aplicáveis da Meta/WhatsApp e a legislação. A profissional é responsável pelo conteúdo das mensagens que envia, por possuir base legal adequada para tratar os dados de seus clientes e, em mensagens promocionais, por utilizar somente destinatárias que tenham autorizado esse tipo de comunicação.',
+      'O uso de WhatsApp deve respeitar as políticas aplicáveis da Meta/WhatsApp e a legislação. A pessoa responsável pelo espaço responde pelo conteúdo das mensagens que envia, por possuir base legal adequada para tratar os dados de seus clientes e, em mensagens promocionais, por utilizar somente pessoas destinatárias que tenham autorizado esse tipo de comunicação.',
     ]},
     { id: 'pagamento', title: '5. Planos, pagamento e acesso', paragraphs: [
       'Preço, ciclo, descontos, período de acesso e condições comerciais válidas são os apresentados antes da finalização da compra. A contratação só deve ser concluída após a possibilidade de revisar essas informações e corrigir os dados informados.',
-      'Pagamentos podem ser processados por prestador especializado. O NaRégua recebe apenas os dados necessários para identificar a transação, conciliar o pagamento e administrar o acesso. Eventual cobrança recorrente ou renovação somente poderá ocorrer conforme informação exibida no fluxo de contratação e regras do meio de pagamento utilizado.',
-      'Quando o direito de arrependimento previsto em lei for aplicável à contratação eletrônica, ele poderá ser exercido pelos canais de suporte informados pela plataforma, sem prejuízo de outros direitos obrigatórios. Reembolsos, estornos e cancelamentos observarão a legislação aplicável, o estado da transação e as regras do processador de pagamento.',
+      'Os pagamentos são processados pela AbacatePay. Nas novas assinaturas mensais no cartão, a renovação é automática até o cancelamento, mediante autorização expressa na contratação. Preço, faixa da equipe e descontos são apresentados antes do pagamento. Descontos exclusivos da primeira mensalidade não se repetem nas próximas cobranças, conforme o resumo da contratação. Períodos adquiridos sem recorrência não se tornam automáticos sem nova autorização. O acesso é liberado após a confirmação do pagamento pelo provedor.',
+      'Para interromper cobranças futuras, acesse a área de plano da barbearia no painel e selecione “Cancelar renovação automática”. Após a confirmação, não haverá novas renovações e o acesso continuará até o fim do período já pago. Cancelar a renovação não equivale a excluir a conta nem solicita, por si só, o reembolso do período pago.',
+      `Se não conseguir acessar o painel, solicite o cancelamento pelo e-mail ${env.LEGAL_CONTACT_EMAIL || 'informado no canal de suporte da plataforma'}. Informe o e-mail da conta e o endereço do espaço. Não envie senha, código de autenticação nem dados completos do cartão.`,
+      'Quando aplicável à relação de consumo, o direito de arrependimento pode ser exercido em até 7 dias contados da assinatura do contrato ou do recebimento do serviço, conforme o art. 49 do Código de Defesa do Consumidor, com devolução integral dos valores pagos. Para exercê-lo, solicite expressamente o cancelamento e o reembolso pelo contato indicado nestes Termos.',
+      'Para solicitar reembolso ou comunicar cobrança indevida, informe o e-mail da conta, o endereço do espaço, a data e o identificador da cobrança, se disponível. O pedido será analisado sem afastar os direitos previstos em lei. Reconhecido o direito à devolução, o estorno será encaminhado ao processador; o lançamento do crédito depende do meio de pagamento e da instituição emissora. Não exigimos dados completos do cartão para atender ao pedido.',
     ]},
     { id: 'responsabilidades', title: '6. Responsabilidades do profissional', paragraphs: [
-      'A profissional é responsável pela organização e licitude de sua atividade, pelos serviços oferecidos às clientes, pelos preços e informações publicados, por manter sua agenda e dados corretos, por observar obrigações fiscais e regulatórias próprias e por definir quem pode acessar a conta.',
+      'A pessoa responsável pelo espaço responde pela organização e licitude de sua atividade, pelos serviços oferecidos aos clientes, pelos preços e informações publicados, por manter sua agenda e dados corretos, por observar obrigações fiscais e regulatórias próprias e por definir quem pode acessar a conta.',
       'Também é responsável por utilizar dados de clientes apenas para finalidades legítimas, fornecer os avisos de privacidade que lhe caibam como controladora e respeitar solicitações de opt-out de marketing. O NaRégua oferece mecanismos de consentimento e revogação, mas não substitui a análise jurídica da operação particular de cada espaço.',
     ]},
     { id: 'assistant', title: '7. Assistant e recursos de inteligência artificial', paragraphs: [
-      'O Mestre AI é uma ferramenta de apoio. Respostas podem conter imprecisões, interpretações incompletas ou erros. A profissional deve revisar informações antes de utilizá-las para decisões comerciais, financeiras, operacionais ou comunicações com clientes. O Mestre AI não presta aconselhamento jurídico, contábil, tributário, médico ou financeiro profissional.',
+      'O Mestre AI é uma ferramenta de apoio. Respostas podem conter imprecisões, interpretações incompletas ou erros. A pessoa responsável deve revisar informações antes de utilizá-las para decisões comerciais, financeiras, operacionais ou comunicações com clientes. O Mestre AI não presta aconselhamento jurídico, contábil, tributário, médico ou financeiro profissional.',
       'Algumas solicitações podem envolver processamento por provedores de inteligência artificial. O tratamento aplicável é descrito na Política de Privacidade.',
     ]},
     { id: 'propriedade-intelectual', title: '8. Propriedade intelectual e licença de uso', paragraphs: [
@@ -56,15 +59,15 @@ function termsSections(providerName: string): LegalSection[] {
       'A contratação não transfere código-fonte, marca, tecnologia ou qualquer direito de propriedade intelectual do NaRégua. É vedado copiar, revender, sublicenciar, explorar comercialmente o acesso de terceiros, contornar limites técnicos ou reproduzir elementos protegidos da plataforma fora das hipóteses autorizadas por lei.',
     ]},
     { id: 'conteudo', title: '9. Dados e conteúdo da conta', paragraphs: [
-      'A profissional mantém seus direitos sobre conteúdo, marca e dados que inserir na plataforma. Ela concede ao NaRégua apenas as permissões técnicas necessárias para armazenar, processar, reproduzir, transmitir e exibir esse conteúdo na medida necessária à prestação, segurança, suporte e evolução do serviço, observada a Política de Privacidade.',
+      'A pessoa responsável mantém seus direitos sobre conteúdo, marca e dados que inserir na plataforma. Essa pessoa concede ao NaRégua apenas as permissões técnicas necessárias para armazenar, processar, reproduzir, transmitir e exibir esse conteúdo na medida necessária à prestação, segurança, suporte e evolução do serviço, observada a Política de Privacidade.',
       'É proibido usar a plataforma para fraude, spam, assédio, atividade ilícita, violação de direitos de terceiros, tentativa de acesso não autorizado, engenharia reversa abusiva, distribuição de malware ou qualquer conduta capaz de comprometer o serviço.',
     ]},
     { id: 'suspensao', title: '10. Suspensão e encerramento', paragraphs: [
       'O acesso poderá ser limitado ou suspenso em caso de inadimplência, risco de segurança, uso ilícito, abuso de infraestrutura, violação relevante destes Termos ou determinação legal. Sempre que a situação permitir, serão priorizadas medidas proporcionais e possibilidade de regularização.',
-      'A titular pode solicitar cancelamento pelos canais disponibilizados. O encerramento não elimina obrigações já constituídas nem impede retenção de dados necessária ao cumprimento de obrigação legal, exercício regular de direitos, prevenção a fraude ou outras hipóteses permitidas pela LGPD.',
+      'A pessoa titular pode solicitar cancelamento pelos canais disponibilizados. O encerramento não elimina obrigações já constituídas nem impede retenção de dados necessária ao cumprimento de obrigação legal, exercício regular de direitos, prevenção a fraude ou outras hipóteses permitidas pela LGPD.',
     ]},
     { id: 'responsabilidade', title: '11. Limites e preservação de direitos', paragraphs: [
-      'O NaRégua não se responsabiliza por decisões tomadas exclusivamente com base em dados incorretos inseridos pela própria usuária, por condutas de clientes ou terceiros, nem por indisponibilidades que estejam fora de seu controle razoável, sem prejuízo das responsabilidades que a lei imponha de forma obrigatória.',
+      'O NaRégua não se responsabiliza por decisões tomadas exclusivamente com base em dados incorretos inseridos pela própria pessoa usuária, por condutas de clientes ou terceiros, nem por indisponibilidades que estejam fora de seu controle razoável, sem prejuízo das responsabilidades que a lei imponha de forma obrigatória.',
       'Nenhuma cláusula destes Termos deve ser interpretada como exclusão de garantia legal, exoneração por ato doloso, fraude, violação de dever legal de segurança ou renúncia antecipada a direito que não possa ser afastado contratualmente.',
     ]},
     { id: 'mudancas', title: '12. Atualizações destes Termos', paragraphs: [
@@ -72,7 +75,7 @@ function termsSections(providerName: string): LegalSection[] {
     ]},
     { id: 'comunicacoes', title: '13. Comunicações essenciais', paragraphs: [
       'Avisos necessários à execução do contrato, segurança da conta, autenticação, cobrança, alterações materiais do serviço, incidentes, manutenção e suporte podem ser enviados pelos canais cadastrados, inclusive e-mail, WhatsApp ou mensagens dentro da plataforma. Essas comunicações operacionais não se confundem com publicidade e não dependem da autorização promocional opcional.',
-      'A titular deve manter seus dados de contato atualizados. Quando a legislação exigir forma, destaque ou antecedência específicos para determinada comunicação, prevalecerá o requisito legal aplicável.',
+      'A pessoa titular deve manter seus dados de contato atualizados. Quando a legislação exigir forma, destaque ou antecedência específicos para determinada comunicação, prevalecerá o requisito legal aplicável.',
     ]},
     { id: 'contato', title: '14. Contato e solução de questões', paragraphs: [
       `Dúvidas, solicitações de cancelamento, reclamações e questões contratuais podem ser encaminhadas para ${env.LEGAL_CONTACT_EMAIL || 'o canal de suporte informado pela plataforma'}.`,
@@ -92,15 +95,15 @@ function privacySections(providerName: string): LegalSection[] {
       'Não solicitamos dados pessoais além do necessário para as finalidades descritas. Informações sensíveis não devem ser inseridas sem necessidade e base legal adequada.',
     ]},
     { id: 'finalidades', title: '3. Por que tratamos', paragraphs: [
-      'Os dados podem ser usados para criar e administrar a conta; executar agendamentos e funcionalidades contratadas; autenticar acessos; processar e conciliar pagamentos; entregar mensagens e automações solicitadas; oferecer suporte; prevenir fraude e incidentes; manter logs e cópias técnicas quando configuradas; melhorar estabilidade e usabilidade; cumprir obrigações legais; exercer ou defender direitos; e operar o Mestre AI quando habilitada.',
+      'Os dados podem ser usados para criar e administrar a conta; executar agendamentos e funcionalidades contratadas; autenticar acessos; processar e conciliar pagamentos; entregar mensagens e automações solicitadas; oferecer suporte; prevenir fraude e incidentes; manter logs e cópias técnicas quando configuradas; melhorar estabilidade e usabilidade; cumprir obrigações legais; exercer ou defender direitos; e operar o Mestre AI quando habilitado.',
       'Comunicações promocionais do NaRégua ou do espaço dependem da hipótese legal aplicável. Quando utilizarmos consentimento, a autorização será específica, separada das condições necessárias ao serviço e poderá ser retirada gratuitamente.',
     ]},
     { id: 'bases', title: '4. Bases legais', paragraphs: [
       'Conforme a operação, o tratamento pode se apoiar na execução de contrato ou procedimentos preliminares; cumprimento de obrigação legal ou regulatória; exercício regular de direitos; legítimo interesse, mediante avaliação de necessidade, expectativa e impacto; proteção contra fraude e segurança; e consentimento quando essa for a base adequada, especialmente para comunicações promocionais opcionais.',
     ]},
     { id: 'compartilhamento', title: '5. Compartilhamento e fornecedores', paragraphs: [
-      'Dados são compartilhados apenas quando necessário para a finalidade correspondente. Isso pode envolver infraestrutura de hospedagem e rede; processadores de pagamento como a InfinitePay; provedores e infraestrutura usados para integração com WhatsApp; serviços de inteligência artificial usados pelo Mestre AI; serviços técnicos de armazenamento, observabilidade ou suporte; profissionais autorizados; e autoridades públicas quando houver obrigação ou fundamento jurídico.',
-      'Fornecedores recebem apenas os dados necessários à função contratada e devem ser selecionados e geridos com medidas proporcionais de segurança e proteção de dados.',
+      'Dados são compartilhados apenas quando necessário para a finalidade correspondente. Isso pode envolver infraestrutura de hospedagem e rede; processadores de pagamento como a AbacatePay; provedores e infraestrutura usados para integração com WhatsApp; serviços de inteligência artificial usados pelo Mestre AI; serviços técnicos de armazenamento, observabilidade ou suporte; profissionais autorizados; e autoridades públicas quando houver obrigação ou fundamento jurídico.',
+      'Para criar o cliente de cobrança e aproveitar os dados já preenchidos no checkout da AbacatePay, enviamos nome, e-mail, telefone e CPF/CNPJ do responsável. O documento de cobrança persistido no NaRégua é criptografado. Os dados completos de cartão são informados diretamente no ambiente do processador, sem armazenamento pelo NaRégua. Fornecedores recebem apenas os dados necessários à função contratada e devem ser selecionados e geridos com medidas proporcionais de segurança e proteção de dados.',
     ]},
     { id: 'internacional', title: '6. Transferências internacionais', paragraphs: [
       'Alguns fornecedores de infraestrutura, mensageria ou inteligência artificial podem processar dados fora do Brasil. Quando houver transferência internacional sujeita à LGPD, serão adotados mecanismos e salvaguardas aplicáveis, incluindo instrumentos contratuais e medidas de segurança compatíveis com a regulamentação da ANPD.',
@@ -113,17 +116,17 @@ function privacySections(providerName: string): LegalSection[] {
       'Nenhum ambiente conectado à internet é absolutamente imune a falhas ou ataques. Caso ocorra incidente com potencial de risco ou dano relevante, serão adotadas as medidas de contenção, investigação e comunicação exigidas pela legislação e regulamentação aplicáveis.',
     ]},
     { id: 'marketing-whatsapp', title: '9. WhatsApp e promoções', paragraphs: [
-      'Mensagens necessárias ao atendimento, acesso ou agendamento são tratadas separadamente de marketing. Para promoções via WhatsApp, a plataforma registra o estado atual da autorização e eventos de concessão ou retirada. A opção promocional começa desativada e só é ativada mediante ação positiva da titular.',
+      'Mensagens necessárias ao atendimento, acesso ou agendamento são tratadas separadamente de marketing. Para promoções via WhatsApp, a plataforma registra o estado atual da autorização e eventos de concessão ou retirada. A opção promocional começa desativada e só é ativada mediante ação positiva da pessoa titular.',
       'A autorização promocional do espaço pode ser retirada no portal do cliente ou respondendo palavras de saída suportadas, como “SAIR”, “PARE”, “PARAR” ou “STOP”. Comunicações promocionais do próprio NaRégua podem ser desativadas nas configurações da conta. A retirada não impede comunicações transacionais necessárias ao agendamento ou à segurança da conta.',
     ]},
     { id: 'ia', title: '10. Assistant e inteligência artificial', paragraphs: [
-      'Quando o Mestre AI é utilizada, a pergunta e apenas o contexto necessário para produzir a resposta podem ser enviados ao provedor de inteligência artificial configurado. Evitamos enviar segredos técnicos e aplicamos limites de uso. A profissional deve evitar inserir dados excessivos ou sensíveis sem necessidade.',
+      'Quando o Mestre AI é utilizado, a pergunta e apenas o contexto necessário para produzir a resposta podem ser enviados ao provedor de inteligência artificial configurado. Evitamos enviar segredos técnicos e aplicamos limites de uso. A pessoa responsável deve evitar inserir dados excessivos ou sensíveis sem necessidade.',
     ]},
     { id: 'cookies', title: '11. Cookies e armazenamento local', paragraphs: [
       'O NaRégua utiliza cookies e mecanismos locais essenciais para sessão, autenticação, segurança, preferências e funcionamento técnico. Não dependemos de consentimento promocional para os mecanismos estritamente necessários à prestação do serviço. Caso ferramentas não essenciais de publicidade ou rastreamento sejam adicionadas futuramente, esta política e os controles de escolha deverão ser atualizados antes de seu uso.',
     ]},
-    { id: 'direitos', title: '12. Direitos da titular', paragraphs: [
-      'Nos termos da LGPD e conforme aplicável a cada operação, a titular pode solicitar confirmação e acesso; correção; anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade; portabilidade quando regulamentada e aplicável; informação sobre compartilhamentos; eliminação de dados tratados com consentimento, ressalvadas as hipóteses legais de conservação; informação sobre a possibilidade de negar consentimento; revogação; e revisão ou oposição nos casos previstos em lei.',
+    { id: 'direitos', title: '12. Direitos da pessoa titular', paragraphs: [
+      'Nos termos da LGPD e conforme aplicável a cada operação, a pessoa titular pode solicitar confirmação e acesso; correção; anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade; portabilidade quando regulamentada e aplicável; informação sobre compartilhamentos; eliminação de dados tratados com consentimento, ressalvadas as hipóteses legais de conservação; informação sobre a possibilidade de negar consentimento; revogação; e revisão ou oposição nos casos previstos em lei.',
       'Para dados de clientes tratados por um espaço, a solicitação pode precisar ser dirigida primeiro ao próprio espaço, que é quem determina a finalidade daquele tratamento.',
     ]},
     { id: 'contato-privacidade', title: '13. Canal de privacidade', paragraphs: [
@@ -147,7 +150,7 @@ export function legalPublicConfig() {
   const documents = {
     termsVersion: TERMS_VERSION,
     privacyVersion: PRIVACY_VERSION,
-    updatedAt: '2026-08-14',
+    updatedAt: '2026-11-05',
   }
   const content = { terms: termsSections(providerName), privacy: privacySections(providerName) }
   const bundleHash = createHash('sha256').update(JSON.stringify({ provider, documents, content })).digest('hex')
