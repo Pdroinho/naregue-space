@@ -1,5 +1,11 @@
 # AbacatePay no NaRégua
 
+## Produção ativada — 05/11/2026
+
+A credencial live fornecida pelo responsável foi instalada apenas no ambiente privado da VPS (0600), sem inclusão no Git ou no frontend. A consulta autenticada de loja retornou a NaRéguaSpace. `ABACATEPAY_DEV_MODE=false`, `ABACATEPAY_ALLOW_SANDBOX_IN_PRODUCTION=false` e checkout habilitado. O catálogo persistente separa clientes e produtos por credencial/ambiente; registros e períodos sandbox existentes não foram convertidos em cobranças reais.
+
+Foi cadastrado um webhook de produção, `NaRegua producao - pagamentos e assinaturas`, com os quatro eventos de checkout e cinco de assinatura tratados pelo adaptador, usando segredo aleatório exclusivo. A verificação sintética sem efeito financeiro retornou 401 para assinatura inválida e 200/ignorado para assinatura válida. Isso confirma alcance e autenticação do endpoint, não a entrega de evento financeiro real. Nenhuma compra, assinatura ou cobrança real foi criada nesta ativação. A primeira compra real e sua conciliação, assim como a disponibilidade de Pix Automático nesta loja, continuam pendentes de homologação. O checkout mensal permanece no cartão.
+
 ## Documentos públicos — 05/11/2026
 
 Termos e Privacidade usam a versão `2026-11-05-v2`, com novo hash do conjunto. Aceites anteriores mantêm seus snapshots; não são reescritos. O conteúdo descreve AbacatePay, compartilhamento dos dados de cobrança, renovação no cartão, cancelamento sem perda do período pago e solicitação de reembolso, incluindo arrependimento quando aplicável. Referência: art. 49 do CDC (https://www2.camara.leg.br/legin/fed/lei/1990/lei-8078-11-setembro-1990-365086-normaatualizada-pl.html).
