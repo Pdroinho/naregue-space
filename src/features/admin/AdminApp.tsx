@@ -25,11 +25,13 @@ import {
   Users,
   Wallet,
   Settings,
-  Image as ImageIcon,
+  Scissors,
   ShieldCheck,
   CreditCard,
-  MessageSquare,
-  HeartHandshake,
+  Whatsapp,
+  Headset,
+  Contacts,
+  Gift,
 } from '../../components/Icons'
 
 const SupportCenter = lazy(() => import('../support/SupportCenter').then(module => ({ default: module.SupportCenter })))
@@ -213,7 +215,7 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
               <div className="ld-nav-section">Principal</div>
               <SidebarItem disabled active icon={<LayoutDashboard size={18}/>} label="Início" />
               <SidebarItem disabled icon={<Calendar size={18}/>} label="Agenda" />
-              <SidebarItem disabled icon={<Users size={18}/>} label="Clientes" />
+              <SidebarItem disabled icon={<Contacts size={18}/>} label="Clientes" />
             </div>
           }
         >
@@ -281,8 +283,8 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
         mobileNav={subscriptionInactive ? undefined : [
           { key: 'dashboard', label: 'Início', icon: <LayoutDashboard size={21}/>, active: tab === 'dashboard', onClick: () => goTab('dashboard') },
           { key: 'calendar', label: 'Agenda', icon: <Calendar size={21}/>, active: tab === 'calendar', onClick: () => goTab('calendar') },
-          { key: 'clients', label: 'Clientes', icon: <Users size={21}/>, active: tab === 'clients', onClick: () => goTab('clients') },
-          { key: 'evolution', label: 'WhatsApp', icon: <MessageSquare size={21}/>, active: tab === 'evolution', onClick: () => goTab('evolution') },
+          { key: 'clients', label: 'Clientes', icon: <Contacts size={21}/>, active: tab === 'clients', onClick: () => goTab('clients') },
+          { key: 'evolution', label: 'WhatsApp', icon: <Whatsapp size={21}/>, active: tab === 'evolution', onClick: () => goTab('evolution') },
         ]}
         mobileMoreActive={!subscriptionInactive && !['dashboard', 'calendar', 'clients', 'evolution'].includes(tab)}
         sidebar={
@@ -297,20 +299,20 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
                     <div className="ld-nav-section">Principal</div>
                     <SidebarItem active={tab === 'dashboard'} icon={<LayoutDashboard size={18}/>} label="Início" onClick={() => goTab('dashboard')} />
                     <SidebarItem active={tab === 'calendar'} icon={<Calendar size={18}/>} label="Agenda" onClick={() => goTab('calendar')} />
-                    <SidebarItem active={tab === 'clients'} icon={<Users size={18}/>} label="Clientes" onClick={() => goTab('clients')} />
+                    <SidebarItem active={tab === 'clients'} icon={<Contacts size={18}/>} label="Clientes" onClick={() => goTab('clients')} />
                     <div className="ld-nav-section ld-nav-section--spaced">Gestão</div>
                     <SidebarItem active={tab === 'team'} icon={<Users size={18}/>} label="Equipe" onClick={() => goTab('team')} />
-                    <SidebarItem active={tab === 'services'} icon={<ImageIcon size={18}/>} label="Serviços" onClick={() => goTab('services')} />
+                    <SidebarItem active={tab === 'services'} icon={<Scissors size={18}/>} label="Serviços" onClick={() => goTab('services')} />
                     <SidebarItem active={tab === 'finance'} icon={<Wallet size={18}/>} label="Financeiro" onClick={() => goTab('finance')} />
-                    <SidebarItem active={tab === 'evolution'} icon={<MessageSquare size={18}/>} label="WhatsApp" onClick={() => goTab('evolution')} />
+                    <SidebarItem active={tab === 'evolution'} icon={<Whatsapp size={18}/>} label="WhatsApp" onClick={() => goTab('evolution')} />
                     <SidebarItem active={tab === 'assistant'} icon={<Sparkles size={18}/>} label="Mestre AI" onClick={() => goTab('assistant')} />
                     <div className="ld-nav-section ld-nav-section--spaced">Sistema</div>
-                    <SidebarItem active={tab === 'referrals'} icon={<HeartHandshake size={18}/>} label="Indicações" onClick={() => goTab('referrals')} />
+                    <SidebarItem active={tab === 'referrals'} icon={<Gift size={18}/>} label="Indicações" onClick={() => goTab('referrals')} />
                     <SidebarItem active={tab === 'billing'} icon={<CreditCard size={18}/>} label="Assinatura" onClick={() => goTab('billing')} />
                     <SidebarItem active={tab === 'settings'} icon={<Settings size={18}/>} label="Configurações" onClick={() => goTab('settings')} />
                   </>
                 )}
-                <SidebarItem active={tab === 'support'} icon={<MessageSquare size={18}/>} label="Suporte" onClick={() => goTab('support')} />
+                <SidebarItem active={tab === 'support'} icon={<Headset size={18}/>} label="Suporte" onClick={() => goTab('support')} />
                 <SidebarItem icon={<LogOut size={18}/>} label="Sair" onClick={async () => {
                      await api('/api/auth/logout', {method: 'POST'})
                      window.location.href = '/'

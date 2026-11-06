@@ -32,8 +32,8 @@ import {
   Globe,
   Webhook,
   Database,
-  HeartHandshake,
-  MessageSquare,
+  Gift,
+  Headset,
 } from '../../components/Icons'
 
 const SupportCenter = lazy(() => import('../support/SupportCenter').then(module => ({ default: module.SupportCenter })))
@@ -905,11 +905,11 @@ export function Dev() {
             sidebar={
                 <div className="ld-nav-group">
                     <SidebarItem active={tab === 'tenants'} icon={<LayoutDashboard size={18}/>} label="Tenants" onClick={() => setTab('tenants')} />
-                    <SidebarItem active={tab === 'referrals'} icon={<HeartHandshake size={18}/>} label="Indicações" onClick={() => setTab('referrals')} />
+                    <SidebarItem active={tab === 'referrals'} icon={<Gift size={18}/>} label="Indicações" onClick={() => setTab('referrals')} />
                     <SidebarItem active={tab === 'integrations'} icon={<Webhook size={18}/>} label="Integrações" onClick={() => setTab('integrations')} />
                     <SidebarItem active={tab === 'backups'} icon={<Database size={18}/>} label="Backups" onClick={() => setTab('backups')} />
                     <SidebarItem active={tab === 'settings'} icon={<Settings size={18}/>} label="Configurações" onClick={() => setTab('settings')} />
-                    <SidebarItem active={tab === 'support'} icon={<MessageSquare size={18}/>} label="Atendimento" onClick={() => setTab('support')} />
+                    <SidebarItem active={tab === 'support'} icon={<Headset size={18}/>} label="Atendimento" onClick={() => setTab('support')} />
                     <div className="navDivider" />
                     <SidebarItem icon={<LogOut size={18}/>} label="Sair" onClick={async () => {
                          await api('/api/auth/logout', {method: 'POST'})

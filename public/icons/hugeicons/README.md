@@ -4,4 +4,5 @@ This directory contains only the Hugeicons Free SVG glyphs actually used by NaRÃ
 They are vendored locally so production does not depend on a CDN or on loading the full icon catalogue.
 
 Source: https://github.com/hugeicons/hugeicons
+Additional navigation glyphs (`contact-book`, `gift`, `headset`, `whatsapp`): https://github.com/hugeicons/hugeicons-static/tree/main/icons (Free Stroke Rounded, MIT).
 License for the free icon package/source: MIT. See `THIRD_PARTY_NOTICES.md`.

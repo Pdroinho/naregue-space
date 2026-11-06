@@ -4,6 +4,8 @@ As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tag
 
 ## Não lançado
 
+- Ícones distintos para Clientes, Equipe, Serviços, WhatsApp, Indicações e Suporte, mantendo Hugeicons; nomes do menu recolhido visíveis com mouse e teclado.
+
 - Sidebar acomoda a altura natural da logo completa nos três tamanhos; botão de recolher centralizado sobre a divisória no desktop, inclusive no menu recolhido.
 
 - Termos e Privacidade v2: AbacatePay, dados de cobrança, renovação, cancelamento e solicitação de reembolso; comprovantes de aceites anteriores preservados.

@@ -280,6 +280,19 @@ try{
   }
   await page.getByRole('heading',{name:'Como quer começar?',exact:true}).waitFor({state:'detached'});assert.equal(setupCompletions.at(-1).mode,mode);pass(`setup ${mode} completes four steps at ${width}px`)
  }
+ }else if(process.argv.includes('--sidebar-icons')){
+  role='ADMIN';await page.setViewportSize({width:1440,height:900});await page.goto(origin+'/admin?view=dashboard');await cleanLayout();
+  const items=page.locator('.ld-sidebar .ld-nav-item');
+  const masks=await items.locator('.nr-icon').evaluateAll(icons=>icons.map(icon=>getComputedStyle(icon).maskImage));
+  assert.equal(new Set(masks).size,masks.length,'Every sidebar destination needs a distinct glyph');
+  for(const mask of masks){const url=mask.match(/url\("?([^"\)]+)/)?.[1];assert.ok(url);assert.equal((await page.request.get(url)).status(),200)}
+  await page.screenshot({path:'.validation/sidebar-icons-expanded.png',animations:'disabled'});
+  await page.locator('.ld-sidebar-collapse').click();
+  const clients=page.locator('.ld-sidebar').getByRole('button',{name:'Clientes',exact:true});await clients.hover();await page.getByRole('tooltip',{name:'Clientes',exact:true}).waitFor();
+  await page.mouse.move(700,400);await clients.focus();await page.getByRole('tooltip',{name:'Clientes',exact:true}).waitFor();
+  await page.screenshot({path:'.validation/sidebar-icons-collapsed.png',animations:'disabled'});await page.keyboard.press('Escape');await page.getByRole('tooltip').waitFor({state:'detached'});
+  await page.setViewportSize({width:390,height:900});await page.reload();await cleanLayout();await page.locator('.ld-mobile-tabbar button').last().click();await page.screenshot({path:'.validation/sidebar-icons-mobile.png',animations:'disabled'});
+  assert.equal(await page.getByRole('tooltip').count(),0);pass('Sidebar icons are distinct, load locally and labels work on hover, keyboard and Escape');
  }else if(process.argv.includes('--brand-height')){
  for(const width of [1440,390]) for(const size of ['S','M','L']) for(const [shape,w,h] of [['portrait',120,200],['wide',240,80]]){
   tenant.logoUrl='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#082a39"/><path d="M5 5H${w-5}V${h-5}H5Z" fill="none" stroke="#b85a30" stroke-width="8"/></svg>`);tenant.logoLayout='FULL';tenant.logoSize=size;role='ADMIN';

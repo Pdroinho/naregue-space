@@ -1,9 +1,12 @@
 import {
   cloneElement,
   isValidElement,
+  useId,
+  useState,
   type ReactElement,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 
 export function EmptyState(props: {
   image?: string
@@ -66,6 +69,13 @@ export function SidebarItem(props: {
   onClick?: () => void
   disabled?: boolean
 }) {
+  const tooltipId = useId()
+  const [tooltip, setTooltip] = useState<{ left: number; top: number } | null>(null)
+  const revealLabel = (button: HTMLButtonElement) => {
+    if (!window.matchMedia('(min-width: 901px)').matches || !button.closest('.is-sidebar-collapsed')) return
+    const box = button.getBoundingClientRect()
+    setTooltip({ left: box.right + 14, top: box.top + box.height / 2 })
+  }
   const icon = isValidElement(props.icon)
     ? cloneElement(
         props.icon as ReactElement<{ weight?: 'regular' | 'duotone' }>,
@@ -73,20 +83,28 @@ export function SidebarItem(props: {
       )
     : props.icon
   return (
-    <button
+    <><button
       type="button"
       className={`ld-nav-item ${props.active ? 'is-active' : ''}`}
-      onClick={props.onClick}
+      onClick={() => { setTooltip(null); props.onClick?.() }}
+      onMouseEnter={event => revealLabel(event.currentTarget)}
+      onMouseLeave={() => setTooltip(null)}
+      onFocus={event => revealLabel(event.currentTarget)}
+      onBlur={() => setTooltip(null)}
+      onPointerDown={() => setTooltip(null)}
+      onWheel={() => setTooltip(null)}
+      onKeyDown={event => { if (event.key === 'Escape') setTooltip(null) }}
       disabled={props.disabled}
       aria-current={props.active ? 'page' : undefined}
       aria-label={props.label}
-      title={props.label}
+      title={tooltip ? undefined : props.label}
+      aria-describedby={tooltip ? tooltipId : undefined}
       data-label={props.label}
     >
       <span className="ld-nav-icon" aria-hidden="true">
         {icon}
       </span>
       <span className="ld-nav-text">{props.label}</span>
-    </button>
+    </button>{tooltip ? createPortal(<span id={tooltipId} role="tooltip" className="sidebar-item-tooltip" style={{ left: tooltip.left, top: tooltip.top }}>{props.label}</span>, document.body) : null}</>
   )
 }
