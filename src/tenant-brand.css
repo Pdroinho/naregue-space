@@ -13,6 +13,8 @@
  .ld-sidebar-brand .tenant-brand-sidebar[data-layout=FULL] .tenant-brand-image{width:min(var(--brand-full),100%);max-width:100%;flex-shrink:1}
  .ld-sidebar-brand .ld-sidebar-collapse{position:absolute;left:auto;right:0;top:50%;z-index:3;width:38px;height:38px;transform:translate(50%,-50%);background:var(--surface-panel);box-shadow:none}
  .ld-shell.is-sidebar-collapsed .ld-sidebar-brand{padding:18px 16px}
+ .ld-shell.is-sidebar-collapsed .ld-sidebar-brand .tenant-brand-sidebar{align-self:center;justify-content:center;gap:0}
+ .ld-shell.is-sidebar-collapsed .ld-sidebar-brand .tenant-brand-sidebar .tenant-brand-image{max-width:44px;flex:0 1 auto}
  .ld-shell.is-sidebar-collapsed .ld-sidebar-brand .ld-sidebar-collapse{left:50%;right:auto;top:100%;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:9px}
  .ld-shell.is-sidebar-collapsed .ld-sidebar-collapse svg{width:16px;height:16px}
 }

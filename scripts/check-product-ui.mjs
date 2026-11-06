@@ -292,6 +292,8 @@ try{
    await checkEdge();await page.locator('.ld-sidebar-collapse').click();
    const compact=await page.locator('.ld-sidebar-collapse').evaluate(button=>{const b=button.getBoundingClientRect(),header=button.closest('.ld-sidebar-brand').getBoundingClientRect();return{dx:Math.abs(b.x+b.width/2-(header.x+header.width/2)),dy:Math.abs(b.y+b.height/2-header.bottom),width:b.width}});
    assert.ok(compact.dx<2&&compact.dy<2,'Collapsed control must be centered on the brand bottom divider');assert.equal(compact.width,30);
+   const logoCenter=await page.locator('.tenant-brand-sidebar img').evaluate(img=>{const b=img.getBoundingClientRect(),header=img.closest('.ld-sidebar-brand').getBoundingClientRect();return{dx:Math.abs(b.x+b.width/2-(header.x+header.width/2)),dy:Math.abs(b.y+b.height/2-(header.y+header.height/2))}});
+   assert.ok(logoCenter.dx<2&&logoCenter.dy<2,'Collapsed artwork must be centered in both axes');
    if(shape==='wide'&&size==='M')await page.screenshot({path:'.validation/sidebar-compact-divider.png',animations:'disabled'});
    await page.locator('.ld-sidebar-collapse').click();
   }
