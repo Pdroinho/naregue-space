@@ -280,6 +280,13 @@ try{
   }
   await page.getByRole('heading',{name:'Como quer começar?',exact:true}).waitFor({state:'detached'});assert.equal(setupCompletions.at(-1).mode,mode);pass(`setup ${mode} completes four steps at ${width}px`)
  }
+ }else if(process.argv.includes('--dashboard-icon-contrast')){
+  role='ADMIN';await page.setViewportSize({width:1440,height:900});
+  for(const accent of ['#082a39','#b85a30'])for(const theme of ['light','dark']){
+   tenant.primaryColor=accent;await page.goto(origin+'/admin?view=dashboard');await page.locator('.stats-grid .stat-icon .nr-icon').first().waitFor();await cleanLayout();await page.evaluate(theme=>{document.documentElement.dataset.theme=theme},theme);
+   const ratios=await page.locator('.stats-grid .stat-icon .nr-icon').evaluateAll(icons=>{const ctx=document.createElement('canvas').getContext('2d');const luminance=color=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data].slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)};return icons.map(icon=>{const fg=luminance(getComputedStyle(icon).color),bg=luminance(getComputedStyle(icon.closest('.stat-card')).backgroundColor);return(Math.max(fg,bg)+.05)/(Math.min(fg,bg)+.05)})});
+   assert.equal(ratios.length,4);assert.ok(ratios.every(r=>r>=3),`${theme} ${accent} metric icon contrast: ${ratios}`);await page.screenshot({path:`.validation/dashboard-icons-${theme}-${accent.slice(1)}.png`,animations:'disabled'});pass(`All four metric icons pass 3:1 contrast in ${theme} with ${accent}`)
+  }
  }else if(process.argv.includes('--sidebar-icons')){
   role='ADMIN';await page.setViewportSize({width:1440,height:900});await page.goto(origin+'/admin?view=dashboard');await cleanLayout();
   const items=page.locator('.ld-sidebar .ld-nav-item');
