@@ -7,6 +7,7 @@ import { nextBillingPeriodEnd } from './plans.js'
 import { badRequest } from './http.js'
 import { isBillingRecoveryTenant } from './tenantRecovery.js'
 import { teamPlanByCode, type TeamPlanCode } from './teamPlans.js'
+import type { ReferralCashService } from './referralCash.js'
 
 type Link = { linkId: number; checkoutUrl: string }
 type Provider = {
@@ -22,7 +23,7 @@ type Provider = {
 
 type Intent = { id: string; tenantId: string; planCode: TeamPlanCode; amountCents: number; grossAmountCents: number; discountPercent: number; referralRedemptionId: string | null; paymentLinkId: number | null; checkoutUrl: string | null; status: string; orderId: number | null }
 
-export function createPaymentBillingService(db: Database.Database, provider: Provider) {
+export function createPaymentBillingService(db: Database.Database, provider: Provider, cash?:ReferralCashService) {
   const referrals = createPaymentReferralService(db)
   function load(tenantId: string, id: string) {
     return db.prepare(`SELECT id, tenant_id as tenantId, plan_code as planCode, amount_cents as amountCents, gross_amount_cents as grossAmountCents, discount_percent as discountPercent, referral_redemption_id as referralRedemptionId,
@@ -62,6 +63,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
       db.prepare(`INSERT INTO payment_checkout_intents (id, tenant_id, plan_code, amount_cents, gross_amount_cents, discount_percent, referral_redemption_id, status, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'CREATING', ?)`).run(id, tenantId, code, reserved.quote.amountCents, plan.amountCents, reserved.quote.discountPercent, reserved.redemptionId, new Date().toISOString())
       referrals.reserveDebts(id,reserved.debts)
+      cash?.snapshot(id)
       return { name: tenant.name, intent: load(tenantId, id)! }
     }).immediate()
     if (existing.intent.status === 'PENDING') return { intentId: existing.intent.id, checkoutUrl: existing.intent.checkoutUrl! }
@@ -82,6 +84,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
       if (error instanceof PaymentRequestError && error.status >= 400 && error.status < 500 && error.status !== 408) db.transaction(() => {
         db.prepare(`UPDATE payment_checkout_intents SET status = 'FAILED' WHERE id = ? AND tenant_id = ? AND status = 'CREATING'`).run(existing.intent.id, tenantId)
         referrals.failed(tenantId,existing.intent.id)
+        cash?.failed(existing.intent.id)
       }).immediate()
       throw error
     }
@@ -115,7 +118,8 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
       else db.prepare(`INSERT INTO subscriptions (id, tenant_id, external_id, status, current_period_end, billing_cycle, plan_code, created_at, updated_at)
         VALUES (?, ?, ?, 'ACTIVE', ?, 'MONTHLY', ?, ?, ?)`).run(randomUUID(), input.tenantId, `payment:${input.orderId}`, periodEnd, intent.planCode, now, now)
       db.prepare(`UPDATE tenants SET status = 'ACTIVE', suspension_reason = NULL WHERE id = ? AND (status = 'ONBOARDING' OR (status = 'SUSPENDED' AND suspension_reason = 'PAYMENT'))`).run(input.tenantId)
-      referrals.paid(input.tenantId,input.intentId)
+      referrals.paid(input.tenantId,input.intentId,cash?.isCashIntent(input.intentId))
+      cash?.paid(input.tenantId,input.intentId)
       return true
     }).immediate()
   }
@@ -139,6 +143,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
       db.prepare("UPDATE payment_checkout_intents SET status = 'REFUNDED', order_id = ? WHERE id = ? AND tenant_id = ?")
         .run(input.orderId, input.intentId, input.tenantId)
       referrals.reversed(input.tenantId,input.intentId)
+      cash?.reverse(input.intentId)
       if (latest.status === 'PAID') {
         // A newer paid order may own the current subscription. Never suspend it.
         const suspended = db.prepare("UPDATE subscriptions SET status = 'CANCELLED', updated_at = ? WHERE tenant_id = ? AND status = 'ACTIVE' AND external_id = ?")
@@ -191,6 +196,7 @@ export function createPaymentBillingService(db: Database.Database, provider: Pro
             const now=new Date().toISOString()
             db.prepare("UPDATE subscriptions SET current_period_end=?,updated_at=? WHERE tenant_id=? AND external_id=? AND current_period_end<?").run(periodEnd,now,intent.tenantId,`payment:${state.localId}`,periodEnd)
             db.prepare('UPDATE abacatepay_checkouts SET period_end=CASE WHEN period_end<? THEN ? ELSE period_end END,last_renewed_cycle=? WHERE id=?').run(periodEnd,periodEnd,cycleStart.toISOString(),state.localId)
+            if(months>=1)cash?.renewed(intent.id,event.occurredAt)
             db.prepare("UPDATE tenants SET status='ACTIVE',suspension_reason=NULL WHERE id=? AND status='SUSPENDED' AND suspension_reason='PAYMENT'").run(intent.tenantId)
           }
           // Cancellation/payment failure stops renewal, never discards already paid access.

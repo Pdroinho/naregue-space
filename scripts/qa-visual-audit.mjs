@@ -5,7 +5,7 @@ import { inspectPanel } from './qa-panel-inspection.mjs'
 export async function runVisualAudit({page,origin,setRole}) {
  const reports=[]
  const onlyViews=process.env.NAREGUA_QA_AUDIT_VIEWS?.split(',')
- const views={dashboard:'.ld-dashboard-page',services:'.service-admin-page',clients:'.client-admin-page',calendar:'.ld-agenda',finance:'.finance36',settings:'.settings-page',assistant:'.assistant34',billing:'.billing-shell',team:'.team-page',referrals:'.referral-page',evolution:'.wa39',support:'.support-center'}
+ const views={dashboard:'.ld-dashboard-page',services:'.service-admin-page',clients:'.client-admin-page',calendar:'.ld-agenda',finance:'.finance36',settings:'.settings-page',assistant:'.assistant34',billing:'.billing-shell',team:'.team-page',referrals:'.cash-referrals',evolution:'.wa39',support:'.support-center'}
  mkdirSync('.validation/ui-audit',{recursive:true})
  for(const width of (process.env.NAREGUA_QA_AUDIT_WIDTHS||'1440,768,390,320').split(',').map(Number))for(const theme of ['light','dark'])for(const [view,selector] of Object.entries(views)){
   if(onlyViews&&!onlyViews.includes(view))continue

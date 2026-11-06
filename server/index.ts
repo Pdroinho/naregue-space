@@ -31,6 +31,9 @@ import { createApplicationServerRuntime } from './applicationServerRuntime.js'
 import { createInfinitePayRuntime } from './infinitePay.js'
 import { createPaymentClient } from './payment.js'
 import { createPaymentBillingService } from './paymentBillingService.js'
+import { createReferralCashService } from './referralCash.js'
+import { createReferralCashGateway } from './referralCashGateway.js'
+import { createReferralCashRouters } from './routes/referralCashRoutes.js'
 import { createPaymentWebhookRuntime } from './paymentWebhookRuntime.js'
 import { registerPlatformRoutes } from './routes/registerPlatformRoutes.js'
 import { registerBillingAssistantRoutes } from './routes/registerBillingAssistantRoutes.js'
@@ -54,7 +57,8 @@ const infinitePay = createInfinitePayRuntime(db)
 const paymentClient = env.ABACATEPAY_CHECKOUT_ENABLED && env.ABACATEPAY_API_KEY
   ? createPaymentClient({ db, apiKey: env.ABACATEPAY_API_KEY, devMode: env.ABACATEPAY_DEV_MODE, appBaseUrl: env.APP_BASE_URL! })
   : null
-const paymentBilling = paymentClient ? createPaymentBillingService(db, paymentClient) : null
+const referralCash = createReferralCashService(db,env.ABACATEPAY_API_KEY?createReferralCashGateway(env.ABACATEPAY_API_KEY,env.ABACATEPAY_DEV_MODE):null)
+const paymentBilling = paymentClient ? createPaymentBillingService(db, paymentClient,referralCash) : null
 const assistantPaymentCredits = paymentClient ? createAssistantPaymentCredits(db, paymentClient) : null
 const paymentWebhook = paymentBilling ? createPaymentWebhookRuntime(db, paymentBilling, assistantPaymentCredits ?? undefined) : null
 const network = createPlatformNetworkConfig({
@@ -140,6 +144,10 @@ registerPlatformRoutes(app, {
 })
 
 app.use('/api',createStaffSelfRouter(db))
+
+const cashReferralRoutes=createReferralCashRouters({db,cash:referralCash,requireDevHost:tenantRouting.requireDevHost,mutationLimiter:limiters.referralMutationLimiter,passwordLimiter:limiters.authPasswordLimiter,token:commercial.referralToken,publicUrl:commercial.publicReferralUrl,enabled:env.ABACATEPAY_CHECKOUT_ENABLED&&!env.ABACATEPAY_DEV_MODE&&Boolean(paymentBilling),verifyReward:async(id)=>{const row=db.prepare('SELECT i.tenant_id AS tenantId,i.id AS intentId,i.order_id AS orderId FROM referral_cash_rewards r JOIN payment_checkout_intents i ON i.id=r.intent_id WHERE r.id=?').get(id) as {tenantId:string;intentId:string;orderId:number}|undefined;return Boolean(row&&paymentBilling&&await paymentBilling.reconcileOrder(row))}})
+app.use('/api/admin',cashReferralRoutes.admin)
+app.use('/api/dev',cashReferralRoutes.dev)
 
 registerBillingAssistantRoutes(app, {
   db, commercial, infinitePay, limiters, whatsapp, clientConsent, paymentBilling, paymentWebhook, assistantPaymentCredits,

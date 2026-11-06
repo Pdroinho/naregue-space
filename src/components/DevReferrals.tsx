@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { api } from '../api'
 import { Copy } from './Icons'
 import { notify } from '../lib/feedback'
+import { DevReferralCash } from './DevReferralCash'
 
 type DevReferralData = {
   metrics: { activeLinks: number; totalRedemptions: number; paidRedemptions: number; grantedDiscountCents: number; availableCredits: number }
@@ -40,6 +41,7 @@ export function DevReferrals() {
   if (!data) return <div className="skeleton skeleton-card" style={{ height: 440 }} />
   return (
     <section className="dev-referrals" aria-labelledby="dev-referrals-title">
+      <DevReferralCash />
       <header className="dev-section-heading"><span className="eyebrow">Governança comercial</span><h1 id="dev-referrals-title">Indicações e links de desconto</h1><p>Acompanhe conversões, limite exposição e revogue campanhas sem alterar preços do plano.</p></header>
       <div className="platform-metrics">
         <article><span>Links ativos</span><strong>{data.metrics.activeLinks}</strong><small>inclui links de clientes</small></article>

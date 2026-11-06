@@ -1,5 +1,9 @@
 # AbacatePay no NaRégua
 
+## Recompensas em Pix — 06/11/2026
+
+O programa de indicações em dinheiro, a migração 118, a revisão e os limites de homologação estão em [REFERRAL_CASH.md](REFERRAL_CASH.md). A aprovação do pagamento de uma indicação não dispara Pix: o cliente precisa acumular R$100 liberados, solicitar o saque e passar pela revisão DEV com reautenticação. Não houve transferência real na preparação desta entrega.
+
 ## Produção ativada — 05/11/2026
 
 A credencial live fornecida pelo responsável foi instalada apenas no ambiente privado da VPS (0600), sem inclusão no Git ou no frontend. A consulta autenticada de loja retornou a NaRéguaSpace. `ABACATEPAY_DEV_MODE=false`, `ABACATEPAY_ALLOW_SANDBOX_IN_PRODUCTION=false` e checkout habilitado. O catálogo persistente separa clientes e produtos por credencial/ambiente; registros e períodos sandbox existentes não foram convertidos em cobranças reais.

@@ -3,8 +3,8 @@ import type { Request } from 'express'
 import { env } from './env.js'
 import { secretHmac } from './secretCrypto.js'
 
-export const TERMS_VERSION = '2026-11-05-v2'
-export const PRIVACY_VERSION = '2026-11-05-v2'
+export const TERMS_VERSION = '2026-11-06-v3'
+export const PRIVACY_VERSION = '2026-11-06-v3'
 export const LEGAL_BUNDLE_VERSION = `${TERMS_VERSION}|${PRIVACY_VERSION}`
 export const PLATFORM_MARKETING_WHATSAPP_VERSION = 'lashdesigner-marketing-whatsapp-v1'
 export const PLATFORM_MARKETING_WHATSAPP_TEXT = 'Quero receber novidades, recursos e ofertas do NaRégua pelo WhatsApp.'
@@ -45,6 +45,7 @@ function termsSections(providerName: string): LegalSection[] {
       `Se não conseguir acessar o painel, solicite o cancelamento pelo e-mail ${env.LEGAL_CONTACT_EMAIL || 'informado no canal de suporte da plataforma'}. Informe o e-mail da conta e o endereço do espaço. Não envie senha, código de autenticação nem dados completos do cartão.`,
       'Quando aplicável à relação de consumo, o direito de arrependimento pode ser exercido em até 7 dias contados da assinatura do contrato ou do recebimento do serviço, conforme o art. 49 do Código de Defesa do Consumidor, com devolução integral dos valores pagos. Para exercê-lo, solicite expressamente o cancelamento e o reembolso pelo contato indicado nestes Termos.',
       'Para solicitar reembolso ou comunicar cobrança indevida, informe o e-mail da conta, o endereço do espaço, a data e o identificador da cobrança, se disponível. O pedido será analisado sem afastar os direitos previstos em lei. Reconhecido o direito à devolução, o estorno será encaminhado ao processador; o lançamento do crédito depende do meio de pagamento e da instituição emissora. Não exigimos dados completos do cartão para atender ao pedido.',
+      'A participação no programa de indicação em dinheiro exige aceite separado do regulamento exibido na área Indicações. O regulamento define comissão, elegibilidade, validação, saque mínimo, taxa do processador e tratamento de estornos. Cada aceite preserva a versão das regras. Créditos anteriores de desconto não se convertem automaticamente em dinheiro; cancelar a renovação da assinatura não elimina, por si só, comissões legitimamente adquiridas.',
     ]},
     { id: 'responsabilidades', title: '6. Responsabilidades do profissional', paragraphs: [
       'A pessoa responsável pelo espaço responde pela organização e licitude de sua atividade, pelos serviços oferecidos aos clientes, pelos preços e informações publicados, por manter sua agenda e dados corretos, por observar obrigações fiscais e regulatórias próprias e por definir quem pode acessar a conta.',
@@ -93,6 +94,7 @@ function privacySections(providerName: string): LegalSection[] {
     { id: 'dados', title: '2. Dados tratados', paragraphs: [
       'Dependendo das funções usadas, podemos tratar: dados de cadastro e contato do profissional; configurações e identidade visual do espaço; dados de clientes e agenda; serviços e valores; registros financeiros inseridos na plataforma; mensagens, números e metadados de WhatsApp; arquivos e mídias enviados; solicitações de suporte; dados de pagamento e conciliação; prompts, contexto e respostas do Mestre AI; além de registros técnicos de segurança, sessão, dispositivo, IP ou identificadores derivados quando necessários para prevenir abuso e comprovar eventos relevantes.',
       'Não solicitamos dados pessoais além do necessário para as finalidades descritas. Informações sensíveis não devem ser inseridas sem necessidade e base legal adequada.',
+      'No programa de indicação, tratamos vínculos de convite, valores e datas de comissões, aceite do regulamento, chave Pix CPF/CNPJ, decisões de revisão, identificadores de transferência e comprovantes. A chave Pix é armazenada criptografada, e identificadores protegidos por HMAC ajudam a prevenir repetição de benefícios por recriação de contas. A consulta do destino pela equipe é restrita e registrada. O processador de pagamentos recebe os dados necessários ao repasse.',
     ]},
     { id: 'finalidades', title: '3. Por que tratamos', paragraphs: [
       'Os dados podem ser usados para criar e administrar a conta; executar agendamentos e funcionalidades contratadas; autenticar acessos; processar e conciliar pagamentos; entregar mensagens e automações solicitadas; oferecer suporte; prevenir fraude e incidentes; manter logs e cópias técnicas quando configuradas; melhorar estabilidade e usabilidade; cumprir obrigações legais; exercer ou defender direitos; e operar o Mestre AI quando habilitado.',
@@ -150,7 +152,7 @@ export function legalPublicConfig() {
   const documents = {
     termsVersion: TERMS_VERSION,
     privacyVersion: PRIVACY_VERSION,
-    updatedAt: '2026-11-05',
+    updatedAt: '2026-11-06',
   }
   const content = { terms: termsSections(providerName), privacy: privacySections(providerName) }
   const bundleHash = createHash('sha256').update(JSON.stringify({ provider, documents, content })).digest('hex')

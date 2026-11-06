@@ -193,7 +193,7 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
   const subscriptionInactive = Boolean(me?.role === 'ADMIN' && !subscriptionActive)
 
   useEffect(() => {
-    if (subscriptionInactive && tab !== 'billing' && tab !== 'support') setTab('billing')
+    if (subscriptionInactive && tab !== 'billing' && tab !== 'support' && tab !== 'referrals') setTab('billing')
   }, [subscriptionInactive, tab])
 
   useEffect(() => {
@@ -270,7 +270,7 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
 
   return (
     <Shell
-        title={subscriptionInactive && tab !== 'support' ? 'Assinatura' : ({dashboard: 'Visão Geral', calendar: 'Agenda', services: 'Serviços', team: 'Equipe', clients: 'Clientes', finance: 'Financeiro', settings: 'Configurações', evolution: 'WhatsApp', billing: 'Assinatura', assistant: 'Mestre AI', referrals: 'Indicações', support: 'Suporte'} as const)[tab]}
+        title={subscriptionInactive && !['support','referrals'].includes(tab) ? 'Assinatura' : ({dashboard: 'Visão Geral', calendar: 'Agenda', services: 'Serviços', team: 'Equipe', clients: 'Clientes', finance: 'Financeiro', settings: 'Configurações', evolution: 'WhatsApp', billing: 'Assinatura', assistant: 'Mestre AI', referrals: 'Indicações', support: 'Suporte'} as const)[tab]}
         subtitle="Seu espaço"
         actions={<><button type="button" className="btn btnGhost" aria-label="Alternar tema" onClick={()=>toggleTheme()}><Moon size={18}/></button>{!subscriptionInactive && tab !== 'assistant' ? <AssistantContextAction screen={tab}/> : null}</>}
         user={me}
@@ -292,7 +292,8 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
                 {subscriptionInactive ? (
                   <>
                     <div className="ld-nav-section">Conta</div>
-                    <SidebarItem active icon={<CreditCard size={18}/>} label="Ativar assinatura" onClick={() => goTab('billing')} />
+                    <SidebarItem active={tab === 'billing'} icon={<CreditCard size={18}/>} label="Ativar assinatura" onClick={() => goTab('billing')} />
+                    <SidebarItem active={tab === 'referrals'} icon={<Gift size={18}/>} label="Indicações" onClick={() => goTab('referrals')} />
                   </>
                 ) : (
                   <>
@@ -323,7 +324,7 @@ export function Admin(props: { tenant?: TenantPublic; tenantSlug?: string; baseP
         <div className="nr-team-scope-toolbar">{!subscriptionInactive && ['dashboard','calendar','clients','finance'].includes(tab) ? <TeamScopeSelect value={professionalScope} onChange={id=>{setApiProfessionalScope(id);setProfessionalScope(id);loadStats()}}/> : null}</div>
         <Suspense key={professionalScope} fallback={<AdminAreaLoading />}>
           {subscriptionInactive ? (
-              tab === 'support' ? <SupportCenter role="ADMIN" /> : <BillingCenter locked />
+              tab === 'support' ? <SupportCenter role="ADMIN" /> : tab === 'referrals' ? <ReferralCenter /> : <BillingCenter locked />
           ) : (
               <>
                 {tab === 'dashboard' ? <AdminDashboard me={me} stats={stats} dataError={statsError} onRefresh={loadStats} onOpenAgenda={() => goTab('calendar')} /> : null}

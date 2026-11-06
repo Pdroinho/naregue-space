@@ -14,6 +14,9 @@ export function isBillingRecoveryTenant(db: Database.Database, tenantId: string,
 
 export function isBillingRecoveryRequest(req: Pick<Request, 'method' | 'originalUrl'>) {
   const path = req.originalUrl.split('?')[0].replace(/\/+$/, '')
+  // Access to earned referral money survives a subscription's expiry.
+  if(req.method==='GET'&&path==='/api/admin/referrals/cash')return true
+  if(req.method==='POST'&&path==='/api/admin/referrals/cash/withdrawals')return true
   if (path.startsWith('/api/auth/')) return true
   if (req.method === 'GET' && /^\/api\/support\/(tickets(?:\/\d+)?|notifications|attachments\/[a-f0-9-]{36})$/i.test(path)) return true
   if (req.method === 'POST' && /^\/api\/support\/tickets(?:\/\d+\/(?:replies|read))?$/.test(path)) return true

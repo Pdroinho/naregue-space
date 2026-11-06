@@ -88,6 +88,14 @@ test('router DEV core preserva proteção, configurações e ciclo de tenants', 
     assert.equal(refused.status,400)
     assert.ok(db.prepare('SELECT id FROM tenants WHERE id=?').get(created.tenant.id))
 
+    db.exec('CREATE TABLE referral_cash_rewards(owner_tenant_id TEXT,invited_tenant_id TEXT,paid_at TEXT)')
+    db.prepare('INSERT INTO referral_cash_rewards VALUES(?,?,?)').run(created.tenant.id,'other-tenant','2026-11-06T12:00:00Z')
+    const financialHold=await fetch(`${baseUrl}/api/dev/tenants/${created.tenant.id}/permanent-delete`,{method:'POST',headers:devHeaders,body:JSON.stringify({confirmation:'EXCLUIR studio-teste',acknowledgeBackup:true})})
+    assert.equal(financialHold.status,400)
+    assert.equal((await financialHold.json() as {code:string}).code,'REFERRAL_FINANCIAL_RECORDS')
+    assert.ok(db.prepare('SELECT id FROM tenants WHERE id=?').get(created.tenant.id))
+    db.exec('DELETE FROM referral_cash_rewards')
+
     const removed = await fetch(`${baseUrl}/api/dev/tenants/${created.tenant.id}/permanent-delete`, {
       method: 'POST', headers: devHeaders,
       body: JSON.stringify({ confirmation: 'EXCLUIR studio-teste', acknowledgeBackup: true }),

@@ -1,4 +1,4 @@
-/* global document,window */
+/* global document,window,getComputedStyle */
 // Compiled product in Chromium with controlled API fixtures; never contacts external services.
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
@@ -28,6 +28,8 @@ const failedGetRoutes=new Set()
 const assistantRequests=[]
 const serviceWrites=[],cashWrites=[]
 let assistantMode='ok',releaseAssistant=null,usageMode='ok',referralsEnabled=false,referralLink=null
+let referralCashState='empty'
+let referralCashWithdrawal=null
 const omitted = new Set()
 const setupAnalyses=[],setupCompletions=[]
 const settingsAnalyses=[],settingsWrites=[]
@@ -125,6 +127,9 @@ try{
   if(p==='/api/admin/billing/overview')return json(route,{subscription:null,orders:[]})
   if(p==='/api/admin/subscription/team-plans')return json(route,{plans,activeProfessionals:1,checkoutAvailable:false,currentSubscription:billingActive?{planCode:'TEAM_6',currentPeriodEnd:'2027-08-15T12:00:00Z'}:null,orders:[]})
   if(p==='/api/admin/finance/extract')return extractFailed?json(route,{message:'Falha ao carregar extrato de teste'},503):json(route,{transactions:[]})
+  if(p==='/api/admin/referrals/cash/withdrawals'){const body=route.request().postDataJSON();assert.equal(body.amountCents,12732);assert.equal(body.feesAccepted,true);referralCashWithdrawal={id:'cash-withdrawal-qa',amountCents:body.amountCents,status:'REQUESTED',requestedAt:'2026-11-06T12:00:00Z',feeCents:null,receiptUrl:null,reviewNote:null};return json(route,{id:referralCashWithdrawal.id})}
+  if(p==='/api/admin/referrals/cash')return refError?json(route,{message:'Indicações indisponíveis'},503):json(route,{enabled:referralsEnabled,policy:{version:'naregua-cash-2026-11-v1',rewardPercent:50,holdDays:45,minWithdrawalCents:10000},availableCents:referralCashState==='funded'&&!referralCashWithdrawal?12732:0,pendingCents:referralCashState==='funded'?3183:0,reservedCents:referralCashWithdrawal?12732:0,paidCents:0,debtCents:0,link:referralLink,rewards:referralCashState==='funded'?[{id:'cash-qa-1',amountCents:3183,status:'PENDING',reason:null,createdAt:'2026-11-05T12:00:00Z',paidAt:'2026-11-05T12:00:00Z',eligibleAt:'2026-12-20T12:00:00Z',secondPaidAt:null}]:[],withdrawals:referralCashWithdrawal?[referralCashWithdrawal]:[]})
+  if(p==='/api/admin/referrals/cash/link'){assert.equal(route.request().postDataJSON().accepted,true);referralLink={active:1,url:'https://naregua.space/?ref=controlled-browser-test'};return json(route,{url:referralLink.url})}
   if(p==='/api/admin/referrals/overview')return refError?json(route,{message:'Indicações indisponíveis'},503):json(route,{teamDiscountsAvailable:referralsEnabled,link:referralLink,metrics:{total:2,paid:1,customerSavingsCents:749},credits:[],rules:{inviteeDiscountPercent:10,referrerRewardPercent:10,renewalCapPercent:30}})
   if(p==='/api/admin/referrals/link' && process.argv.includes('--interactions')){referralLink={id:'qa-link',active:true,url:'https://naregua.space/?ref=controlled-browser-test',inviteeDiscountPercent:10,referrerRewardPercent:10,redemptionsCount:0};return json(route,{url:referralLink.url})}
   if(p==='/api/admin/assistant/message' && process.argv.includes('--interactions')){
@@ -285,6 +290,18 @@ try{
   }
   await page.getByRole('heading',{name:'Como quer começar?',exact:true}).waitFor({state:'detached'});assert.equal(setupCompletions.at(-1).mode,mode);pass(`setup ${mode} completes four steps at ${width}px`)
  }
+ }else if(process.argv.includes('--referral-cash')){
+  role='ADMIN';referralsEnabled=true;
+  for(const width of [1440,390,320])for(const theme of ['light','dark']){
+   referralCashState='empty';referralLink=null;referralCashWithdrawal=null;await page.setViewportSize({width,height:1000});await page.goto(origin+'/admin?view=referrals');await page.locator('.cash-wallet').waitFor();await cleanLayout();await page.evaluate(theme=>{document.documentElement.dataset.theme=theme},theme);
+   assert.equal(await page.getByRole('button',{name:'Ativar meu link de indicação',exact:true}).isDisabled(),true);assert.equal(await page.getByRole('button',{name:'Solicitar saque',exact:true}).isDisabled(),true);assert.equal(await page.locator('.cash-referrals').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+   await page.screenshot({path:`.validation/referral-cash-empty-${theme}-${width}.png`,fullPage:true,animations:'disabled'});
+   await page.locator('.cash-join input').check();await page.getByRole('button',{name:'Ativar meu link de indicação',exact:true}).click();await page.getByLabel('Seu link de indicação',{exact:true}).waitFor();
+   referralCashState='funded';await page.reload();await page.locator('.cash-wallet').waitFor();await page.evaluate(theme=>{document.documentElement.dataset.theme=theme},theme);await page.getByRole('button',{name:'Solicitar saque',exact:true}).click();await page.getByLabel('Chave Pix CPF/CNPJ',{exact:true}).waitFor();assert.equal(await page.locator('.cash-referrals').evaluate(el=>el.scrollWidth>el.clientWidth),false);
+   await page.screenshot({path:`.validation/referral-cash-funded-${theme}-${width}.png`,fullPage:true,animations:'disabled'});await page.getByRole('tab',{name:'Saques 0'}).click();await page.getByRole('heading',{name:'Seu primeiro Pix aparece aqui.',exact:true}).waitFor();
+   await page.getByLabel('Chave Pix CPF/CNPJ',{exact:true}).fill('111.444.777-35');await page.getByLabel('Sua senha atual',{exact:true}).fill('qa-private-password');await page.locator('.cash-withdraw-form input[type=checkbox]').check();await page.getByRole('button',{name:'Confirmar solicitação de saque',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:`.validation/referral-cash-form-${theme}-${width}.png`,animations:'disabled'});await page.getByRole('button',{name:'Confirmar solicitação de saque',exact:true}).click();await page.getByText('Saque em análise',{exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Solicitar saque',exact:true}).isDisabled(),true);
+   pass(`Cash referrals ${width}px ${theme}: enrollment, minimum, pending balance, withdrawal request and history`)
+  }
  }else if(process.argv.includes('--dashboard-icon-contrast')){
   role='ADMIN';await page.setViewportSize({width:1440,height:900});
   for(const accent of ['#082a39','#b85a30'])for(const theme of ['light','dark']){
@@ -297,7 +314,7 @@ try{
   const items=page.locator('.ld-sidebar .ld-nav-item');
   const masks=await items.locator('.nr-icon').evaluateAll(icons=>icons.map(icon=>getComputedStyle(icon).maskImage));
   assert.equal(new Set(masks).size,masks.length,'Every sidebar destination needs a distinct glyph');
-  for(const mask of masks){const url=mask.match(/url\("?([^"\)]+)/)?.[1];assert.ok(url);assert.equal((await page.request.get(url)).status(),200)}
+  for(const mask of masks){const url=mask.match(/url\("?([^")]+)/)?.[1];assert.ok(url);assert.equal((await page.request.get(url)).status(),200)}
   await page.screenshot({path:'.validation/sidebar-icons-expanded.png',animations:'disabled'});
   await page.locator('.ld-sidebar-collapse').click();
   const clients=page.locator('.ld-sidebar').getByRole('button',{name:'Clientes',exact:true});await clients.hover();await page.getByRole('tooltip',{name:'Clientes',exact:true}).waitFor();

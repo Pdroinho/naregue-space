@@ -445,6 +445,7 @@ export function createDevCoreRouter(options: DevCoreRouterOptions) {
       if (!requestedBy) return next(unauthorized())
       const now = new Date().toISOString()
       db.transaction(() => {
+        if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='referral_cash_rewards'").get()&&db.prepare('SELECT 1 FROM referral_cash_rewards WHERE (owner_tenant_id=? OR invited_tenant_id=?) AND paid_at IS NOT NULL LIMIT 1').get(tenant.id,tenant.id))throw badRequest('Este espaço possui registros de recompensas em dinheiro. Preserve o histórico financeiro e desative o espaço em vez de apagá-lo permanentemente.','REFERRAL_FINANCIAL_RECORDS')
         revokeSessionsForTenant(db, tenant.id)
         db.prepare(`INSERT INTO tenant_deletion_audit (id, tenant_id, tenant_slug, tenant_name, requested_by_user_id, confirmation_text, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`)
           .run(randomUUID(), tenant.id, tenant.slug, tenant.name, requestedBy, body.confirmation, now)

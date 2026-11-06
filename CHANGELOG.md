@@ -4,6 +4,10 @@ As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tag
 
 ## Não lançado
 
+- Programa de indicação em Pix: comissão única de 50% do primeiro pagamento após descontos, espera de 45 dias, segunda mensalidade confirmada e saque mínimo de R$100. Aceite versionado, revisão dev, reautenticação, reserva atômica, tratamento de timeout/estorno e histórico separado dos créditos anteriores.
+- Área Indicações reconstruída para desktop e celular com saldos pendente/disponível/reservado, link do programa, acompanhamento e solicitação de saque; acesso ao saldo adquirido preservado após expiração da assinatura.
+- Migração 118 adiciona registros financeiros e identidade protegida contra repetição de recompensa; Termos e Privacidade v3 descrevem o programa.
+
 - Ícones distintos para Clientes, Equipe, Serviços, WhatsApp, Indicações e Suporte, mantendo Hugeicons; nomes do menu recolhido visíveis com mouse e teclado.
 
 - Sidebar acomoda a altura natural da logo completa nos três tamanhos; botão de recolher centralizado sobre a divisória no desktop, inclusive no menu recolhido.

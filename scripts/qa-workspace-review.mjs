@@ -15,8 +15,8 @@ export async function runWorkspaceReview(q){
  const setTheme=theme=>page.evaluate(theme=>{document.documentElement.dataset.theme=theme;localStorage.setItem('theme',theme)},theme)
  if(q.onlyReferrals){
   for(const width of [320,390])for(const theme of ['light','dark']){
-   await page.setViewportSize({width,height:900});await page.goto(origin+'/admin?view=referrals');await page.locator('.referral-unavailable').waitFor();await setTheme(theme)
-   assert.equal(await page.locator('.referral-metrics').evaluate(el=>el.scrollWidth>el.clientWidth),false)
+   await page.setViewportSize({width,height:900});await page.goto(origin+'/admin?view=referrals');await page.locator('.cash-referrals').waitFor();await setTheme(theme)
+   assert.equal(await page.locator('.cash-referrals').evaluate(el=>el.scrollWidth>el.clientWidth),false)
    await capture(`referrals-${theme}-${width}`);pass(`referral metrics fit without hidden horizontal content ${theme} ${width}px`)
   }
   return
@@ -25,7 +25,7 @@ export async function runWorkspaceReview(q){
  const remaining=q.professionalRows.splice(1)
  for(const width of [1440,1024,390,320])for(const theme of ['light','dark']){
   await page.setViewportSize({width,height:900})
-  for(const [view,selector] of [['finance','.nr-finance'],['referrals','.referral-unavailable'],['billing','.billing-summary'],['team','.team-person']]){
+  for(const [view,selector] of [['finance','.nr-finance'],['referrals','.cash-referrals'],['billing','.billing-summary'],['team','.team-person']]){
    await page.goto(origin+'/admin?view='+view);await page.locator(selector).first().waitFor();await setTheme(theme)
    if(view==='billing'){
     await page.getByRole('radio',{name:/4 a 6 profissionais/}).waitFor();assert.equal(await page.getByRole('radio',{name:/4 a 6 profissionais/}).getAttribute('aria-checked'),'true')
@@ -34,7 +34,7 @@ export async function runWorkspaceReview(q){
     await page.getByRole('radio',{name:/7 a 15 profissionais/}).click();await page.getByText('Faixa selecionada',{exact:true}).waitFor()
     assert.equal(await page.getByRole('radio',{name:/4 a 6 profissionais/}).getByText('Plano atual',{exact:true}).isVisible(),true)
    }
-   if(view==='referrals'){assert.equal(await page.locator('.referral-page img').count(),0);if(width<=640)assert.equal(await page.locator('.referral-metrics').evaluate(el=>el.scrollWidth>el.clientWidth),false)}
+   if(view==='referrals'){assert.equal(await page.locator('.cash-referrals img').count(),0);if(width<=640)assert.equal(await page.locator('.cash-referrals').evaluate(el=>el.scrollWidth>el.clientWidth),false)}
    if(view==='team')assert.ok((await page.locator('.team-person').first().boundingBox()).width<=361)
    await capture(`${view}-${theme}-${width}`)
    if(view==='finance')for(const [part,selector] of [['movements','.finance36-transactions'],['goals','.finance36-goals'],['chart','.finance36-flow-panel']]){

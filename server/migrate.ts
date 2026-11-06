@@ -1,6 +1,7 @@
 import { bridgeNareguaTeamSchema, createNareguaPaymentAndPriceSchema } from './nareguaUpgrade.js'
 import { createSupportSchema } from './support/schema.js'
 import { createPaymentReferralSchema } from './paymentReferralSchema.js'
+import { createReferralCashSchema } from './referralCashSchema.js'
 import { createAssistantOperationsSchema } from './assistantOperationsSchema.js'
 import { createPasswordRecoverySchema } from './passwordRecoverySchema.js'
 import { getDb } from './db.js'
@@ -1256,5 +1257,7 @@ export function migrate(db = getDb()) {
       status TEXT NOT NULL DEFAULT 'PENDING', processed_at TEXT
     );
   `))
+
+  apply(118, () => createReferralCashSchema(db))
 
 }

@@ -76,12 +76,12 @@ export async function runInteractionChecks(q){
  for(const width of [390,320]){
   await page.setViewportSize({width,height:844});await page.goto(origin+'/admin?view=assistant');await page.locator('.assistant34-composer textarea').waitFor()
   await composerFits();await iconVisible(page.getByRole('button',{name:'Anexar imagem'}));await iconVisible(page.getByRole('button',{name:'Enviar mensagem'}));await cleanLayout();await shot(`fixed-assistant-light-${width}`)
-  await page.goto(origin+'/admin?view=referrals');await page.getByText('Indicações indisponíveis no momento',{exact:true}).waitFor();await cleanLayout();await shot(`fixed-referrals-light-${width}`)
+  await page.goto(origin+'/admin?view=referrals');await page.getByText('O programa em dinheiro não está disponível neste ambiente. Seu histórico permanece preservado.',{exact:true}).waitFor();await cleanLayout();await shot(`fixed-referrals-light-${width}`)
   pass(`assistant controls and honest unavailable referrals fit ${width}px`)
  }
- await page.setViewportSize({width:1440,height:900});await page.goto(origin+'/admin?view=referrals');await page.getByText('Indicações indisponíveis no momento',{exact:true}).waitFor()
+ await page.setViewportSize({width:1440,height:900});await page.goto(origin+'/admin?view=referrals');await page.getByText('O programa em dinheiro não está disponível neste ambiente. Seu histórico permanece preservado.',{exact:true}).waitFor()
  assert.equal(await page.getByRole('button',{name:'Copiar link',exact:true}).count(),0);await shot('fixed-referrals-light-1440')
- q.setReferrals(true);await page.reload();await page.getByRole('button',{name:'Criar meu link',exact:true}).click();await page.getByRole('textbox',{name:'Link de indicação'}).waitFor()
+ q.setReferrals(true);await page.reload();await page.locator('.cash-join input').check();await page.getByRole('button',{name:'Ativar meu link de indicação',exact:true}).click();await page.getByRole('textbox',{name:'Seu link de indicação'}).waitFor()
  let copied;await page.evaluate(()=>{window.__qaCopied=[];Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__qaCopied.push(text)}}})})
  await page.getByRole('button',{name:'Copiar link',exact:true}).click();copied=await page.evaluate(()=>window.__qaCopied.at(-1));assert.equal(copied,'https://naregua.space/?ref=controlled-browser-test')
  pass('referrals create and copy work when enabled; unavailable state offers no misleading active link')

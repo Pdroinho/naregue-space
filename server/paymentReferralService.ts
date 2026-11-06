@@ -290,7 +290,7 @@ export function createPaymentReferralService(db: Database.Database) {
       'INSERT OR IGNORE INTO payment_referral_debts (credit_id,tenant_id,discount_percent) VALUES (?,?,?)',
     ).run(credit.id, credit.tenantId, credit.percent)
   }
-  function paid(tenantId: string, intentId: string) {
+  function paid(tenantId: string, intentId: string, skipReward = false) {
     const now = new Date().toISOString()
     const revoked = db
       .prepare(
@@ -329,7 +329,7 @@ export function createPaymentReferralService(db: Database.Database) {
       "UPDATE referral_redemptions SET status = 'PAID', paid_at = ? WHERE id = ?",
     ).run(now, redemption.id)
     if (
-      redemption.ownerTenantId &&
+      !skipReward && redemption.ownerTenantId &&
       redemption.ownerTenantId !== tenantId &&
       redemption.percent > 0
     )
