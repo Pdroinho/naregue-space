@@ -289,7 +289,11 @@ try{
   assert.ok(Math.abs(measurement.ratio-measurement.natural)<.02,'Logo must retain natural aspect ratio');assert.ok(measurement.contained,'Brand row must grow to contain artwork');if(shape==='portrait')assert.ok(measurement.headerHeight>200,'Portrait logo must enlarge its row');
   if(width>900){
    const checkEdge=async()=>{const edge=await page.locator('.ld-sidebar-collapse').evaluate(button=>{const b=button.getBoundingClientRect(),s=button.closest('.ld-sidebar').getBoundingClientRect();return Math.abs(b.x+b.width/2-s.right)});assert.ok(edge<2,'Collapse control must straddle the sidebar divider')};
-   await checkEdge();await page.locator('.ld-sidebar-collapse').click();await checkEdge();await page.locator('.ld-sidebar-collapse').click();
+   await checkEdge();await page.locator('.ld-sidebar-collapse').click();
+   const compact=await page.locator('.ld-sidebar-collapse').evaluate(button=>{const b=button.getBoundingClientRect(),header=button.closest('.ld-sidebar-brand').getBoundingClientRect();return{dx:Math.abs(b.x+b.width/2-(header.x+header.width/2)),dy:Math.abs(b.y+b.height/2-header.bottom),width:b.width}});
+   assert.ok(compact.dx<2&&compact.dy<2,'Collapsed control must be centered on the brand bottom divider');assert.equal(compact.width,30);
+   if(shape==='wide'&&size==='M')await page.screenshot({path:'.validation/sidebar-compact-divider.png',animations:'disabled'});
+   await page.locator('.ld-sidebar-collapse').click();
   }
   await page.screenshot({path:`.validation/brand-height-${shape}-${size}-${width}.png`,animations:'disabled'});pass(`${shape} logo ${size} preserves ratio and expands brand row at ${width}px`)
  }
