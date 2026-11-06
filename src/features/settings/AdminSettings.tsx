@@ -472,13 +472,13 @@ export function AdminSettings({ tenant, onUpdate }: { tenant: TenantPublic | nul
                             <div className="input-group">
                                 <label className="label">Logo</label>
                                 <div className="settings-logo-field">
-                                    <div className="settings-logo-preview">
+                                    <div className="settings-logo-preview" aria-busy={logoBusy}>
                                         {logoUrl ? (
                                             <img decoding="async" src={logoUrl} alt="Logo atual do espaço" />
                                         ) : (
                                             <ImageIcon size={24} aria-hidden="true" />
                                         )}
-                                        {logoBusy && <div className="spinner settings-logo-spinner" />}
+                                        {logoBusy && <div className="settings-logo-loading" role="status" aria-label="Preparando e analisando sua logo"><span className="spinner settings-logo-spinner" aria-hidden="true" /></div>}
                                     </div>
                                     <div className="settings-logo-controls">
                                         <div className="settings-logo-actions">

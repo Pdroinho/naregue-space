@@ -27,7 +27,9 @@
 .settings-logo-field { display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 14px; align-items: center; min-width: 0; }
 .settings-logo-preview { width: 82px; aspect-ratio: 1; position: relative; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--bg-subtle); color: var(--text-muted); }
 .settings-logo-preview img { width: 100%; height: 100%; object-fit: cover; }
-.settings-logo-spinner { position: absolute; inset: 50% auto auto 50%; transform: translate(-50%,-50%); }
+.settings-logo-loading { position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--surface-raised) 90%, transparent); color: var(--brand-accent-strong); }
+.settings-logo-loading .settings-logo-spinner { position: static; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .settings-logo-loading .settings-logo-spinner { animation: none; } }
 .settings-logo-controls { min-width: 0; display: grid; gap: 8px; }
 .settings-logo-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 
