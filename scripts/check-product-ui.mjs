@@ -281,12 +281,17 @@ try{
   await page.getByRole('heading',{name:'Como quer começar?',exact:true}).waitFor({state:'detached'});assert.equal(setupCompletions.at(-1).mode,mode);pass(`setup ${mode} completes four steps at ${width}px`)
  }
  }else if(process.argv.includes('--brand-height')){
- for(const width of [1440,390]) for(const [shape,w,h] of [['portrait',120,200],['wide',240,80]]){
-  tenant.logoUrl='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#082a39"/><path d="M5 5H${w-5}V${h-5}H5Z" fill="none" stroke="#b85a30" stroke-width="8"/></svg>`);tenant.logoLayout='FULL';tenant.logoSize='M';role='ADMIN';
+ for(const width of [1440,390]) for(const size of ['S','M','L']) for(const [shape,w,h] of [['portrait',120,200],['wide',240,80]]){
+  tenant.logoUrl='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#082a39"/><path d="M5 5H${w-5}V${h-5}H5Z" fill="none" stroke="#b85a30" stroke-width="8"/></svg>`);tenant.logoLayout='FULL';tenant.logoSize=size;role='ADMIN';
   await page.setViewportSize({width,height:900});await page.goto(origin+'/admin?view=dashboard');await page.locator('.tenant-brand-sidebar img').waitFor();await cleanLayout();
   if(width<900){await page.locator('.ld-mobile-tabbar button').last().click()}
   const measurement=await page.locator('.tenant-brand-sidebar img').evaluate(img=>{const image=img.getBoundingClientRect(),box=img.closest('.ld-sidebar-brand').getBoundingClientRect();return{ratio:image.width/image.height,natural:img.naturalWidth/img.naturalHeight,contained:image.top>=box.top&&image.bottom<=box.bottom,headerHeight:box.height}});
-  assert.ok(Math.abs(measurement.ratio-measurement.natural)<.02,'Logo must retain natural aspect ratio');assert.ok(measurement.contained,'Brand row must grow to contain artwork');if(shape==='portrait')assert.ok(measurement.headerHeight>200,'Portrait logo must enlarge its row');await page.screenshot({path:`.validation/brand-height-${shape}-${width}.png`,animations:'disabled'});pass(`${shape} logo preserves ratio and expands brand row at ${width}px`)
+  assert.ok(Math.abs(measurement.ratio-measurement.natural)<.02,'Logo must retain natural aspect ratio');assert.ok(measurement.contained,'Brand row must grow to contain artwork');if(shape==='portrait')assert.ok(measurement.headerHeight>200,'Portrait logo must enlarge its row');
+  if(width>900){
+   const checkEdge=async()=>{const edge=await page.locator('.ld-sidebar-collapse').evaluate(button=>{const b=button.getBoundingClientRect(),s=button.closest('.ld-sidebar').getBoundingClientRect();return Math.abs(b.x+b.width/2-s.right)});assert.ok(edge<2,'Collapse control must straddle the sidebar divider')};
+   await checkEdge();await page.locator('.ld-sidebar-collapse').click();await checkEdge();await page.locator('.ld-sidebar-collapse').click();
+  }
+  await page.screenshot({path:`.validation/brand-height-${shape}-${size}-${width}.png`,animations:'disabled'});pass(`${shape} logo ${size} preserves ratio and expands brand row at ${width}px`)
  }
  }else if(process.argv.includes('--branding')){
  for(const width of [1440,768,390,320]) {

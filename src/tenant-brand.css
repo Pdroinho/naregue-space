@@ -3,9 +3,18 @@
 .tenant-brand[data-layout=FULL] .tenant-brand-image,
 .booking30-brand .tenant-brand[data-layout=FULL] .tenant-brand-image,
 :root[data-mode=admin] .tenant-brand-mobile .tenant-brand-image{height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;display:block}
-.ld-sidebar-brand{height:auto;flex-shrink:0;overflow:visible}
-.ld-sidebar-brand .tenant-brand-sidebar{min-height:0;overflow:visible}
+.ld-sidebar-brand{position:relative;height:auto;flex-shrink:0;overflow:visible}
+.ld-sidebar-brand .tenant-brand-sidebar{min-height:0;overflow:visible;align-self:start}
+.ld-sidebar-brand .tenant-brand-sidebar .tenant-brand-image{height:auto;max-height:none;object-fit:contain;object-position:center}
 .ld-shell.is-sidebar-collapsed .tenant-brand-sidebar .tenant-brand-image{max-width:44px;height:auto}
+@media(min-width:901px){
+ .ld-sidebar-brand{grid-template-columns:minmax(0,1fr);padding:18px 24px 18px 18px}
+ .ld-sidebar-brand .tenant-brand-sidebar{grid-column:1;width:100%;max-width:100%}
+ .ld-sidebar-brand .tenant-brand-sidebar[data-layout=FULL] .tenant-brand-image{width:min(var(--brand-full),100%);max-width:100%;flex-shrink:1}
+ .ld-sidebar-brand .ld-sidebar-collapse,
+ .ld-shell.is-sidebar-collapsed .ld-sidebar-brand .ld-sidebar-collapse{position:absolute;left:auto;right:0;top:50%;z-index:3;width:38px;height:38px;transform:translate(50%,-50%);background:var(--surface-panel);box-shadow:none}
+ .ld-shell.is-sidebar-collapsed .ld-sidebar-brand{padding:18px 16px}
+}
 @media(max-width:900px){
  .ld-shell.has-mobile-tabbar .ld-main{grid-template-rows:auto minmax(0,1fr)}
  .ld-shell.has-mobile-tabbar .ld-topbar{height:auto;min-height:var(--ld-mobile-topbar-height)}

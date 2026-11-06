@@ -4,6 +4,8 @@ As versões seguem [Semantic Versioning](https://semver.org/). Releases usam tag
 
 ## Não lançado
 
+- Sidebar acomoda a altura natural da logo completa nos três tamanhos; botão de recolher centralizado sobre a divisória no desktop, inclusive no menu recolhido.
+
 - Termos e Privacidade v2: AbacatePay, dados de cobrança, renovação, cancelamento e solicitação de reembolso; comprovantes de aceites anteriores preservados.
 
 - Novas contratações por equipe usam assinatura mensal automática no cartão, com eventos de assinatura e cancelamento pelo painel. Períodos anteriores são preservados.
