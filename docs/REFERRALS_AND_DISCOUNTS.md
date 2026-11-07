@@ -1,5 +1,7 @@
 # Indicações e links de desconto — estratégia 2.2
 
+> Documento histórico do programa de créditos para renovação. O programa atual de recompensa em dinheiro está em [REFERRAL_CASH.md](REFERRAL_CASH.md); consulte também [ESTADO_ATUAL.md](ESTADO_ATUAL.md). Créditos e contratos antigos continuam separados: as regras abaixo não descrevem os novos saques.
+
 ## Objetivo
 
 Transformar clientes satisfeitas em aquisição mensurável sem criar passivo financeiro, saldo sacável ou cupons fáceis de enumerar.

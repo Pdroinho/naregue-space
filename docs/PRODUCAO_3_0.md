@@ -2,14 +2,14 @@
 
 ## Estado da entrega
 
-A versão 3.0 foi publicada deliberadamente na VPS. Na preparação da release GitHub, a base de código em produção é `79d4a3c`; mudanças posteriores dessa preparação documentam a entrega e adicionam CI. O push para o GitHub não publica no servidor. Não copie `.env`, banco ou volumes de desenvolvimento para produção.
+A versão 3.0 foi publicada deliberadamente na VPS. Na conferência de 06/11/2026, a aplicação publicada usa `a3eb242`, posterior à release inicial. Consulte o [estado atual](ESTADO_ATUAL.md) e o [procedimento de continuidade](CONTINUIDADE_OPERACIONAL.md) antes de operar. O push para o GitHub não publica no servidor. Não copie `.env`, banco ou volumes de desenvolvimento para produção.
 
-O checkout publicado está em sandbox por autorização do responsável enquanto a conta de pagamentos aguarda aprovação. Consulte `ABACATEPAY.md` antes de habilitar cobranças reais. Relatórios, credenciais e arquivos operacionais privados não fazem parte do Git.
+O checkout publicado está em produção, com assinatura mensal por cartão. Os repasses Pix das indicações ainda exigem homologação completa; ter uma chave de produção não comprova que um repasse foi concluído. Consulte [ABACATEPAY.md](ABACATEPAY.md) e [REFERRAL_CASH.md](REFERRAL_CASH.md). Relatórios, credenciais e arquivos operacionais privados não fazem parte do Git.
 
 ## Antes do deploy
 
 1. Guardar a imagem/configuração anterior e um backup SQLite online consistente. Não confiar apenas no `cp app.db` do timer antigo. Preservar também mídias, PostgreSQL/Evolution e as chaves fora do host.
-2. Restaurar o backup em staging, executar a atualização 40→115 e validar dados, foreign keys e acesso ADMIN/STAFF/CLIENT. Nunca aplicar as migrações 39/40 do Lash ao banco NaRégua.
+2. Restaurar o backup em staging, executar a atualização 40→118 quando partir dessa base e validar dados, foreign keys e acesso ADMIN/STAFF/CLIENT. Nunca aplicar as migrações 39/40 do Lash ao banco NaRégua.
 3. Configurar e homologar AbacatePay conforme `ABACATEPAY.md`, Evolution, MFA e IA. A chave de aplicação existente precisa ser preservada para ler os segredos criptografados.
 4. Usar Node 22 e `npm ci`. Executar `npm run check` e os testes de navegador. Com as variáveis reais carregadas, executar `npm run preflight`.
 5. Revisar a nova rede Docker `172.30.41.0/24` contra redes existentes. O callback interno de TLS autoriza o gateway definido em `INTERNAL_PROXY_IPS`; nunca habilitar essa rota para qualquer IP privado indiscriminadamente.

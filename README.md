@@ -4,11 +4,15 @@ Gestão para barbearias, com a evolução funcional da referência 5.14.2 e a id
 
 Código consolidado em `main`, com release identificada pela tag anotada **`v3.0.0`**. Consulte o [changelog](CHANGELOG.md) e as [notas da release](docs/RELEASE_3.0.0.md). A publicação no GitHub não executa deploy automático.
 
+**Para retomar o trabalho em outro chat:** comece por [Estado atual](docs/ESTADO_ATUAL.md), [Continuidade operacional](docs/CONTINUIDADE_OPERACIONAL.md) e [AGENTS.md](AGENTS.md). Há mudanças funcionais publicadas após a tag; esses documentos distinguem produção, histórico e homologação pendente.
+
 ## O que está integrado
 
 Agenda e reserva mobile, equipes e acesso individual, clientes, financeiro, suporte com anexos/notificações, recuperação de senha, domínios, WhatsApp, campanhas com imagem, Mestre AI com ferramentas confirmadas, lembretes e histórico por conta. Novas cobranças usam AbacatePay v2, incluindo planos por equipe, indicações e créditos extras.
 
-A landing, as fotografias de barbearia, a marca, Hugeicons e a paleta petróleo/creme/cobre permanecem NaRégua. Planos mensais herdados da referência: R$ 74,90 (1–3 profissionais), R$ 99,90 (4–6), R$ 149,00 (7–15), com renovação manual.
+A landing, as fotografias de barbearia, a marca, Hugeicons e a paleta petróleo/creme/cobre permanecem NaRégua. Planos mensais: R$ 74,90 (1–3 profissionais), R$ 99,90 (4–6), R$ 149,00 (7–15). Novas assinaturas têm renovação automática no cartão via AbacatePay de produção; períodos anteriores são preservados. Pix Automático não está habilitado.
+
+O programa de indicações em dinheiro oferece 50% da primeira mensalidade efetivamente paga, após descontos, com 45 dias, segunda mensalidade confirmada e revisão. Saque mínimo de R$100; aprovação humana no DEV e execução pela API. A saída Pix ainda precisa de homologação completa. Veja [Recompensas em Pix](docs/REFERRAL_CASH.md).
 
 ## Desenvolvimento e validação
 
@@ -49,6 +53,6 @@ node scripts/check-mobile-landing.mjs --firefox
 
 ## Produção
 
-A ponte de banco preserva a linhagem 1–40 do NaRégua e adiciona as migrações 101–115. Não aplique as migrações 39/40 do Lash diretamente. Faça backup online, restaure em staging e execute `npm run preflight` com as variáveis reais antes de publicar.
+A ponte de banco preserva a linhagem 1–40 do NaRégua e adiciona as migrações 101–118. Não aplique as migrações 39/40 do Lash diretamente. Faça backup online, restaure em staging e execute `npm run preflight` com as variáveis reais antes de publicar.
 
 Uma instância da aplicação escreve no SQLite local. A migração não transforma SQLite em banco distribuído. Provedores externos precisam de homologação real; testes locais não comprovam credenciais live.

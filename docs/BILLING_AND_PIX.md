@@ -1,5 +1,7 @@
 # Billing, cartão e Pix
 
+> Documento histórico da integração InfinitePay. O checkout atual usa AbacatePay, com assinatura mensal por cartão: veja [ABACATEPAY.md](ABACATEPAY.md) e [ESTADO_ATUAL.md](ESTADO_ATUAL.md). Não use os ciclos ou procedimentos abaixo como configuração da produção atual.
+
 ## Modelo adotado
 
 O usuário escolhe o ciclo dentro do NaRégua e segue para o checkout seguro hospedado pela InfinitePay. O retorno e o webhook ativam o período comprado automaticamente. O fluxo não usa WhatsApp e a plataforma não recebe nem armazena o número completo do cartão.
