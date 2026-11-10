@@ -1,4 +1,5 @@
 /* Tenant artwork owns its aspect ratio; surrounding rows grow with the logo. */
+.booking30-brand{padding-block:16px}
 .sidebar-item-tooltip{position:fixed;z-index:80;transform:translateY(-50%);pointer-events:none;padding:8px 12px;border-radius:8px;background:var(--ink-strong);color:var(--surface-raised);font:650 .8rem/1.4 var(--font-ui);white-space:nowrap}
 .tenant-brand .tenant-brand-image,
 .tenant-brand[data-layout=FULL] .tenant-brand-image,
